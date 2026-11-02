@@ -1,0 +1,21 @@
+# Cash-game session: stacks persist between hands; anyone below 40bb tops up to 100bb.
+name: continuous_session
+hands: 10000
+seed: 2001
+mode: continuous
+rebuy_enabled: true
+rebuy_below_bb: 40
+rebuy_to_bb: 100
+rake: {percentage: 0.04, cap: 150, no_flop_no_drop: true}
+chunk_size: 2000
+workers: 0
+lineup:
+  - {type: Experimental, id: Hero}
+  - {type: Nit}
+  - {type: TAG}
+  - {type: LAG}
+  - {type: CallingStation}
+  - {type: Maniac}
+  - {type: LoosePassive}
+  - {type: FitOrFold}
+  - {type: Balanced}

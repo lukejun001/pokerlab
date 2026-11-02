@@ -1,0 +1,27 @@
+# Default 9-handed $25/$50 game, 100bb stacks, 4% rake capped at 3bb, no flop no drop.
+# Chips are integers: 1 chip = $1.
+name: default
+hands: 10000
+seed: 42
+small_blind: 25
+big_blind: 50
+starting_stack_bb: 100
+mode: independent          # independent (stacks reset every hand) | continuous
+rake:
+  percentage: 0.04
+  cap: 150                 # chips; omit or null for uncapped
+  no_flop_no_drop: true
+  # cap_by_players: {2: 50, 3: 100, 5: 150}   # optional schedule by players dealt in
+seat_assignment: fixed     # fixed | rotate | shuffle (per chunk)
+chunk_size: 1000
+workers: 1                 # 0 = one process per CPU core
+lineup:
+  - {type: Experimental, id: Hero, params: {strategy: equity}}
+  - {type: Nit}
+  - {type: TAG}
+  - {type: LAG}
+  - {type: CallingStation}
+  - {type: Maniac}
+  - {type: LoosePassive}
+  - {type: FitOrFold}
+  - {type: Balanced}

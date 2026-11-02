@@ -1,0 +1,19 @@
+# Experiment A: zero-rake baseline. Experimental agent vs eight mixed opponents.
+# Same seed and lineup as rake_comparison.yaml, so the two are matched hand for hand.
+name: zero_rake
+hands: 20000
+seed: 1001
+mode: independent
+rake: {percentage: 0.0, cap: null, no_flop_no_drop: true}
+chunk_size: 1000
+workers: 0
+lineup:
+  - {type: Experimental, id: Hero}
+  - {type: Nit}
+  - {type: TAG}
+  - {type: LAG}
+  - {type: CallingStation}
+  - {type: Maniac}
+  - {type: LoosePassive}
+  - {type: FitOrFold}
+  - {type: Balanced}

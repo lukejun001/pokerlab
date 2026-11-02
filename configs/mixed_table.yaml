@@ -1,0 +1,19 @@
+# Experiment E: one opponent from each of the eight archetypes, seats shuffled
+# per chunk so nobody is permanently to the hero's left.
+name: mixed_table
+hands: 20000
+seed: 1005
+rake: {percentage: 0.04, cap: 150, no_flop_no_drop: true}
+seat_assignment: shuffle
+chunk_size: 1000
+workers: 0
+lineup:
+  - {type: Experimental, id: Hero}
+  - {type: Nit}
+  - {type: TAG}
+  - {type: LAG}
+  - {type: CallingStation}
+  - {type: Maniac}
+  - {type: LoosePassive}
+  - {type: FitOrFold}
+  - {type: Balanced}

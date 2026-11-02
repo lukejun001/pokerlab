@@ -1,0 +1,21 @@
+# Experiment F: the lineup rotates one seat per chunk, so the experimental agent
+# spends equal time in all nine seats (and every table position, since the
+# button also rotates every hand). Report breaks results down by seat and position.
+# hands should be a multiple of 9 * chunk_size for an even rotation.
+name: position_benchmark
+hands: 18000
+seed: 1006
+rake: {percentage: 0.04, cap: 150, no_flop_no_drop: true}
+seat_assignment: rotate
+chunk_size: 1000
+workers: 0
+lineup:
+  - {type: Experimental, id: Hero}
+  - {type: Nit}
+  - {type: TAG}
+  - {type: LAG}
+  - {type: CallingStation}
+  - {type: Maniac}
+  - {type: LoosePassive}
+  - {type: FitOrFold}
+  - {type: Balanced}

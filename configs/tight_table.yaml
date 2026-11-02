@@ -1,0 +1,17 @@
+# Experiment C: experimental agent vs a tight table (TAGs, Nits, a tight Balanced).
+name: tight_table
+hands: 20000
+seed: 1003
+rake: {percentage: 0.04, cap: 150, no_flop_no_drop: true}
+chunk_size: 1000
+workers: 0
+lineup:
+  - {type: Experimental, id: Hero}
+  - {type: TAG}
+  - {type: TAG}
+  - {type: TAG}
+  - {type: TAG, params: {open_range: {late: 0.22}, bluff_frequency: 0.08}}
+  - {type: Nit}
+  - {type: Nit}
+  - {type: Balanced, params: {tightness: 0.8, open_range: {early: 0.1, middle: 0.13, late: 0.24}}}
+  - {type: FitOrFold}

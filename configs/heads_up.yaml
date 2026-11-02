@@ -1,0 +1,11 @@
+# Heads-up: experimental agent vs the Balanced baseline, rake capped at 1bb.
+name: heads_up
+hands: 20000
+seed: 3001
+rake: {percentage: 0.04, cap: 150, no_flop_no_drop: true, cap_by_players: {2: 50, 3: 100, 5: 150}}
+seat_assignment: rotate
+chunk_size: 1000
+workers: 0
+lineup:
+  - {type: Experimental, id: Hero}
+  - {type: Balanced}

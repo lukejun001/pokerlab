@@ -1,0 +1,20 @@
+# Experiment B: identical to zero_rake.yaml (same seed, lineup, stacks) but with
+# 4% rake capped at 3bb. In independent mode every card and decision matches A,
+# so the difference in results is exactly the rake.
+name: rake_comparison
+hands: 20000
+seed: 1001
+mode: independent
+rake: {percentage: 0.04, cap: 150, no_flop_no_drop: true}
+chunk_size: 1000
+workers: 0
+lineup:
+  - {type: Experimental, id: Hero}
+  - {type: Nit}
+  - {type: TAG}
+  - {type: LAG}
+  - {type: CallingStation}
+  - {type: Maniac}
+  - {type: LoosePassive}
+  - {type: FitOrFold}
+  - {type: Balanced}

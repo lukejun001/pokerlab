@@ -1,0 +1,17 @@
+# Experiment D: experimental agent vs an aggressive table (LAGs and Maniacs).
+name: aggressive_table
+hands: 20000
+seed: 1004
+rake: {percentage: 0.04, cap: 150, no_flop_no_drop: true}
+chunk_size: 1000
+workers: 0
+lineup:
+  - {type: Experimental, id: Hero}
+  - {type: LAG}
+  - {type: LAG}
+  - {type: LAG}
+  - {type: LAG, params: {aggression: 0.9, bluff_frequency: 0.4}}
+  - {type: Maniac}
+  - {type: Maniac}
+  - {type: LAG}
+  - {type: Maniac, params: {bluff_frequency: 0.4}}
