@@ -102,8 +102,19 @@ pokerlab/
   analysis/
     statistics.py    per-agent and table stats (mergeable)
     reporting.py     terminal report, CSV/JSON export
+  solver/            Phase 3: asymmetric-stack preflop solver
+    game.py          preflop tree with a stack per player (PokerKit betting and pot rules)
+    hands.py         169 hand classes, batched dealing, vectorized 7-card evaluator
+    cfr.py           chance-sampled Discounted CFR and sampled best-response evaluation
+    parallel.py      multi-process sampling and evaluation
+    config.py        solver configs (configs/6max_*.yaml)
+    store.py         strategy cache: SQLite index + compressed strategy files
+    pipeline.py      generate / inspect / simulation wiring
+  strategies/solver.py  ExperimentalAgent strategy backed by the cache
   cli.py
-configs/             experiment presets (YAML)
+configs/             experiment presets and solver configs (YAML)
+strategies/          solved strategies (index.sqlite + files/*.npz)
+docs/                Phase 3 GTOpen assessment and report
 tests/               pytest suite
 ```
 
@@ -276,6 +287,31 @@ Multiprocessing scales close to linearly because chunks are independent. If
 equity estimation becomes the bottleneck for heavier strategies, the next step
 is a compiled evaluator package (for example `phevaluator` or `eval7`) behind
 `engine/cards.py`, or caching equities by (hand class, board texture).
+
+## Preflop solver (Phase 3)
+
+Six-max preflop strategies for games where **every player has their own stack**, solved
+offline and cached for the experimental agent. Details, measured results and limitations:
+[docs/phase3_report.md](docs/phase3_report.md); why GTOpen was not used:
+[docs/gtopen_assessment.md](docs/gtopen_assessment.md).
+
+```bash
+python -m pokerlab strategies generate --config configs/6max_asymmetric.yaml   # solve + store
+python -m pokerlab strategies inspect  --config configs/6max_asymmetric.yaml   # summary, lookup latency
+python -m pokerlab strategies inspect  --config configs/6max_asymmetric.yaml --history "f-r12500"
+python -m pokerlab strategies list
+python -m pokerlab simulate --config configs/6max_asymmetric.yaml --hands 10000
+```
+
+- The game model ports PokerKit's rules (all-in calls for less, short all-ins that do not
+  reopen betting, uncalled-bet refunds, side pots, per-pot rake under a whole-hand cap) and
+  is checked against PokerKit node by node and payout by payout.
+- The solver deals real hole cards and boards, so card removal is exact. Flop terminals are
+  valued by checking the hand down (continuation model `showdown-v1`): there is no postflop play yet.
+- A cached strategy is used only for an **exact** match of variant, players, positions,
+  every stack, blinds, ante, rake, abstraction and solver/model versions. Anything else,
+  including an opponent's off-tree raise size, falls back to the heuristic strategy, and
+  every decision is counted by source in the simulation report.
 
 ## Known limitations
 

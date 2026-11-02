@@ -39,12 +39,12 @@ abstraction:
   allow_limp: false
 
 solve:
-  iterations: 1500
+  iterations: 1200
   batch_size: 4096
   workers: 8
   seed: 1
-  eval_every: 250
-  eval_deals: 30000
+  eval_every: 400
+  eval_deals: 50000
 
 simulation:
   hands: 10000

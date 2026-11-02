@@ -15,7 +15,7 @@ from multiprocessing import shared_memory
 
 import numpy as np
 
-from pokerlab.solver.cfr import Deals, PreflopSolver
+from pokerlab.solver.cfr import HOLDOUT_Z, Deals, PreflopSolver
 from pokerlab.solver.game import PreflopGame, PreflopTree
 
 _STATE: dict = {}
@@ -80,8 +80,11 @@ def _evaluate_player(args) -> dict:
     idx, hidx = np.arange(deals), np.arange(deals)
     base = solver._values(0, idx, sample, table).mean(axis=0)
     hold_base = solver._values(0, hidx, holdout, table).mean(axis=0)
+    br = solver._values(0, idx, sample, table, player, None, {})[:, player].mean()
     best: dict = {}
-    br = solver._values(0, idx, sample, table, player, None, best)[:, player].mean()
+    solver.br_z = HOLDOUT_Z
+    solver._values(0, idx, sample, table, player, None, best)
+    solver.br_z = 0.0
     hv = solver._values(0, hidx, holdout, table, player, best, None)[:, player].mean()
     return {"player": player, "base": base, "gain": br - base[player], "holdout_gain": hv - hold_base[player]}
 

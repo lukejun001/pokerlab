@@ -40,6 +40,7 @@ CONTINUATION_VERSION = "showdown-v1"
 DCFR_ALPHA = 1.5
 DCFR_BETA = 0.0
 DCFR_GAMMA = 2.0
+HOLDOUT_Z = 2.0
 
 
 def class_sums(classes: np.ndarray, weights: np.ndarray) -> np.ndarray:
@@ -107,6 +108,7 @@ class PreflopSolver:
                 pots = [(p.amount / bb, np.array(p.eligible)) for p in nd.pots]
                 self.flop_pots[nd.id] = (np.array(nd.contributions, dtype=np.float64) / bb, pots)
         self.history: list[dict] = []
+        self.br_z = 0.0  # significance threshold for best-response deviations (see _best_actions)
 
     # --- strategies ---------------------------------------------------------------
 
@@ -260,19 +262,30 @@ class PreflopSolver:
         off = self.offset[node_id]
         width = len(nd.actions)
         if i == br_player and best is not None:
-            child = [self._values(c, idx, deals, table, br_player, policy, best, weight) for c in nd.children]
-            q = np.stack([v[:, i] for v in child], axis=1)  # (B, A) values for the responder
-            choice = class_sums(deals.classes[idx, i], q * weight[:, None]).argmax(axis=0)  # best action per class
+            cls = deals.classes[idx, i]
+            child = np.stack([self._values(c, idx, deals, table, br_player, policy, best, weight)
+                              for c in nd.children])  # (A, B, n)
+            q = child[:, :, i].T  # (B, A) values for the responder
+            sigma = table[off:off + width][:, cls].T
+            choice = self._best_actions(cls, q, sigma, weight)
             best[node_id] = choice
-            pick = choice[deals.classes[idx, i]]
-            return np.stack(child, axis=0)[pick, np.arange(len(idx))]
+            pick = choice[cls]
+            out = np.einsum("ba,abn->bn", sigma, child)  # classes that keep the average strategy
+            dev = pick >= 0
+            out[dev] = child[pick[dev], np.flatnonzero(dev)]
+            return out
         if i == br_player and policy is not None:
             pick = policy[node_id][deals.classes[idx, i]]
+            sigma = table[off:off + width][:, deals.classes[idx, i]].T
             out = np.zeros((len(idx), self.n))
             for a, c in enumerate(nd.children):
-                sel = pick == a
+                # Play action ``a`` where the policy says so, or with the average
+                # strategy's probability where the policy keeps it (-1).
+                share = np.where(pick == a, 1.0, np.where(pick < 0, sigma[:, a], 0.0))
+                sel = share > 0
                 if sel.any():
-                    out[sel] = self._values(c, idx[sel], deals, table, br_player, policy, best, weight[sel])
+                    out[sel] += share[sel, None] * self._values(c, idx[sel], deals, table, br_player, policy, best,
+                                                                weight[sel])
             return out
         sigma = table[off:off + width][:, deals.classes[idx, i]].T
         out = np.zeros((len(idx), self.n))
@@ -287,13 +300,39 @@ class PreflopSolver:
             out[sel] += sigma[sel, a, None] * v
         return out
 
+    def _best_actions(self, cls: np.ndarray, q: np.ndarray, sigma: np.ndarray, weight: np.ndarray) -> np.ndarray:
+        """Best action per class, or -1 (keep the average strategy).
+
+        With ``br_z == 0`` this is the plain empirical best response. With
+        ``br_z > 0`` a class deviates only if its best action beats the average
+        strategy by more than ``br_z`` standard errors on these deals, which
+        keeps sampling noise from masquerading as exploitability."""
+        total = class_sums(cls, q * weight[:, None])  # (A, 169)
+        if self.br_z <= 0:
+            return total.argmax(axis=0)
+        follow = (sigma * q).sum(axis=1)
+        d = q - follow[:, None]
+        sw = np.bincount(cls, weights=weight, minlength=NUM_CLASSES)
+        sw2 = np.bincount(cls, weights=weight**2, minlength=NUM_CLASSES)
+        with np.errstate(invalid="ignore", divide="ignore"):
+            m1 = class_sums(cls, d * weight[:, None]) / sw
+            m2 = class_sums(cls, d * d * weight[:, None]) / sw
+            se = np.sqrt(np.maximum(m2 - m1**2, 0) * sw2 / sw**2)
+        best = np.nan_to_num(m1, nan=-np.inf).argmax(axis=0)
+        cols = np.arange(NUM_CLASSES)
+        gain, err = m1[best, cols], se[best, cols]
+        significant = (sw > 0) & (sw2 > 0) & (gain > self.br_z * err) & (gain > 0)
+        return np.where(significant, best, -1)
+
     def evaluate(self, deals: Deals, holdout: Deals | None = None) -> dict:
         """Expected value of the average strategy and each player's sampled best-response gain.
 
-        In-sample gains (best response chosen and scored on the same deals) are
-        biased upward by sampling noise; with ``holdout`` the chosen responses
-        are also scored on independent deals, which gives an unbiased value for
-        that particular response and hence a lower bound on the true gain.
+        In-sample gains (plain best response chosen and scored on the same
+        deals) are biased upward by sampling noise. With ``holdout``, a
+        conservative response (deviating only where the gain is significant at
+        ``HOLDOUT_Z`` standard errors) is chosen on ``deals`` and scored on the
+        independent ``holdout`` deals: an unbiased value for a real deviation,
+        hence an estimate of a lower bound on the true gain.
         """
         table = self.average_strategy()
         idx = np.arange(len(deals))
@@ -304,10 +343,14 @@ class PreflopSolver:
             hidx = np.arange(len(holdout))
             hold_base = self._values(0, hidx, holdout, table).mean(axis=0)
         for p in range(self.n):
-            best: dict = {}
-            br = self._values(0, idx, deals, table, p, None, best)[:, p].mean()
+            self.br_z = 0.0
+            br = self._values(0, idx, deals, table, p, None, {})[:, p].mean()
             gains.append(br - base[p])
             if holdout is not None:
+                best: dict = {}
+                self.br_z = HOLDOUT_Z
+                self._values(0, idx, deals, table, p, None, best)
+                self.br_z = 0.0
                 hv = self._values(0, hidx, holdout, table, p, best, None)[:, p].mean()
                 holdout_gains.append(hv - hold_base[p])
         out = {
