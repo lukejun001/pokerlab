@@ -150,59 +150,73 @@ class PreflopSolver:
 
     # --- training --------------------------------------------------------------------
 
-    def _walk(self, node_id: int, idx: np.ndarray, reach: np.ndarray, own: np.ndarray,
-              deals: Deals, regret_inc: np.ndarray) -> np.ndarray:
+    def _walk(self, node_id: int, idx: np.ndarray, reach: np.ndarray, deals: Deals,
+              regret_inc: np.ndarray) -> np.ndarray:
         nd = self.tree.nodes[node_id]
         if nd.is_terminal:
             return self._terminal(node_id, deals.ranks[idx])
         i = nd.actor
         off = self.offset[node_id]
         width = len(nd.actions)
-        strat = self.current[off:off + width]  # (A, 169)
-        # Average strategy: weighted by the actor's own reach for each class.
-        self.strategy_sum[off:off + width] += own[i] * strat
-
         cls = deals.classes[idx, i]
-        sigma = strat[:, cls].T  # (B, A)
+        sigma = self.current[off:off + width][:, cls].T  # (B, A)
         values = np.zeros((len(idx), self.n))
         child_values = np.zeros((len(idx), width))
         for a, child in enumerate(nd.children):
-            child_own = own.copy()
-            child_own[i] = own[i] * strat[a]
-            if len(idx):
-                child_reach = reach.copy()
-                child_reach[:, i] *= sigma[:, a]
-                alive = (child_reach > 0).sum(axis=1) >= self.n - 1
-                if alive.all():
-                    v = self._walk(child, idx, child_reach, child_own, deals, regret_inc)
-                else:
-                    v = np.zeros((len(idx), self.n))
-                    if alive.any():
-                        v[alive] = self._walk(child, idx[alive], child_reach[alive], child_own, deals, regret_inc)
-                values += sigma[:, a, None] * v
-                child_values[:, a] = v[:, i]
-            elif child_own.any():
-                self._walk(child, idx, reach, child_own, deals, regret_inc)
-        if len(idx):
-            others = np.prod(reach[:, self.others[i]], axis=1)
-            inc = others[:, None] * (child_values - values[:, i, None])
-            regret_inc[off:off + width] += class_sums(cls, inc)
+            child_reach = reach.copy()
+            child_reach[:, i] *= sigma[:, a]
+            # A deal where two players can no longer reach the child contributes
+            # nothing to anyone's counterfactual regret below it.
+            alive = (child_reach > 0).sum(axis=1) >= self.n - 1
+            if alive.all():
+                v = self._walk(child, idx, child_reach, deals, regret_inc)
+            else:
+                v = np.zeros((len(idx), self.n))
+                if alive.any():
+                    v[alive] = self._walk(child, idx[alive], child_reach[alive], deals, regret_inc)
+            values += sigma[:, a, None] * v
+            child_values[:, a] = v[:, i]
+        others = np.prod(reach[:, self.others[i]], axis=1)
+        inc = others[:, None] * (child_values - values[:, i, None])
+        regret_inc[off:off + width] += class_sums(cls, inc)
         return values
 
-    def iterate(self, deals: Deals | None = None) -> None:
+    def sampled_regrets(self, deals: Deals) -> np.ndarray:
+        """Counterfactual regret increments summed over ``deals`` for the current strategy."""
+        regret_inc = np.zeros_like(self.regret)
+        self._walk(0, np.arange(len(deals)), np.ones((len(deals), self.n)), deals, regret_inc)
+        return regret_inc
+
+    def _accumulate_average(self, node_id: int, own: np.ndarray) -> None:
+        """Add the current strategy, weighted by each class's own reach, to the average."""
+        nd = self.tree.nodes[node_id]
+        if nd.is_terminal:
+            return
+        i = nd.actor
+        off = self.offset[node_id]
+        strat = self.current[off:off + len(nd.actions)]  # (A, 169)
+        self.strategy_sum[off:off + len(nd.actions)] += own[i] * strat
+        for a, child in enumerate(nd.children):
+            child_own = own.copy()
+            child_own[i] = own[i] * strat[a]
+            if child_own[i].any():
+                self._accumulate_average(child, child_own)
+
+    def iterate(self, deals: Deals | None = None, regret_inc: np.ndarray | None = None,
+                deal_count: int | None = None) -> None:
+        """One iteration. ``regret_inc``/``deal_count`` let a caller supply
+        increments computed elsewhere (e.g. by worker processes)."""
         started = time.perf_counter()
         t = self.iterations + 1
-        if deals is None:
-            rng = np.random.default_rng([self.seed, t])
-            deals = Deals.sample(rng, self.batch_size, self.n)
-        regret_inc = np.zeros_like(self.regret)
-        idx = np.arange(len(deals))
-        reach = np.ones((len(deals), self.n))
-        own = np.ones((self.n, NUM_CLASSES))
-        self._walk(0, idx, reach, own, deals, regret_inc)
+        if regret_inc is None:
+            if deals is None:
+                deals = Deals.sample(np.random.default_rng([self.seed, t]), self.batch_size, self.n)
+            regret_inc = self.sampled_regrets(deals)
+            deal_count = len(deals)
+        self._accumulate_average(0, np.ones((self.n, NUM_CLASSES)))
         # Sampled values are sums over the batch; scale to a per-deal average so
         # discounting behaves the same for any batch size.
-        self.regret += regret_inc / len(deals)
+        self.regret += regret_inc / deal_count
         pos = self.regret > 0
         self.regret[pos] *= t**DCFR_ALPHA / (t**DCFR_ALPHA + 1)
         self.regret[~pos] *= t**DCFR_BETA / (t**DCFR_BETA + 1)
@@ -231,10 +245,14 @@ class PreflopSolver:
     # --- evaluation --------------------------------------------------------------------
 
     def _values(self, node_id: int, idx: np.ndarray, deals: Deals, table: np.ndarray,
-                br_player: int = -1, policy: dict | None = None, best: dict | None = None) -> np.ndarray:
+                br_player: int = -1, policy: dict | None = None, best: dict | None = None,
+                weight: np.ndarray | None = None) -> np.ndarray:
         """Values (len(idx), n) when everyone plays ``table``, except that
         ``br_player`` plays a fixed ``policy`` (node -> best action per class)
-        or, if ``best`` is given, computes a best response into it."""
+        or, if ``best`` is given, computes a best response into it. ``weight``
+        is the other players' probability of reaching this node in each deal."""
+        if weight is None:
+            weight = np.ones(len(idx))
         nd = self.tree.nodes[node_id]
         if nd.is_terminal:
             return self._terminal(node_id, deals.ranks[idx])
@@ -242,9 +260,9 @@ class PreflopSolver:
         off = self.offset[node_id]
         width = len(nd.actions)
         if i == br_player and best is not None:
-            child = [self._values(c, idx, deals, table, br_player, policy, best) for c in nd.children]
+            child = [self._values(c, idx, deals, table, br_player, policy, best, weight) for c in nd.children]
             q = np.stack([v[:, i] for v in child], axis=1)  # (B, A) values for the responder
-            choice = class_sums(deals.classes[idx, i], q).argmax(axis=0)  # best action per class
+            choice = class_sums(deals.classes[idx, i], q * weight[:, None]).argmax(axis=0)  # best action per class
             best[node_id] = choice
             pick = choice[deals.classes[idx, i]]
             return np.stack(child, axis=0)[pick, np.arange(len(idx))]
@@ -254,12 +272,19 @@ class PreflopSolver:
             for a, c in enumerate(nd.children):
                 sel = pick == a
                 if sel.any():
-                    out[sel] = self._values(c, idx[sel], deals, table, br_player, policy, best)
+                    out[sel] = self._values(c, idx[sel], deals, table, br_player, policy, best, weight[sel])
             return out
         sigma = table[off:off + width][:, deals.classes[idx, i]].T
         out = np.zeros((len(idx), self.n))
         for a, c in enumerate(nd.children):
-            out += sigma[:, a, None] * self._values(c, idx, deals, table, br_player, policy, best)
+            # Deals that never take this action contribute nothing below it.
+            # (At the responder's own nodes every action is explored above.)
+            sel = sigma[:, a] > 0
+            if not sel.any():
+                continue
+            w = weight[sel] * sigma[sel, a] if br_player >= 0 else weight[sel]
+            v = self._values(c, idx[sel], deals, table, br_player, policy, best, w)
+            out[sel] += sigma[sel, a, None] * v
         return out
 
     def evaluate(self, deals: Deals, holdout: Deals | None = None) -> dict:

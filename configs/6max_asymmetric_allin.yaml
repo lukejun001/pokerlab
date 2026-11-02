@@ -1,0 +1,58 @@
+# Asymmetric stacks with re-jams over all-ins and two flat calls per raise (multiway unequal all-ins).
+# Phase 3 solver config: a concrete six-max game with an independent stack per
+# position. Generate:  python -m pokerlab strategies generate --config configs/6max_asymmetric_allin.yaml
+# Simulate:           python -m pokerlab simulate --config configs/6max_asymmetric_allin.yaml --hands 10000
+name: 6max_asymmetric_allin
+game:
+  variant: no_limit_texas_holdem
+  max_players: 6
+  active_players: 6
+  small_blind_bb: 0.5
+  big_blind_bb: 1.0
+  ante_bb: 0
+  chips_per_bb: 5000        # integer chips: 1 chip = $0.01 at $25/$50
+  starting_stacks_bb: {UTG: 100, HJ: 150, CO: 70, BTN: 115, SB: 40, BB: 200}
+
+rake:
+  percentage: 0.045
+  cap_bb: 0.06              # $3 per hand
+  no_flop_no_drop: true
+  cap_basis: players_dealt_in
+
+strategy:
+  model: approximate_equilibrium
+  opponent_specific_exploitation: false
+  preflop_solver: pokerlab-cfr  # GTOpen is unlicensed and equal-stack only; see docs/phase3_report.md
+  realtime_solving: false
+
+abstraction:
+  name: 6max-b-v1
+  open_sizes_bb: [2.5]
+  sb_open_sizes_bb: [3.0]
+  reraise_multipliers: [3.0]
+  later_multipliers: [2.25]
+  max_sized_raises: 2       # open and 3-bet; later raises are all-in only
+  max_raises: 4
+  max_calls_per_raise: 2
+  allow_allin: true
+  allin_threshold: 0.5
+  allow_limp: false
+
+solve:
+  iterations: 800
+  batch_size: 4096
+  workers: 8
+  seed: 1
+  eval_every: 200
+  eval_deals: 30000
+
+simulation:
+  hands: 10000
+  seed: 42
+  lineup:
+    - {type: Experimental, id: Hero}
+    - {type: TAG}
+    - {type: LAG}
+    - {type: CallingStation}
+    - {type: Nit}
+    - {type: Balanced}

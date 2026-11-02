@@ -83,6 +83,30 @@ def _pct(value: float | None) -> str:
     return _fmt(None if value is None else 100 * value, ".1f", "%")
 
 
+def describe_stacks(cfg) -> str:
+    if cfg.stacks_by_position_bb:
+        return "by position " + " ".join(f"{p} {v:g}bb" for p, v in cfg.stacks_by_position_bb.items())
+    return f"{cfg.starting_stack_bb:g}bb"
+
+
+def decision_source_lines(result: BatchResult) -> list[str]:
+    """Where solver-backed agents' decisions came from (exact / approximate / fallback)."""
+    lines = []
+    for stats in result.stats.agents.values():
+        sources = stats.decision_sources
+        if not sources:
+            continue
+        total = sum(sources.values())
+        lines += ["", f"{stats.agent_id} DECISION SOURCES ({total:,} decisions)"]
+        for label, count in sorted(sources.items(), key=lambda kv: -kv[1]):
+            lines.append(f"  {label:<44}{count:>9,}  {100 * count / total:5.1f}%")
+        preflop = sum(c for k, c in sources.items() if k != "fallback:postflop")
+        exact = sum(c for k, c in sources.items() if k.startswith("exact:"))
+        if preflop:
+            lines.append(f"  preflop decisions from an exact solved model: {100 * exact / preflop:.1f}%")
+    return lines
+
+
 def describe_rake(rake: dict[str, Any], bb: int) -> str:
     pct = rake.get("percentage", 0) or 0
     if not pct:
@@ -111,7 +135,7 @@ def render_report(result: BatchResult, hero: str | None = None) -> str:
         f"Experiment:        {cfg.name}",
         f"Hands completed:   {summary['hands_completed']:,}",
         f"Players:           {cfg.players}",
-        f"Blinds:            {cfg.small_blind}/{cfg.big_blind} chips, stacks {cfg.starting_stack_bb:g}bb ({cfg.mode})",
+        f"Blinds:            {cfg.small_blind}/{cfg.big_blind} chips, stacks {describe_stacks(cfg)} ({cfg.mode})",
         f"Rake:              {describe_rake(cfg.rake, cfg.big_blind)}",
         f"Seed:              {cfg.seed}",
     ]
@@ -166,6 +190,7 @@ def render_report(result: BatchResult, hero: str | None = None) -> str:
             for _, r in seats.iterrows():
                 lines.append(f"{int(r['seat']):<10}{r['hands']:>9,}{r['net_bb100']:>+12.1f}{1.96 * r['bb100_std_error']:>9.1f}")
 
+    lines += decision_source_lines(result)
     total_net = sum(s.net for s in result.stats.agents.values())
     lines += [
         "",
@@ -198,6 +223,7 @@ def export(result: BatchResult, out_dir: str | Path) -> Path:
         "table": table_summary(result),
         "agents": agents.to_dict(orient="records"),
         "chunk_lineups": result.chunk_lineups[:50],
+        "decision_sources": {s.agent_id: s.decision_sources for s in result.stats.agents.values() if s.decision_sources},
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2, default=str))
     (out / "config.yaml").write_text(yaml.safe_dump(result.config.to_dict(), sort_keys=False))

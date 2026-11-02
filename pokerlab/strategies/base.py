@@ -60,12 +60,17 @@ class AgentStrategy(Strategy):
 
 
 def load_strategy(spec: str, seed: int | str = 0, **params: Any) -> Strategy:
-    """Build a strategy from ``equity`` (built-in default), ``archetype:<Name>``
-    or an import path ``package.module:ClassName``."""
+    """Build a strategy from ``equity`` (built-in default), ``solver``
+    (precomputed preflop strategies, see ``strategies/solver.py``),
+    ``archetype:<Name>`` or an import path ``package.module:ClassName``."""
     if spec in ("equity", "heuristic", "default"):
         from pokerlab.strategies.heuristic import EquityStrategy
 
         return EquityStrategy(seed=seed, **params)
+    if spec == "solver":
+        from pokerlab.strategies.solver import SolverStrategy
+
+        return SolverStrategy(seed=seed, **params)
     if spec.startswith("archetype:"):
         from pokerlab.agents.opponents import ARCHETYPES
 

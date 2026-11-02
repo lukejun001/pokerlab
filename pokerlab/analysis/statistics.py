@@ -130,6 +130,7 @@ class AgentStats:
     rebuy_chips: int = 0
     by_position: dict[str, BucketStats] = field(default_factory=dict)
     by_seat: dict[int, BucketStats] = field(default_factory=dict)
+    decision_sources: dict[str, int] = field(default_factory=dict)  # solver-backed strategies only
 
     def merge(self, other: AgentStats) -> None:
         for f in fields(self):
@@ -137,7 +138,10 @@ class AgentStats:
                 continue
             mine = getattr(self, f.name)
             theirs = getattr(other, f.name)
-            if isinstance(mine, dict):
+            if f.name == "decision_sources":
+                for key, count in theirs.items():
+                    mine[key] = mine.get(key, 0) + count
+            elif isinstance(mine, dict):
                 for key, bucket in theirs.items():
                     mine.setdefault(key, BucketStats()).merge(bucket)
             else:

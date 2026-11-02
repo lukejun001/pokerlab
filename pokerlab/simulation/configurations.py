@@ -37,6 +37,9 @@ class SimulationConfig:
     small_blind: int = 25
     big_blind: int = 50
     starting_stack_bb: float = 100
+    # Independent mode: give each position its own starting stack every hand,
+    # e.g. {UTG: 100, HJ: 150, CO: 70, BTN: 115, SB: 40, BB: 200} (solver labels).
+    stacks_by_position_bb: dict[str, float] | None = None
     mode: str = "independent"  # independent | continuous
     rebuy_enabled: bool = True
     rebuy_below_bb: float = 40  # continuous mode: top up when a stack drops below this
@@ -67,6 +70,13 @@ class SimulationConfig:
         self.lineup = resize_lineup(self.lineup, self.players or len(self.lineup))
         self.players = len(self.lineup)
         RakeConfig.from_dict(self.rake)  # validate early
+        if self.stacks_by_position_bb:
+            from pokerlab.solver.game import position_names
+
+            if self.mode != "independent":
+                raise ValueError("stacks_by_position_bb requires independent mode")
+            if set(self.stacks_by_position_bb) != set(position_names(self.players)):
+                raise ValueError(f"stacks_by_position_bb must name {position_names(self.players)}")
 
     @property
     def starting_stack(self) -> int:
@@ -86,6 +96,7 @@ class SimulationConfig:
             rake_cap=rake.cap,
             no_flop_no_drop=rake.no_flop_no_drop,
             mode=self.mode,
+            rake_cap_by_players=tuple(sorted(rake.cap_by_players.items())),
         )
 
     def agent_specs(self) -> list[dict[str, Any]]:
@@ -153,4 +164,9 @@ def load_config(name_or_path: str | None = None, overrides: dict[str, Any] | Non
 
 
 def list_presets() -> list[Path]:
-    return sorted(CONFIG_DIR.glob("*.yaml"))
+    """Simulation presets (solver configs, which have a ``game:`` section, are listed separately)."""
+    return [p for p in sorted(CONFIG_DIR.glob("*.yaml")) if "game" not in (yaml.safe_load(p.read_text()) or {})]
+
+
+def list_solver_configs() -> list[Path]:
+    return [p for p in sorted(CONFIG_DIR.glob("*.yaml")) if "game" in (yaml.safe_load(p.read_text()) or {})]

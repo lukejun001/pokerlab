@@ -25,7 +25,7 @@ from types import MappingProxyType
 from pokerlab.agents import create_agent
 from pokerlab.analysis.statistics import StatsCollector, action_flags
 from pokerlab.engine.cards import cards_str
-from pokerlab.engine.game import ChipConservationError, HandResult, StalledHandError, play_hand
+from pokerlab.engine.game import ChipConservationError, HandResult, StalledHandError, play_hand, seat_order
 from pokerlab.engine.observations import PlayerPublicStats
 from pokerlab.engine.rake import make_rake_function
 from pokerlab.simulation.configurations import SimulationConfig
@@ -83,6 +83,22 @@ def seat_lineup(config: SimulationConfig, chunk_index: int) -> list[dict]:
     return specs
 
 
+def _position_stack_fn(config: SimulationConfig):
+    """button seat -> {seat: chips} for per-position starting stacks."""
+    from pokerlab.solver.game import position_names, preflop_order_from_pokerkit
+
+    n = config.players
+    names = position_names(n)
+    order = preflop_order_from_pokerkit(n)
+    chips = {p: int(round(v * config.big_blind)) for p, v in config.stacks_by_position_bb.items()}
+
+    def stacks(button: int) -> dict[int, int]:
+        seats = seat_order(range(n), button)
+        return {seat: chips[names[order[pk]]] for pk, seat in enumerate(seats)}
+
+    return stacks
+
+
 def _hand_log_entry(result: HandResult, names: dict[int, str]) -> dict:
     return {
         "hand": result.hand_id,
@@ -122,6 +138,7 @@ def run_chunk(config: SimulationConfig, chunk_index: int, hand_start: int, hand_
     history: deque = deque(maxlen=config.history_window)
 
     continuous = config.mode == "continuous"
+    position_stacks = _position_stack_fn(config) if config.stacks_by_position_bb else None
     stacks = dict.fromkeys(range(n), starting_stack)
     table_chips = starting_stack * n  # chips on the table, for the session conservation check
     rebuy_below = int(config.rebuy_below_bb * bb)
@@ -156,6 +173,8 @@ def run_chunk(config: SimulationConfig, chunk_index: int, hand_start: int, hand_
             button = hand_id % n
             while button not in active:
                 button = (button + 1) % n
+            if position_stacks:
+                stacks = position_stacks(button)
 
             try:
                 result = play_hand(
@@ -208,6 +227,13 @@ def run_chunk(config: SimulationConfig, chunk_index: int, hand_start: int, hand_
     finally:
         if log_file:
             log_file.close()
+
+    for seat, agent in agents.items():
+        sources = getattr(getattr(agent, "strategy", None), "decision_sources", None)
+        if sources:
+            counts = stats.agents[seat_agents[seat][0]].decision_sources
+            for label, count in sources.items():
+                counts[label] = counts.get(label, 0) + count
 
     return ChunkResult(
         chunk_index=chunk_index,

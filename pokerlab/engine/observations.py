@@ -63,6 +63,7 @@ class GameInfo:
     rake_cap: int | None
     no_flop_no_drop: bool
     mode: str
+    rake_cap_by_players: tuple[tuple[int, int], ...] = ()  # (players dealt, cap) pairs
 
 
 @dataclass(frozen=True, slots=True)
