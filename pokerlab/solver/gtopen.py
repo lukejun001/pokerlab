@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import json
 import os
-import re
 import subprocess
 import sys
 import tempfile
@@ -149,29 +148,30 @@ def run(game: PreflopGame, iterations: int, check_every: int = 0, threads: int |
         src, dst = Path(tmp) / "in.json", Path(tmp) / "out.json"
         src.write_text(json.dumps(request))
         started = time.perf_counter()
-        proc = subprocess.Popen(["/usr/bin/time", "-l", str(BINARY), str(src), str(dst)], cwd=GTOPEN_DIR,
+        proc = subprocess.Popen([str(BINARY), str(src), str(dst)], cwd=GTOPEN_DIR,
                                 env=env, stderr=subprocess.PIPE, text=True)
         log = []
         for line in proc.stderr:
             log.append(line)
             if progress and ("iter" in line or "built" in line or "rejected" in line):
                 print(line.rstrip(), file=sys.stderr)
-        proc.wait()
+        # wait4 reports the child's own CPU time and peak RSS on macOS and Linux alike.
+        _, status, usage = os.wait4(proc.pid, 0)
+        proc.returncode = os.waitstatus_to_exitcode(status)
         wall = time.perf_counter() - started
         text = "".join(log)
         if proc.returncode != 0:
             raise RuntimeError(f"preflop-cli failed ({proc.returncode}):\n{text[-2000:]}")
         out = json.loads(dst.read_text())
-    rss = re.search(r"(\d+)\s+maximum resident set size", text)
-    user = re.search(r"([\d.]+) user", text)
-    system = re.search(r"([\d.]+) sys", text)
-    cpu = (float(user.group(1)) if user else 0.0) + (float(system.group(1)) if system else 0.0)
+    cpu = usage.ru_utime + usage.ru_stime
+    # ru_maxrss is bytes on macOS, kilobytes on Linux.
+    rss_mb = usage.ru_maxrss / 2**20 if sys.platform == "darwin" else usage.ru_maxrss / 2**10
     out["metrics"].update(
         wall_s=round(wall, 2),
         cpu_s=round(cpu, 2),
         cpu_utilization=round(cpu / wall / (os.cpu_count() or 1), 3) if wall else None,
         cores=os.cpu_count(),
-        peak_memory_mb=round(int(rss.group(1)) / 2**20, 1) if rss else None,
+        peak_memory_mb=round(rss_mb, 1),
         fork_commit=fork_commit(),
         gpu="not used (CPU build)",
         request=request,
