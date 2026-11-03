@@ -215,9 +215,13 @@ def to_gtopen_profile(strategy: dict[str, np.ndarray]) -> dict[str, list]:
 class WarmStart:
     """A profile to start a solve from (pokerlab class order), and how hard to trust it.
 
-    ``regret_scale`` and ``sum_scale`` multiply each node's per-hand regret and
-    strategy-sum mass after the first iteration; ``iterations`` is how much
-    history DCFR's discounting treats the prior as. See ``preflop-cli``.
+    ``sum_scale``: how many iterations' worth of average strategy the prior
+    counts as (each node's strategy sums become the prior times the actor's
+    reach under it, times this). ``regret_scale``: the prior's regret mass
+    relative to one iteration's (rescaled to the prior's opponent reach), so
+    regret matching plays the prior until real regrets outweigh it.
+    ``iterations``: DCFR's iteration counter after seeding, i.e. how slowly the
+    discounting forgets the prior. See ``preflop-cli``.
     """
 
     profile: dict[str, np.ndarray]

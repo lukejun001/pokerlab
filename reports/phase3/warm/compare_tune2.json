@@ -1,0 +1,56 @@
+{
+  "library_size": 16,
+  "runs": [
+    {
+      "stacks_bb": [
+        63,
+        82,
+        206,
+        65,
+        72,
+        88
+      ],
+      "variant": "r1s30t20",
+      "approximation": {
+        "distance": 0.462,
+        "node_distance_mean": 0.28,
+        "node_distance_p90": 0.462,
+        "node_distance_max": 1.3863,
+        "first_in_distance_max": 0.4308,
+        "untranslated_nodes": 48
+      },
+      "approximation_s": 5.1,
+      "warm_start": {
+        "cold_nodes": 48,
+        "regret_scale": 1.0,
+        "seeded_nodes": 10374,
+        "sum_scale": 30.0,
+        "warm_iterations": 20
+      },
+      "threads": 4,
+      "wall_s": 92.47,
+      "curve": [
+        {
+          "iteration": 5,
+          "solve_s": 12.9,
+          "nash_conv_bb100": 208.12
+        },
+        {
+          "iteration": 10,
+          "solve_s": 27.1,
+          "nash_conv_bb100": 116.56
+        },
+        {
+          "iteration": 15,
+          "solve_s": 43.5,
+          "nash_conv_bb100": 81.035
+        },
+        {
+          "iteration": 20,
+          "solve_s": 63.5,
+          "nash_conv_bb100": 61.817
+        }
+      ]
+    }
+  ]
+}
