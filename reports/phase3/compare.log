@@ -1,0 +1,192 @@
+{
+ "first_in": {
+  "6max_gtopen_equal": {
+   "UTG": {
+    "fold": 0.8112,
+    "r12500": 0.1888,
+    "a500000": 0.0
+   },
+   "HJ": {
+    "fold": 0.7742,
+    "r12500": 0.2258,
+    "a500000": 0.0
+   },
+   "CO": {
+    "fold": 0.6988,
+    "r12500": 0.3012,
+    "a500000": 0.0
+   },
+   "BTN": {
+    "fold": 0.5895,
+    "r12500": 0.4105,
+    "a500000": 0.0
+   },
+   "SB": {
+    "fold": 0.4651,
+    "r15000": 0.5349,
+    "a500000": 0.0
+   }
+  },
+  "6max_gtopen_asymmetric": {
+   "UTG": {
+    "fold": 0.8095,
+    "r12500": 0.1905,
+    "a500000": 0.0
+   },
+   "HJ": {
+    "fold": 0.7758,
+    "r12500": 0.2242,
+    "a750000": 0.0
+   },
+   "CO": {
+    "fold": 0.7118,
+    "r12500": 0.2882,
+    "a350000": 0.0
+   },
+   "BTN": {
+    "fold": 0.6128,
+    "r12500": 0.3872,
+    "a575000": 0.0
+   },
+   "SB": {
+    "fold": 0.4743,
+    "r15000": 0.5257,
+    "a200000": 0.0
+   }
+  },
+  "6max_gtopen_asymmetric_rot1": {
+   "UTG": {
+    "fold": 0.8094,
+    "r12500": 0.1906,
+    "a1000000": 0.0
+   },
+   "HJ": {
+    "fold": 0.7758,
+    "r12500": 0.2242,
+    "a500000": 0.0
+   },
+   "CO": {
+    "fold": 0.7093,
+    "r12500": 0.2907,
+    "a750000": 0.0
+   },
+   "BTN": {
+    "fold": 0.6086,
+    "r12500": 0.3914,
+    "a350000": 0.0
+   },
+   "SB": {
+    "fold": 0.4749,
+    "r15000": 0.5251,
+    "a575000": 0.0
+   }
+  }
+ },
+ "inspect": {
+  "6max_gtopen_equal": {
+   "key": "d861399d6747f5adae36fb6837975cfc4181eccccfcabd38eb105e95b461f93a",
+   "decision_nodes": 9723,
+   "file_bytes": 3770408,
+   "first_load_ms": 0.01,
+   "cached_lookup_us": 21.06
+  },
+  "6max_gtopen_asymmetric": {
+   "key": "f57301d4b8b78cd769cd8a4ca52b5c45500f6e19947d459f37b4ca7ad9bd5bdb",
+   "decision_nodes": 9764,
+   "file_bytes": 3875158,
+   "first_load_ms": 0.0,
+   "cached_lookup_us": 20.95
+  },
+  "6max_gtopen_asymmetric_rot1": {
+   "key": "e7012923d7a87a330037ce25ab3845bce2eb823cfe0c6a945510712ac513f2f6",
+   "decision_nodes": 10085,
+   "file_bytes": 3874370,
+   "first_load_ms": 0.0,
+   "cached_lookup_us": 20.93
+  }
+ },
+ "equal_vs_asymmetric_distance": {
+  "UTG first in": {
+   "mean_tv": 0.0073,
+   "max_tv_over_classes": 0.7081,
+   "share_of_combos_changing_over_10pct": 0.0121
+  },
+  "BTN first in": {
+   "mean_tv": 0.0232,
+   "max_tv_over_classes": 0.9921,
+   "share_of_combos_changing_over_10pct": 0.0422
+  },
+  "SB first in": {
+   "mean_tv": 0.0105,
+   "max_tv_over_classes": 0.9034,
+   "share_of_combos_changing_over_10pct": 0.0181
+  },
+  "BB vs SB open": {
+   "mean_tv": 0.212,
+   "max_tv_over_classes": 0.9998,
+   "share_of_combos_changing_over_10pct": 0.279
+  },
+  "BB vs SB all-in": {
+   "mean_tv": 0.0593,
+   "max_tv_over_classes": 0.972,
+   "share_of_combos_changing_over_10pct": 0.0905
+  },
+  "SB vs BTN open": {
+   "mean_tv": 0.1256,
+   "max_tv_over_classes": 0.9999,
+   "share_of_combos_changing_over_10pct": 0.1493
+  },
+  "BB vs BTN open, SB folds": {
+   "mean_tv": 0.0289,
+   "max_tv_over_classes": 0.8251,
+   "share_of_combos_changing_over_10pct": 0.0679
+  },
+  "UTG vs HJ 3-bet": {
+   "mean_tv": 0.0958,
+   "max_tv_over_classes": 0.7045,
+   "share_of_combos_changing_over_10pct": 0.3379
+  }
+ },
+ "asymmetric_vs_rotated_distance": {
+  "UTG first in": {
+   "mean_tv": 0.0037,
+   "max_tv_over_classes": 0.3549,
+   "share_of_combos_changing_over_10pct": 0.0121
+  },
+  "BTN first in": {
+   "mean_tv": 0.0059,
+   "max_tv_over_classes": 0.6549,
+   "share_of_combos_changing_over_10pct": 0.0121
+  },
+  "SB first in": {
+   "mean_tv": 0.0007,
+   "max_tv_over_classes": 0.1543,
+   "share_of_combos_changing_over_10pct": 0.003
+  },
+  "BB vs SB open": {
+   "mean_tv": 0.0111,
+   "max_tv_over_classes": 0.2383,
+   "share_of_combos_changing_over_10pct": 0.0347
+  },
+  "BB vs SB all-in": {
+   "mean_tv": 0.0273,
+   "max_tv_over_classes": 0.6435,
+   "share_of_combos_changing_over_10pct": 0.0799
+  },
+  "SB vs BTN open": {
+   "mean_tv": 0.1949,
+   "max_tv_over_classes": 0.9998,
+   "share_of_combos_changing_over_10pct": 0.2217
+  },
+  "BB vs BTN open, SB folds": {
+   "mean_tv": 0.1829,
+   "max_tv_over_classes": 0.9999,
+   "share_of_combos_changing_over_10pct": 0.2081
+  },
+  "UTG vs HJ 3-bet": {
+   "mean_tv": 0.1973,
+   "max_tv_over_classes": 0.9569,
+   "share_of_combos_changing_over_10pct": 0.537
+  }
+ }
+}

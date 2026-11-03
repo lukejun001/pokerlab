@@ -102,7 +102,8 @@ pokerlab/
   analysis/
     statistics.py    per-agent and table stats (mergeable)
     reporting.py     terminal report, CSV/JSON export
-  solver/            Phase 3: asymmetric-stack preflop solver
+  solver/            Phase 3: asymmetric-stack preflop model, cache and solvers
+    gtopen.py        runs the GTOpen fork's preflop-cli and stores its strategies
     game.py          preflop tree with a stack per player (PokerKit betting and pot rules)
     hands.py         169 hand classes, batched dealing, vectorized 7-card evaluator
     cfr.py           chance-sampled Discounted CFR and sampled best-response evaluation
@@ -290,28 +291,37 @@ is a compiled evaluator package (for example `phevaluator` or `eval7`) behind
 
 ## Preflop solver (Phase 3)
 
-Six-max preflop strategies for games where **every player has their own stack**, solved
-offline and cached for the experimental agent. Details, measured results and limitations:
-[docs/phase3_report.md](docs/phase3_report.md); why GTOpen was not used:
-[docs/gtopen_assessment.md](docs/gtopen_assessment.md).
+Six-max preflop strategies for games where **every player has their own stack**, solved offline and
+cached for the experimental agent.
+
+- **Solver:** a private fork of [GTOpen](https://github.com/MatthewPDingle/GTOpen),
+  `lukejun001/gtopen-asymmetric`, checked out next to this repo as `../gtopen-asymmetric`. The fork
+  adds per-seat stacks, PokerKit's all-in rules and side-pot terminals. pokerlab runs its `preflop-cli`
+  binary (`pokerlab/solver/gtopen.py`).
+- **Details and measured results:** [docs/phase3_report.md](docs/phase3_report.md) and
+  [docs/gtopen_assessment.md](docs/gtopen_assessment.md).
 
 ```bash
-python -m pokerlab strategies generate --config configs/6max_asymmetric.yaml   # solve + store
-python -m pokerlab strategies inspect  --config configs/6max_asymmetric.yaml   # summary, lookup latency
-python -m pokerlab strategies inspect  --config configs/6max_asymmetric.yaml --history "f-r12500"
+# once, in ../gtopen-asymmetric
+cargo build --release -p solver --bin preflop-cli
+# in pokerlab
+python -m pokerlab strategies generate --config configs/6max_gtopen_asymmetric.yaml   # solve + store
+python -m pokerlab strategies inspect  --config configs/6max_gtopen_asymmetric.yaml   # summary, lookup latency
+python -m pokerlab strategies inspect  --config configs/6max_gtopen_asymmetric.yaml --history "f-f-f-f"
 python -m pokerlab strategies list
-python -m pokerlab simulate --config configs/6max_asymmetric.yaml --hands 10000
+python -m pokerlab simulate --config configs/6max_gtopen_asymmetric.yaml --hands 10000
 ```
 
-- The game model ports PokerKit's rules (all-in calls for less, short all-ins that do not
-  reopen betting, uncalled-bet refunds, side pots, per-pot rake under a whole-hand cap) and
-  is checked against PokerKit node by node and payout by payout.
-- The solver deals real hole cards and boards, so card removal is exact. Flop terminals are
-  valued by checking the hand down (continuation model `showdown-v1`): there is no postflop play yet.
-- A cached strategy is used only for an **exact** match of variant, players, positions,
-  every stack, blinds, ante, rake, abstraction and solver/model versions. Anything else,
-  including an opponent's off-tree raise size, falls back to the heuristic strategy, and
-  every decision is counted by source in the simulation report.
+- **Validation:** the fork's trees are checked against PokerKit node by node and payout by payout
+  (`tests/test_gtopen.py`, skipped if the fork isn't built).
+- **Postflop:** flop terminals use GTOpen's approximate continuation model; there is no postflop
+  solving yet.
+- **Exact matches only.** A cached strategy is used only when variant, players, positions, every stack,
+  blinds, ante, rake, abstraction and solver/model versions all match. Anything else, including an
+  opponent's off-tree raise size, falls back to the heuristic strategy. Every decision is counted by
+  source in the simulation report.
+- **Cross-check solver:** `pokerlab/solver/cfr.py` (configs `6max_equal`, `6max_asymmetric`) is an
+  independent NumPy solver used for comparison.
 
 ## Known limitations
 

@@ -1,0 +1,243 @@
+{
+  "6max_gtopen_asymmetric": {
+    "hands": 10000,
+    "seconds": 8.3,
+    "rake_chips": 1591191,
+    "agents": [
+      {
+        "agent": "Hero",
+        "archetype": "Experimental",
+        "net_bb100": 45.10856,
+        "bb100_ci95_low": 13.300374436539162,
+        "bb100_ci95_high": 76.91674556346084,
+        "gross_bb100": 45.599334008772566,
+        "vpip": 0.2554,
+        "pfr": 0.1923
+      },
+      {
+        "agent": "LAG",
+        "archetype": "LAG",
+        "net_bb100": 42.910514000000006,
+        "bb100_ci95_low": 8.65879083953746,
+        "bb100_ci95_high": 77.16223716046255,
+        "gross_bb100": 43.52623399742983,
+        "vpip": 0.283,
+        "pfr": 0.2287
+      },
+      {
+        "agent": "Balanced",
+        "archetype": "Balanced",
+        "net_bb100": 29.885958000000002,
+        "bb100_ci95_low": 5.953117357750099,
+        "bb100_ci95_high": 53.8187986422499,
+        "gross_bb100": 30.3141539967973,
+        "vpip": 0.2029,
+        "pfr": 0.1672
+      },
+      {
+        "agent": "Nit",
+        "archetype": "Nit",
+        "net_bb100": 24.131307999999997,
+        "bb100_ci95_low": 9.781617121588768,
+        "bb100_ci95_high": 38.48099887841123,
+        "gross_bb100": 24.344208,
+        "vpip": 0.0809,
+        "pfr": 0.0631
+      },
+      {
+        "agent": "TAG",
+        "archetype": "TAG",
+        "net_bb100": 19.003776,
+        "bb100_ci95_low": -2.526344663820101,
+        "bb100_ci95_high": 40.5338966638201,
+        "gross_bb100": 19.384776000000002,
+        "vpip": 0.1724,
+        "pfr": 0.1374
+      },
+      {
+        "agent": "CallingStation",
+        "archetype": "CallingStation",
+        "net_bb100": -164.22249800000003,
+        "bb100_ci95_low": -198.6419461812925,
+        "bb100_ci95_high": -129.80304981870756,
+        "gross_bb100": -163.16870600299967,
+        "vpip": 0.4551,
+        "pfr": 0.0281
+      }
+    ],
+    "decision_sources": {
+      "Hero": {
+        "fallback:history_not_in_abstraction": 2354,
+        "exact:f57301d4b8b7": 7662,
+        "fallback:postflop": 5426
+      }
+    }
+  },
+  "6max_gtopen_asymmetric_selfplay": {
+    "hands": 10000,
+    "seconds": 17.3,
+    "rake_chips": 1541398,
+    "agents": [
+      {
+        "agent": "Solver2",
+        "archetype": "Experimental",
+        "net_bb100": 23.652084000000002,
+        "bb100_ci95_low": -9.276831981856397,
+        "bb100_ci95_high": 56.5809999818564,
+        "gross_bb100": 24.17748,
+        "vpip": 0.2724,
+        "pfr": 0.1716
+      },
+      {
+        "agent": "Solver4",
+        "archetype": "Experimental",
+        "net_bb100": 19.76746,
+        "bb100_ci95_low": -11.960175105991514,
+        "bb100_ci95_high": 51.49509510599151,
+        "gross_bb100": 20.280527997604043,
+        "vpip": 0.2673,
+        "pfr": 0.1702
+      },
+      {
+        "agent": "Solver5",
+        "archetype": "Experimental",
+        "net_bb100": 1.998904,
+        "bb100_ci95_low": -30.756041249685712,
+        "bb100_ci95_high": 34.753849249685715,
+        "gross_bb100": 2.510904,
+        "vpip": 0.2753,
+        "pfr": 0.1745
+      },
+      {
+        "agent": "Solver1",
+        "archetype": "Experimental",
+        "net_bb100": -5.37873,
+        "bb100_ci95_low": -39.21488495404767,
+        "bb100_ci95_high": 28.45742495404767,
+        "gross_bb100": -4.8701,
+        "vpip": 0.2843,
+        "pfr": 0.1847
+      },
+      {
+        "agent": "Solver6",
+        "archetype": "Experimental",
+        "net_bb100": -14.889686,
+        "bb100_ci95_low": -47.40738072138893,
+        "bb100_ci95_high": 17.628008721388937,
+        "gross_bb100": -14.372086,
+        "vpip": 0.2789,
+        "pfr": 0.179
+      },
+      {
+        "agent": "Solver3",
+        "archetype": "Experimental",
+        "net_bb100": -28.232827999999998,
+        "bb100_ci95_low": -62.03811299058381,
+        "bb100_ci95_high": 5.572456990583817,
+        "gross_bb100": -27.726725997604046,
+        "vpip": 0.2761,
+        "pfr": 0.1794
+      }
+    ],
+    "decision_sources": {
+      "Solver1": {
+        "exact:f57301d4b8b7": 10184,
+        "fallback:postflop": 5491
+      },
+      "Solver2": {
+        "exact:f57301d4b8b7": 10155,
+        "fallback:postflop": 5339
+      },
+      "Solver3": {
+        "exact:f57301d4b8b7": 10153,
+        "fallback:postflop": 5434
+      },
+      "Solver4": {
+        "exact:f57301d4b8b7": 10130,
+        "fallback:postflop": 5270
+      },
+      "Solver5": {
+        "exact:f57301d4b8b7": 10138,
+        "fallback:postflop": 5331
+      },
+      "Solver6": {
+        "exact:f57301d4b8b7": 10135,
+        "fallback:postflop": 5482
+      }
+    }
+  },
+  "6max_gtopen_equal": {
+    "hands": 10000,
+    "seconds": 7.3,
+    "rake_chips": 1584000,
+    "agents": [
+      {
+        "agent": "Hero",
+        "archetype": "Experimental",
+        "net_bb100": 64.90944,
+        "bb100_ci95_low": 29.427676323570836,
+        "bb100_ci95_high": 100.39120367642917,
+        "gross_bb100": 65.40744002845443,
+        "vpip": 0.2612,
+        "pfr": 0.1959
+      },
+      {
+        "agent": "LAG",
+        "archetype": "LAG",
+        "net_bb100": 42.991292,
+        "bb100_ci95_low": 5.462384982207482,
+        "bb100_ci95_high": 80.52019901779252,
+        "gross_bb100": 43.597491992679934,
+        "vpip": 0.2847,
+        "pfr": 0.2295
+      },
+      {
+        "agent": "TAG",
+        "archetype": "TAG",
+        "net_bb100": 33.352348000000006,
+        "bb100_ci95_low": 9.393191153039918,
+        "bb100_ci95_high": 57.31150484696009,
+        "gross_bb100": 33.72644799168836,
+        "vpip": 0.1722,
+        "pfr": 0.1358
+      },
+      {
+        "agent": "Nit",
+        "archetype": "Nit",
+        "net_bb100": 27.24803,
+        "bb100_ci95_low": 10.882484639444119,
+        "bb100_ci95_high": 43.613575360555885,
+        "gross_bb100": 27.45373,
+        "vpip": 0.083,
+        "pfr": 0.0632
+      },
+      {
+        "agent": "Balanced",
+        "archetype": "Balanced",
+        "net_bb100": 6.954602,
+        "bb100_ci95_low": -20.27276472611764,
+        "bb100_ci95_high": 34.18196872611764,
+        "gross_bb100": 7.375702,
+        "vpip": 0.204,
+        "pfr": 0.1702
+      },
+      {
+        "agent": "CallingStation",
+        "archetype": "CallingStation",
+        "net_bb100": -178.623712,
+        "bb100_ci95_low": -218.3074434283891,
+        "bb100_ci95_high": -138.93998057161093,
+        "gross_bb100": -177.5608120128227,
+        "vpip": 0.457,
+        "pfr": 0.028
+      }
+    ],
+    "decision_sources": {
+      "Hero": {
+        "fallback:history_not_in_abstraction": 2353,
+        "exact:d861399d6747": 7672,
+        "fallback:postflop": 5441
+      }
+    }
+  }
+}

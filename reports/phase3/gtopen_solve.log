@@ -1,3 +1,43 @@
 
 == 6max_gtopen_asymmetric: stacks {'UTG': 100.0, 'HJ': 150.0, 'CO': 70.0, 'BTN': 115.0, 'SB': 40.0, 'BB': 200.0}
 built 20863 nodes (9764 action nodes, 28.2 MB arena) in 0.04s
+  iter     50  solve    195.4s  NashConv 0.1757 bb/hand (17.57 bb/100)
+  iter    100  solve    409.0s  NashConv 0.0425 bb/hand (4.25 bb/100)
+  iter    150  solve    582.7s  NashConv 0.0175 bb/hand (1.75 bb/100)
+  iter    200  solve    737.8s  NashConv 0.0091 bb/hand (0.91 bb/100)
+  iter    250  solve    898.8s  NashConv 0.0055 bb/hand (0.55 bb/100)
+  iter    300  solve   1100.0s  NashConv 0.0036 bb/hand (0.36 bb/100)
+  iter    350  solve   1279.3s  NashConv 0.0026 bb/hand (0.26 bb/100)
+  iter    400  solve   1443.5s  NashConv 0.0019 bb/hand (0.19 bb/100)
+{
+ "key": "f57301d4b8b78cd769cd8a4ca52b5c45500f6e19947d459f37b4ca7ad9bd5bdb",
+ "iterations": 400,
+ "solve_s": 1443.5,
+ "wall_s": 1496.09,
+ "cpu_utilization": 0.635,
+ "peak_memory_mb": 361.1,
+ "final_nash_conv_bb100": 0.191,
+ "strategy_bytes": 3875158
+}
+
+== 6max_gtopen_asymmetric_rot1: stacks {'UTG': 200.0, 'HJ': 100.0, 'CO': 150.0, 'BTN': 70.0, 'SB': 115.0, 'BB': 40.0}
+built 21620 nodes (10085 action nodes, 29.2 MB arena) in 0.04s
+  iter     50  solve    223.3s  NashConv 0.0734 bb/hand (7.34 bb/100)
+  iter    100  solve    433.6s  NashConv 0.0160 bb/hand (1.60 bb/100)
+  iter    150  solve    627.4s  NashConv 0.0063 bb/hand (0.63 bb/100)
+  iter    200  solve    813.1s  NashConv 0.0034 bb/hand (0.34 bb/100)
+  iter    250  solve   1012.6s  NashConv 0.0022 bb/hand (0.22 bb/100)
+  iter    300  solve   1193.6s  NashConv 0.0015 bb/hand (0.15 bb/100)
+  iter    350  solve   1375.2s  NashConv 0.0011 bb/hand (0.11 bb/100)
+  iter    400  solve   1549.6s  NashConv 0.0009 bb/hand (0.09 bb/100)
+{
+ "key": "e7012923d7a87a330037ce25ab3845bce2eb823cfe0c6a945510712ac513f2f6",
+ "iterations": 400,
+ "solve_s": 1549.63,
+ "wall_s": 1601.88,
+ "cpu_utilization": 0.686,
+ "peak_memory_mb": 375.2,
+ "final_nash_conv_bb100": 0.088,
+ "strategy_bytes": 3874370
+}
+exit 0

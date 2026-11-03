@@ -1,0 +1,57 @@
+
+POKER AI SIMULATION REPORT
+==========================
+Experiment:        6max_gtopen_equal
+Hands completed:   10,000
+Players:           6
+Blinds:            2500/5000 chips, stacks by position UTG 100bb HJ 100bb CO 100bb BTN 100bb SB 100bb BB 100bb (independent)
+Rake:              4.5%, capped at 300 chips (0.06bb), no flop no drop
+Seed:              42
+
+Hero (Experimental)
+-------------------
+Net profit:        +32,454,720 chips (+6,490.9 bb)
+Net bb/100:        +64.91  (95% CI +29.43 to +100.39, SE 18.10)
+Gross bb/100:      +65.41  (before attributed rake)
+Rake attributed:   249,000 chips (0.50 bb/100)
+Hands won:         1,960 (19.6%)
+VPIP / PFR:        26.1% / 19.6%
+3-bet:             5.2% of 2,970 opportunities
+Fold to 3-bet:     74.0% of 312 opportunities
+Aggression:        AFq 51.7%, AF 1.54
+WTSD / W$SD:       58.7% / 43.7%
+
+ALL AGENTS (sorted by net bb/100)
+
+agent               hands  net bb/100    ±95%    gross   rake   VPIP    PFR     3B    F3B    AFq   WTSD  inval
+--------------------------------------------------------------------------------------------------------------
+Hero               10,000      +64.91    35.5    +65.4    0.5  26.1%  19.6%   5.2%  74.0%  51.7%  58.7%      0
+LAG                10,000      +42.99    37.5    +43.6    0.6  28.5%  22.9%  11.3%  64.9%  82.3%  60.9%      0
+TAG                10,000      +33.35    24.0    +33.7    0.4  17.2%  13.6%   5.4%  68.0%  60.6%  62.9%      0
+Nit                10,000      +27.25    16.4    +27.5    0.2   8.3%   6.3%   2.4%  63.5%  50.5%  58.5%      0
+Balanced           10,000       +6.95    27.2     +7.4    0.4  20.4%  17.0%   7.2%  73.1%  61.8%  63.9%      0
+CallingStation     10,000     -178.62    39.7   -177.6    1.1  45.7%   2.8%   2.0%   0.0%  15.1%  73.1%      0
+
+Hero BY POSITION
+position      hands  net bb/100     ±95%
+LJ            1,667       +99.4     76.1
+HJ            1,667       +47.7     72.7
+CO            1,667       +49.6     87.5
+BTN           1,667      +109.9     81.2
+SB            1,666       +65.5     83.2
+BB            1,666       +17.3    114.4
+
+Hero DECISION SOURCES (15,466 decisions)
+  exact:d861399d6747                              7,672   49.6%
+  fallback:postflop                               5,441   35.2%
+  fallback:history_not_in_abstraction             2,353   15.2%
+  preflop decisions from an exact solved model: 76.5%
+
+TABLE
+Rake removed:      1,584,000 chips (3.17 bb/100 hands, 52.8% of hands raked)
+Players' net sum:  -1,584,000 chips (equals -rake: True)
+Average pot:       23.1 bb; flops seen 52.8%, showdowns 36.3%
+Problems:          0 invalid actions, 0 stalled hands, 0 engine errors
+Simulation runtime: 7.3s on 8 worker(s)
+Hands per second:  1,376
+Decisions per sec: 13,012

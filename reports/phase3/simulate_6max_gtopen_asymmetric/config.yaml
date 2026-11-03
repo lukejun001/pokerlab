@@ -1,0 +1,44 @@
+name: 6max_gtopen_asymmetric
+hands: 10000
+seed: 42
+players: 6
+small_blind: 2500
+big_blind: 5000
+starting_stack_bb: 200.0
+stacks_by_position_bb:
+  UTG: 100.0
+  HJ: 150.0
+  CO: 70.0
+  BTN: 115.0
+  SB: 40.0
+  BB: 200.0
+mode: independent
+rebuy_enabled: true
+rebuy_below_bb: 40
+rebuy_to_bb: 100
+rake:
+  percentage: 0.045
+  cap: 300
+  cap_by_players: {}
+  no_flop_no_drop: true
+seat_assignment: fixed
+chunk_size: 1000
+workers: 8
+max_actions_per_hand: 500
+chunk_timeout_s: 600
+strict: false
+history_window: 10
+hand_log: false
+output_dir: results
+lineup:
+- type: Experimental
+  id: Hero
+  params:
+    strategy: solver
+    strategy_params:
+      config: /Users/LukeJun/Developer/Coding Projects/pokerlab/configs/6max_gtopen_asymmetric.yaml
+- type: TAG
+- type: LAG
+- type: CallingStation
+- type: Nit
+- type: Balanced

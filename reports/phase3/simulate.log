@@ -1,0 +1,196 @@
+
+POKER AI SIMULATION REPORT
+==========================
+Experiment:        6max_gtopen_asymmetric
+Hands completed:   10,000
+Players:           6
+Blinds:            2500/5000 chips, stacks by position UTG 100bb HJ 150bb CO 70bb BTN 115bb SB 40bb BB 200bb (independent)
+Rake:              4.5%, capped at 300 chips (0.06bb), no flop no drop
+Seed:              42
+
+Hero (Experimental)
+-------------------
+Net profit:        +22,554,280 chips (+4,510.9 bb)
+Net bb/100:        +45.11  (95% CI +13.30 to +76.92, SE 16.23)
+Gross bb/100:      +45.60  (before attributed rake)
+Rake attributed:   245,387 chips (0.49 bb/100)
+Hands won:         1,917 (19.2%)
+VPIP / PFR:        25.5% / 19.2%
+3-bet:             5.5% of 2,952 opportunities
+Fold to 3-bet:     69.5% of 318 opportunities
+Aggression:        AFq 50.8%, AF 1.48
+WTSD / W$SD:       60.2% / 44.3%
+
+ALL AGENTS (sorted by net bb/100)
+
+agent               hands  net bb/100    ±95%    gross   rake   VPIP    PFR     3B    F3B    AFq   WTSD  inval
+--------------------------------------------------------------------------------------------------------------
+Hero               10,000      +45.11    31.8    +45.6    0.5  25.5%  19.2%   5.5%  69.5%  50.8%  60.2%      0
+LAG                10,000      +42.91    34.3    +43.5    0.6  28.3%  22.9%  11.2%  63.7%  81.4%  60.4%      0
+Balanced           10,000      +29.89    23.9    +30.3    0.4  20.3%  16.7%   6.7%  68.8%  62.0%  64.7%      0
+Nit                10,000      +24.13    14.3    +24.3    0.2   8.1%   6.3%   2.6%  63.4%  52.4%  57.5%      0
+TAG                10,000      +19.00    21.5    +19.4    0.4  17.2%  13.7%   5.4%  66.2%  61.1%  64.1%      0
+CallingStation     10,000     -164.22    34.4   -163.2    1.1  45.5%   2.8%   2.0%   0.0%  15.0%  73.0%      0
+
+Hero BY POSITION
+position      hands  net bb/100     ±95%
+LJ            1,667      +116.1     75.7
+HJ            1,667       +46.2     67.7
+CO            1,667       +20.8     61.1
+BTN           1,667       +88.7     81.2
+SB            1,666       -11.1     45.0
+BB            1,666        +9.9    117.3
+
+Hero DECISION SOURCES (15,442 decisions)
+  exact:f57301d4b8b7                              7,662   49.6%
+  fallback:postflop                               5,426   35.1%
+  fallback:history_not_in_abstraction             2,354   15.2%
+  preflop decisions from an exact solved model: 76.5%
+
+TABLE
+Rake removed:      1,591,191 chips (3.18 bb/100 hands, 53.0% of hands raked)
+Players' net sum:  -1,591,191 chips (equals -rake: True)
+Average pot:       21.1 bb; flops seen 53.0%, showdowns 36.5%
+Problems:          0 invalid actions, 0 stalled hands, 0 engine errors
+Simulation runtime: 8.3s on 8 worker(s)
+Hands per second:  1,205
+Decisions per sec: 11,335
+
+POKER AI SIMULATION REPORT
+==========================
+Experiment:        6max_gtopen_asymmetric_selfplay
+Hands completed:   10,000
+Players:           6
+Blinds:            2500/5000 chips, stacks by position UTG 100bb HJ 150bb CO 70bb BTN 115bb SB 40bb BB 200bb (independent)
+Rake:              4.5%, capped at 300 chips (0.06bb), no flop no drop
+Seed:              42
+
+Solver1 (Experimental)
+----------------------
+Net profit:        -2,689,365 chips (-537.9 bb)
+Net bb/100:        -5.38  (95% CI -39.21 to +28.46, SE 17.26)
+Gross bb/100:      -4.87  (before attributed rake)
+Rake attributed:   254,315 chips (0.51 bb/100)
+Hands won:         1,707 (17.1%)
+VPIP / PFR:        28.4% / 18.5%
+3-bet:             6.5% of 4,217 opportunities
+Fold to 3-bet:     50.0% of 318 opportunities
+Aggression:        AFq 47.5%, AF 1.48
+WTSD / W$SD:       56.6% / 48.4%
+Note: the 95% interval includes 0 bb/100; this win rate is not distinguishable from break-even.
+
+ALL AGENTS (sorted by net bb/100)
+
+agent               hands  net bb/100    ±95%    gross   rake   VPIP    PFR     3B    F3B    AFq   WTSD  inval
+--------------------------------------------------------------------------------------------------------------
+Solver2            10,000      +23.65    32.9    +24.2    0.5  27.2%  17.2%   6.5%  51.3%  47.7%  56.6%      0
+Solver4            10,000      +19.77    31.7    +20.3    0.5  26.7%  17.0%   7.1%  50.9%  48.3%  56.3%      0
+Solver5            10,000       +2.00    32.8     +2.5    0.5  27.5%  17.4%   6.7%  56.3%  48.9%  57.0%      0
+Solver1            10,000       -5.38    33.8     -4.9    0.5  28.4%  18.5%   6.5%  50.0%  47.5%  56.6%      0
+Solver6            10,000      -14.89    32.5    -14.4    0.5  27.9%  17.9%   7.1%  48.7%  49.3%  57.0%      0
+Solver3            10,000      -28.23    33.8    -27.7    0.5  27.6%  17.9%   7.5%  51.7%  49.0%  57.4%      0
+
+Solver1 BY POSITION
+position      hands  net bb/100     ±95%
+LJ            1,667        -3.9     71.1
+HJ            1,667        +3.9    102.7
+CO            1,667       -63.6     62.3
+BTN           1,667       +79.0     82.3
+SB            1,666       -20.7     50.4
+BB            1,666       -27.1    111.3
+
+Solver1 DECISION SOURCES (15,675 decisions)
+  exact:f57301d4b8b7                             10,184   65.0%
+  fallback:postflop                               5,491   35.0%
+  preflop decisions from an exact solved model: 100.0%
+
+Solver2 DECISION SOURCES (15,494 decisions)
+  exact:f57301d4b8b7                             10,155   65.5%
+  fallback:postflop                               5,339   34.5%
+  preflop decisions from an exact solved model: 100.0%
+
+Solver3 DECISION SOURCES (15,587 decisions)
+  exact:f57301d4b8b7                             10,153   65.1%
+  fallback:postflop                               5,434   34.9%
+  preflop decisions from an exact solved model: 100.0%
+
+Solver4 DECISION SOURCES (15,400 decisions)
+  exact:f57301d4b8b7                             10,130   65.8%
+  fallback:postflop                               5,270   34.2%
+  preflop decisions from an exact solved model: 100.0%
+
+Solver5 DECISION SOURCES (15,469 decisions)
+  exact:f57301d4b8b7                             10,138   65.5%
+  fallback:postflop                               5,331   34.5%
+  preflop decisions from an exact solved model: 100.0%
+
+Solver6 DECISION SOURCES (15,617 decisions)
+  exact:f57301d4b8b7                             10,135   64.9%
+  fallback:postflop                               5,482   35.1%
+  preflop decisions from an exact solved model: 100.0%
+
+TABLE
+Rake removed:      1,541,398 chips (3.08 bb/100 hands, 51.4% of hands raked)
+Players' net sum:  -1,541,398 chips (equals -rake: True)
+Average pot:       25.9 bb; flops seen 51.4%, showdowns 31.2%
+Problems:          0 invalid actions, 0 stalled hands, 0 engine errors
+Simulation runtime: 17.3s on 8 worker(s)
+Hands per second:  577
+Decisions per sec: 5,379
+
+POKER AI SIMULATION REPORT
+==========================
+Experiment:        6max_gtopen_equal
+Hands completed:   10,000
+Players:           6
+Blinds:            2500/5000 chips, stacks by position UTG 100bb HJ 100bb CO 100bb BTN 100bb SB 100bb BB 100bb (independent)
+Rake:              4.5%, capped at 300 chips (0.06bb), no flop no drop
+Seed:              42
+
+Hero (Experimental)
+-------------------
+Net profit:        +32,454,720 chips (+6,490.9 bb)
+Net bb/100:        +64.91  (95% CI +29.43 to +100.39, SE 18.10)
+Gross bb/100:      +65.41  (before attributed rake)
+Rake attributed:   249,000 chips (0.50 bb/100)
+Hands won:         1,960 (19.6%)
+VPIP / PFR:        26.1% / 19.6%
+3-bet:             5.2% of 2,970 opportunities
+Fold to 3-bet:     74.0% of 312 opportunities
+Aggression:        AFq 51.7%, AF 1.54
+WTSD / W$SD:       58.7% / 43.7%
+
+ALL AGENTS (sorted by net bb/100)
+
+agent               hands  net bb/100    ±95%    gross   rake   VPIP    PFR     3B    F3B    AFq   WTSD  inval
+--------------------------------------------------------------------------------------------------------------
+Hero               10,000      +64.91    35.5    +65.4    0.5  26.1%  19.6%   5.2%  74.0%  51.7%  58.7%      0
+LAG                10,000      +42.99    37.5    +43.6    0.6  28.5%  22.9%  11.3%  64.9%  82.3%  60.9%      0
+TAG                10,000      +33.35    24.0    +33.7    0.4  17.2%  13.6%   5.4%  68.0%  60.6%  62.9%      0
+Nit                10,000      +27.25    16.4    +27.5    0.2   8.3%   6.3%   2.4%  63.5%  50.5%  58.5%      0
+Balanced           10,000       +6.95    27.2     +7.4    0.4  20.4%  17.0%   7.2%  73.1%  61.8%  63.9%      0
+CallingStation     10,000     -178.62    39.7   -177.6    1.1  45.7%   2.8%   2.0%   0.0%  15.1%  73.1%      0
+
+Hero BY POSITION
+position      hands  net bb/100     ±95%
+LJ            1,667       +99.4     76.1
+HJ            1,667       +47.7     72.7
+CO            1,667       +49.6     87.5
+BTN           1,667      +109.9     81.2
+SB            1,666       +65.5     83.2
+BB            1,666       +17.3    114.4
+
+Hero DECISION SOURCES (15,466 decisions)
+  exact:d861399d6747                              7,672   49.6%
+  fallback:postflop                               5,441   35.2%
+  fallback:history_not_in_abstraction             2,353   15.2%
+  preflop decisions from an exact solved model: 76.5%
+
+TABLE
+Rake removed:      1,584,000 chips (3.17 bb/100 hands, 52.8% of hands raked)
+Players' net sum:  -1,584,000 chips (equals -rake: True)
+Average pot:       23.1 bb; flops seen 52.8%, showdowns 36.3%
+Problems:          0 invalid actions, 0 stalled hands, 0 engine errors
+Simulation runtime: 7.3s on 8 worker(s)
+Hands per second:  1,376
+Decisions per sec: 13,012

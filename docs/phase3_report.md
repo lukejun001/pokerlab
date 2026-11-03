@@ -1,166 +1,202 @@
-# Phase 3 report: asymmetric-stack six-max preflop solving
+# Phase 3 report: asymmetric-stack six-max preflop solving with GTOpen
 
-Branch `phase3-asymmetric-preflop`. Every number here was measured on one machine: Apple Silicon,
-10 cores, 16 GB RAM, CPU only, Python 3.14, NumPy 2.5. Raw outputs are in `reports/phase3/`.
+pokerlab branch `phase3-asymmetric-preflop`, plus the private GTOpen fork
+[`lukejun001/gtopen-asymmetric`](https://github.com/lukejun001/gtopen-asymmetric) (fork version `asym-3`).
+
+Every number below was measured on one machine: Apple Silicon, 10 cores, 16 GB, CPU only, mostly on
+battery power. Raw outputs are in `reports/phase3/`.
 
 ## Outcome against the definition of done
 
 | Requirement | Status |
 |---|---|
-| Six-player game model with a different stack per player | **Done.** `pokerlab/solver/game.py` handles any 2–9 player stack vector; the configs are test cases, not limits. |
-| Correct betting and all-in logic | **Done.** Ported from PokerKit and checked against PokerKit node by node, plus a randomized full-game property test (400 random games, any raise size). |
-| Side pots and rake | **Done.** Payouts match PokerKit's actual payouts for concrete cards. The one documented exception is ≤ (pots − 1) chips of rake rounding (see below). |
-| A solver producing a genuine asymmetric-stack strategy | **Done**, with our own solver: GTOpen is unlicensed and equal-stack only ([assessment](gtopen_assessment.md)). |
-| Store and retrieve strategies | **Done.** SQLite index plus compressed files; exact keys; mixed strategies preserved. |
-| Experimental agent uses them in reproducible offline simulations | **Done.** Every decision is tagged exact or fallback. |
-| Existing simulator functionality intact | **Done.** All 87 original tests still pass. |
-| Automated tests pass | **Done** (see Validation). |
-| Solver runtime and memory measured | **Done** (see Experiments). |
+| Six-player model where every player has their own stack | **Done.** In the GTOpen fork (`PreflopConfig.stacks`) and in pokerlab's own model. The stack vectors are test cases, not limits. |
+| Correct betting and all-in logic | **Done.** PokerKit's no-limit rules are ported into GTOpen and checked against PokerKit node by node (`tests/test_gtopen.py`). |
+| Side pots and rake | **Done.** Pot structures and concrete-card payouts match PokerKit; chips are conserved on every flop terminal (Rust test). |
+| Solver produces a genuine asymmetric-stack preflop strategy | **Done.** GTOpen solves 100/150/70/115/40/200 to an **exact NashConv of 0.19 bb/100** in the modeled game. |
+| Store and retrieve strategies | **Done.** SQLite index plus compressed files, exact keys, about 21 µs per cached lookup. |
+| Experimental agent uses them in reproducible offline simulations | **Done** (see Simulations). |
+| Existing simulator functionality intact | **Done.** 122 pokerlab tests pass. In GTOpen, 65 library tests (1 ignored; 4 of them new) and 56 preflop integration tests pass. |
+| Runtime and memory measured | **Done.** |
 | Limitations documented | **Done.** This report. |
 
-RESULTS_PLACEHOLDER
+## How we got here (pivots, in order)
 
-## Method
+1. **GTOpen inspected first** ([assessment](gtopen_assessment.md)). The preflop engine has one shared
+   stack, and the repository has no license. A separate NumPy solver was built at first. The project
+   owner then chose GTOpen for private research, so the modified code lives only in a private fork.
+2. **Fork, part 1:** per-seat stacks, PokerKit's betting rules, side-pot terminals, and a `preflop-cli`
+   binary. Validated against PokerKit before any solving.
+3. **First solves stalled** for some stack vectors (a rotated vector plateaued at 14.5 bb/100).
+   - Diagnosis (`reports/phase3/diagnostic_rot1.json`): neither rake nor the realization model was the
+     cause.
+   - GTOpen's regret-based pruning stops updating the *average* strategy in skipped subtrees. In
+     unequal-stack trees these stale averages persist, and best responses exploit them.
+   - Fix: pruning is off by default when stacks differ. Equal-stack behavior is unchanged.
+4. **A valuation bug found in strategy review.**
+   - With pruning fixed, the solves converged, but the stored strategies contained an absurd line: a
+     40 bb small blind opened 100% of hands.
+   - Cause: after a *covered* all-in (for example, a 200 bb jam called by 40 bb), only the refunded
+     player was valued on the matched pot. The covered player was still valued on the gross pot,
+     including the refund.
+   - Fixed in `asym-3`, with a direct test plus conservation checks on every terminal. The affected
+     runs' metrics are kept in `reports/phase3/refund_bug_run/` and `pruned_run/`. No strategy from
+     them is used.
 
-### Game model (`solver/game.py`)
+## Experiments (GTOpen fork, CPU, 10 threads)
 
-- Players are indexed in preflop order (0 acts first; `n-2` is the SB, `n-1` the BB). Every player has
-  their own starting stack in integer chips (1 chip = $0.01 at $25/$50, so 1 bb = 5,000 chips).
-- **Betting is a port of PokerKit's rules:**
-  - a call is capped at the caller's stack;
-  - a raise's legal range is `[min_to, stack + bet]`, using PokerKit's minimum
-    (`max(last full raise, bb) + current bet`);
-  - an all-in raise smaller than a full raise does not reopen betting for players who already acted
-    (PokerKit's `acted_player_indices` and `consecutive_short_all_in_amounts`);
-  - a player who is covered, or whose opponents are all folded or all-in, cannot raise.
-- **The betting abstraction is configurable.** It sets open sizes, an SB open size, 3-bet and 4-bet
-  multipliers, a cap on sized raises, a cap on total raises, a limit on flat calls per raise, all-in
-  always available, and a threshold above which a sized raise becomes all-in. Every abstract size is
-  clamped into the actor's own legal range.
-- **Terminals** are either a fold-out or "the flop" (betting closed with two or more live players).
-  For each terminal the tree records the exact pots PokerKit builds:
-  - the bet above the second-highest bet is refunded (folded players included);
-  - pots are layered at every distinct contribution, and adjacent layers with the same eligible
-    players are merged;
-  - rake is the whole-hand `min(floor(4.5% × pot), cap)`, split across pots pro rata and rounded down,
-    with no rake when there is no flop.
+Common settings for all three runs:
 
-### Solver (`solver/cfr.py`, `solver/parallel.py`)
+- **Abstraction `gtopen-6max-v1`:** open 2.5 bb (SB 3 bb), re-raises 3× the bet faced, at most 3 raises,
+  all-in always available, a raise above 50% of the stack becomes all-in, no limps.
+- **Rake:** 4.5% with a $3 (0.06 bb) cap, no flop no drop.
+- **Continuation model:** GTOpen's `balanced` heads-up model and `coupled_deck_v1` multiway model. Pots
+  with a side pot or refund use raw equity, with no realization adjustment.
+- **Solving:** Discounted CFR, 400 iterations, exact best-response gaps every 50 iterations.
 
-- **Chance-sampled Discounted CFR** (α = 1.5, β = 0, γ = 2).
-  - Each iteration, each of 8 worker processes deals 4,096 complete hands: six hole-card pairs and a
-    five-card board, without replacement, so **card removal is exact**.
-  - The whole public tree is walked once per batch, vectorized over the deals with NumPy, and regrets
-    are updated for every player at every node.
-- **Information sets** are (node, hand class). Preflop, the 169 classes lose no information.
-- **Average strategies** are weighted by each class's exact own reach, so no sampling noise enters
-  those weights.
-- **Continuation model `showdown-v1`:**
-  - at a flop terminal the hand is checked down on the dealt board;
-  - each main and side pot goes to its best eligible hand(s), net of that pot's rake;
-  - this value is exact for all-in pots, and an approximation (no postflop betting) otherwise.
-- **Convergence is measured, not assumed.** For each player we estimate the best-response gain against
-  the average strategy:
-  - *in-sample:* a plain empirical best response, chosen and scored on the same 50k deals. This is
-    biased upward by sampling noise and is an *upper* estimate;
-  - *holdout:* a conservative best response that deviates only where the gain exceeds 2 standard
-    errors, chosen on one 50k-deal sample and scored on an independent one. This is an unbiased value
-    of a real deviation, so it estimates a *lower* bound.
+| | Equal 100 bb | Asymmetric UTG 100, HJ 150, CO 70, BTN 115, SB 40, BB 200 | Rotated: same stacks moved one seat (BB 40, UTG 200) |
+|---|---|---|---|
+| Tree nodes / decision nodes | 20,656 / 9,723 | 20,863 / 9,764 | 21,620 / 10,085 |
+| Information sets (×169 classes) | 1.64 M | 1.65 M | 1.70 M |
+| Regret + strategy arena | 27.9 MB | 28.2 MB | 29.2 MB |
+| Peak memory (whole process) | 372 MB | 361 MB | 375 MB |
+| Solve time, 400 iterations | 1,399 s (688 s in an earlier run on mains power; battery throttling) | 1,444 s | 1,550 s |
+| CPU utilization (10 cores) | 58% | 64% | 69% |
+| Exact NashConv: 50 / 100 / 200 / 400 iterations, bb/100 | 16.6 / 3.55 / 1.09 / **0.62** | 17.6 / 4.26 / 0.91 / **0.19** | 7.3 / 1.60 / 0.34 / **0.09** |
+| Largest single-player best-response gap at 400 iterations | 0.28 bb/100 (UTG) | 0.08 bb/100 (BB) | 0.02 bb/100 |
+| Stored strategy | 3.8 MB | 3.9 MB | 3.9 MB |
+| GPU | not used (CPU build) | not used | not used |
 
-  NashConv is the sum of the six players' gains. With three or more players, CFR carries no Nash
-  guarantee, and a small NashConv in the abstract game says nothing about the real game.
+**What NashConv means here.** It is computed exactly, over all 169 hand classes, with no sampling, but
+only **within the modeled game**: the abstraction plus GTOpen's continuation approximations.
+- It shows the strategies are close to a stationary point of that model: no single player can gain
+  more than 0.08–0.28 bb/100 by deviating.
+- It does **not** show closeness to an equilibrium of real six-max no-limit hold'em, which has full
+  bet-size freedom and real postflop play.
+- Six-player CFR also has no convergence guarantee. These are measured results, not a proof.
 
-### Strategy cache (`solver/store.py`)
+**Unequal all-in possibilities.** The asymmetric tree contains 9,982 flop terminals. Of these, 2,027
+have two pots, 806 three, 184 four and 19 five, and 2,208 involve an uncalled-bet refund. One example:
+UTG and HJ fold, CO opens, BTN and SB call, BB 3-bets, CO calls, BTN jams 115 bb, and three players call.
+A larger tree with one more raise level (103k nodes, 1.6 GB, about 24 minutes) was solved only before
+the refund fix. Its result is therefore void and was not re-run within the time budget.
 
-- **Key:** SHA-256 of variant, players dealt in, positions, button index, all six stacks (chips), blinds,
-  ante, rake (percentage, cap, cap-by-players schedule, no-flop-no-drop), the full abstraction, tree
-  version, solver version (`pokerlab-cs-dcfr-1`), continuation version (`showdown-v1`) and strategy
-  model version (`approx-eq-preflop-1`).
-- **Storage:** metadata lives in SQLite (`strategies/index.sqlite`). Probabilities are stored
-  per node and per class (float32, renormalized on load) in `strategies/files/*.npz`.
-- **Betting history** is the node address inside a strategy, e.g. `f-r12500-c` (tokens with chip amounts).
-- **Approximate matches:** `nearest()` lists games with the same key except stacks, together with their
-  stack distance, as the starting point for interpolation work. The agent uses them only when
-  `allow_approximate` is on. It is off by default, because no approximation has been validated.
+### Do individual stacks change the strategy?
 
-### Agent integration (`strategies/solver.py`)
+Yes. Some measured contrasts (combo-weighted frequencies; full tables in `reports/phase3/comparison.json`):
 
-For each preflop decision the agent:
+| Spot (action) | Equal 100 bb | Asymmetric | Rotated | Why |
+|---|---|---|---|---|
+| UTG opens (raise first in) | 18.9% | 19.1% | 19.1% | Opens barely depend on depth in this coarse tree. |
+| BTN opens | 41.1% | 38.7% | 39.1% | The 70 bb CO behind (asymmetric) or a 40 bb BB (rotated) changes the button's opening range a little. |
+| SB opens vs the BB | 53.5% | 52.6% | 52.5% | **Effective** stack 40 bb in both asymmetric games (SB 40 vs BB 200; SB 115 vs BB 40) gives near-identical play (difference measure 0.0007). |
+| BB vs SB open: 3-bet to 9 bb / all-in | 15.6% / 0% | 0.6% / 15.6% | 0% / 16.0% | At 40 bb effective, the 3-bet becomes a jam. |
+| BB calls an SB all-in | 5.5% (vs 100 bb) | 11.3% (vs 40 bb) | 11.8% (vs 40 bb) | Shorter all-ins are called wider. |
+| SB vs BTN open: 3-bet / all-in | 8.5% / 0% | 0.9% / 9.7% | 7.2% / 0% | Only the 40 bb SB switches to jamming. |
+| UTG vs HJ 3-bet: 4-bet to 22.5 bb | 17.5% | 23.0% | 36.0% | The rotated UTG has 200 bb behind. |
 
-1. rebuilds the game from the observation (each position's starting stack = current stack + chips in);
-2. computes the key and looks it up;
-3. translates the public history into tokens;
-4. samples from the stored mixed strategy with the agent's seeded RNG.
+Combo-weighted mean change in strategy, equal → asymmetric: up to 0.21 at the BB's defense against the
+SB, and **28% of all combos change their action by more than 10 points**. Asymmetric → rotated: up to
+0.20 at the UTG-versus-3-bet spot (54% of combos change). Same stacks in different seats are therefore
+distinct games, not one game relabelled.
 
-Decisions are counted as `exact:<key>`, `approximate:<key>`, `fallback:no_matching_strategy`,
-`fallback:history_not_in_abstraction` or `fallback:postflop`. The fallback is the existing heuristic
-`EquityStrategy`. The simulator gained `stacks_by_position_bb`, so every hand can be dealt at the
-configured stack vector while the button rotates.
+## Strategy cache and agent
 
-## Validation (`tests/test_solver_*.py`)
+- **Lookup:** `python -m pokerlab strategies inspect --config configs/6max_gtopen_asymmetric.yaml`
+  - first load: about 0.1 s for a 3.9 MB file;
+  - cached lookup: **about 21 µs**.
+- **Exact matches only.** Any change to stacks, rake, blinds, players, abstraction or solver version is
+  a miss, and the agent falls back to its heuristic.
+- **Off-tree histories.** An opponent's raise size that isn't in the tree is not mapped to the nearest
+  size; the agent falls back.
+- **Database:** 5 strategies, 13.7 MB in total: three GTOpen strategies (3.8–3.9 MB each) and two from the cross-check solver.
 
-| Test | What it checks |
-|---|---|
-| Legal actions | Every node (or a 1,500-node sample) of four trees, including stacks (40, 41, 300, 12, 9, 80) bb and heads-up, is replayed in a real PokerKit state. Actor, call amount, raise availability and `[min, max]` bounds must be equal, and every abstract raise must be legal in PokerKit. |
-| Randomized rules | 400 random games (2–6 players, random stacks, random raise sizes) step through our state machine and PokerKit side by side. |
-| Test A: equal stacks | With six 100 bb stacks, the vector model reproduces an independent single-stack, single-pot model (GTOpen's v1 semantics, written separately in the test). Measured tolerance: 0 differing terminals, 0 chips. |
-| Test B: asymmetric stacks | Root and early-node action sets, all-in amounts capped at each player's own stack, and short all-ins that do not reopen betting (also checked in PokerKit). |
-| Test C: unequal all-ins | UTG 100 bb all-in, CO 70 and SB 40 call all-in, BB calls: three pots of 800k / 450k / 300k chips with eligibility (UTG, CO, SB, BB) / (UTG, CO, BB) / (UTG, BB), and rake 154 / 87 / 58. Payouts are compared with PokerKit on 60 deals, plus random all-in property tests on random stack vectors. |
-| Terminal payouts | 120 random terminals from each of the equal and asymmetric trees, three card deals each, compared chip by chip with the PokerKit engine's actual payouts. |
-| Test D: rake | Raked and zero-rake trees have identical structure. Fold-outs are never raked, every flop terminal satisfies `sum(payoffs) = −rake` with rake ≤ cap, rake only lowers winners' payouts, and the cap is reached. A solver-level check that terminal values conserve chips is included. |
-| Test E: positions | Rotating the stack vector gives six distinct keys, six distinct root action sets and different tree sizes. A 3-player jam/fold solve shows the solution changes (button jam frequency moves by more than 10 points). |
-| Solver | Heads-up 10 bb push/fold reproduces the published Nash ranges (SB jams ~57%, BB calls ~38%; AA always, 72o never). Seeded runs are deterministic. |
-| Cache and agent | Round trip with mixed probabilities preserved. A changed stack, rake or abstraction is a miss. The agent uses exact strategies with no invalid actions and reproducible results, and falls back when one stack differs by 1 bb. |
+### Simulations (offline, PokerKit engine, 10,000 hands each, stacks dealt by position every hand)
 
-**The one rake difference from PokerKit.** At showdown, PokerKit mucks losing hands and then merges pots
-whose remaining eligible players coincide, before raking. Because per-pot rake is rounded down, the
-total rake can therefore depend on who wins, by at most (pots − 1) chips; at 1 chip = $0.01 that is
-0.0002 bb. The model uses the pre-showdown pot structure, and the tests assert this exact bound.
+| Run | Hero result, net bb/100 [95% CI] | Hero's preflop decisions that were exact | Fallbacks | Notes |
+|---|---|---|---|---|
+| `6max_gtopen_asymmetric`: Hero vs TAG, LAG, CallingStation, Nit, Balanced | **+45.1** [+13.3, +76.9] (gross +45.6) | 76.5% (7,662 of 10,016) | 2,354 off-tree histories (opponent sizes), plus every postflop decision | Most of the table's profit comes from the CallingStation (−164 bb/100). LAG is +42.9 and Balanced +29.9, with overlapping intervals. |
+| `6max_gtopen_asymmetric_selfplay`: six solver agents | between −28.2 and +23.7 per agent; **every interval includes 0** | **100%** (61,000 of 61,000) | postflop only | All six seats play the same cached strategy. As expected, no seat is distinguishable from break-even after rake. |
+| `6max_gtopen_equal`: Hero vs the same opponents | +64.9 [+29.4, +100.4] | 76.5% | 2,353 off-tree histories | Same picture with equal stacks. |
+
+Rake is 3.2 bb/100 for the table (the $3 cap binds early at $25/$50). Speed: about 1,400 hands/s with
+8 workers. These win rates come from 10,000 hands against simple heuristics with a heuristic postflop
+game, so they are not evidence of real-game strength.
+
+Positions rotate every hand, so each player sits at every stack depth in turn. The table's chip total
+equals minus the rake in every run (checked by the simulator).
+
+## Validation
+
+| Test | Where | What it checks |
+|---|---|---|
+| Tree legality | `tests/test_gtopen.py` | Every sampled node of the fork's trees (asymmetric with 3 and 4 raise levels, three random stack vectors, heads-up) is replayed in a real PokerKit state. Actor, fold/check availability, the legality of every raise and all-in amount, all-in = PokerKit's maximum, and **no raise where PokerKit forbids one** (e.g. after a short all-in) must all agree. |
+| Pot structure | `tests/test_gtopen.py` | For every sampled terminal: contributions after refunds and each pot's eligible players are exact; amounts after rake are within 1 chip of pokerlab's PokerKit-validated pot builder. |
+| Test A: equal stacks | both repos | The per-seat path with six 100 bb stacks reproduces GTOpen's original single-stack engine: same tree, bit-identical terminal values (Rust), and after a 10-iteration solve a **maximum strategy difference of 0.0** with identical NashConv. |
+| Test B: asymmetric stacks | both | Each seat's jam and all-in call use its own stack, and the CO (70 bb) cannot re-raise a 100 bb jam. |
+| Test C: unequal all-ins | `test_gtopen.py` | For three-pot terminals, payouts computed from the fork's pots match PokerKit's actual payouts for concrete cards (within rounding). |
+| Chip conservation | Rust `asym_tests` | On every flop terminal (500+), the players' expected values sum to −rake. A covered all-in can only win the matched pot. |
+| Test D: rake | `test_gtopen.py` | Zero rake leaves the tree unchanged; pots sum to contributions; rake is never above the cap; there is no rake without a flop. |
+| Test E: positions | `test_gtopen.py`, experiments | Six rotations give six keys and six different root action sets, and the rotated game solves to a different strategy (see above). |
+| pokerlab model | `tests/test_solver_game.py` | The independent model behind the PokerKit checks: legality, payouts, 400 random full games. |
+
+**The one rake difference from PokerKit.** At showdown, PokerKit mucks losing hands and merges pots
+before raking. With per-pot rounding down, the total rake can differ by at most (pots − 1) chips: with
+1 chip = $0.01, that is 0.0002 bb.
 
 ## Known mathematical approximations
 
-1. **No postflop play (`showdown-v1`).** Every pot that reaches the flop is valued as if checked down.
-   - Equity is fully realized; there is no positional advantage after the flop, no fold equity
-     postflop, and no implied odds.
-   - This overvalues calling with hands that realize poorly and undervalues position.
-   - It is exact only for pots where everyone is all-in.
-2. **A restricted betting tree.** One open size (2.5 bb; SB 3 bb), one 3-bet size (3×), 4-bets and
-   later raises all-in only, no limping, and at most 1 or 2 flat calls per raise. Multiway pots outside
-   these lines do not exist in the model.
-3. **Sampled CFR with a finite budget.** Estimated bounds are reported; nothing is claimed about
-   convergence to an equilibrium of the six-player game, abstract or real.
-4. **The rake model** follows PokerStars' documented structure (percentage, cap per hand, cap by players
-   dealt, no flop no drop). Per-pot floor rounding is an assumption; the brief's $3 cap for 5+
-   players at $25/$50 matches the cap PokerStars historically published (one source reports later
-   increases).
-5. **No antes or straddles** (rejected explicitly), and every stack must exceed the big blind.
+1. **No postflop solving.** GTOpen values flop terminals with an approximate continuation model:
+   - heads-up pots: relative hand-class equity priors (`balanced`), minus the configured rake;
+   - 3+ players: coupled-deck sampled showdown strengths, which approximate card removal;
+   - side pots and refunds: raw equity per pot, with no positional realization.
+2. **Hand classes, not combos.** GTOpen's equity tables are class against class, so card removal
+   between opponents is only approximate.
+3. **A restricted betting tree.** One open size, one re-raise multiplier, three raises, no limps.
+4. **No antes or straddles** with per-seat stacks (rejected explicitly), and no player models (seat
+   profiles) with per-seat stacks.
+5. **The convergence measure is exact only within the model** (see above).
+6. **Rake rounding** follows pokerlab's whole-hand cap with per-pot floor rounding. PokerStars' exact
+   rounding rule was not confirmed from an official source.
 
 ## Unsupported situations
 
-- **All postflop decisions.** The agent falls back to the heuristic strategy, including in pots the
-  preflop model assumed would be checked down.
-- **Any preflop history the abstraction does not contain.** This includes other open or 3-bet sizes,
-  limps, cold calls beyond the limit, and 5-bets that are not all-in. Off-tree actions are never mapped
-  to the nearest size; the agent falls back.
-- **Any stack vector, rake, player count or position assignment that has not been solved.** There is no
-  interpolation yet.
-- **Games with antes, straddles or stacks of 1 bb or less.**
+- **All postflop decisions.** The agent uses its heuristic fallback.
+- **Preflop histories outside the tree:** other raise sizes, limps, a fourth raise.
+- **Any game not solved exactly:** other stacks, other rake, a different player count.
+- Approximate matching (nearest solved stacks) exists in the store as `nearest()`, but it is off in the
+  agent, because nothing has validated it yet.
 
 ## Phase 4 roadmap (prioritized)
 
-1. **Postflop continuation values.** Replace `showdown-v1` heads-up flop terminals with values from a
-   heads-up postflop solver, keyed by preflop line, stack-to-pot ratio and ranges. Start with the most
-   frequent flop terminals in the solved trees.
-2. **Action translation.** Map off-tree opponent sizes onto the abstraction (pseudo-harmonic mapping),
-   validated by measuring the exploitability of the translated strategy, before labelling any such
-   decision "approximate".
-3. **Generalization across stacks.** Solve grids of stack vectors (one position varied at a time) and
-   test interpolated strategies against direct solves on held-out vectors. Only then enable
-   `allow_approximate`.
-4. **Lower-variance evaluation.** The six-player upper bound is noise-dominated at 50k deals. Use
-   control variates (subtract exact heads-up all-in equity), more deals, or per-node local
-   best-response tests to tighten it.
-5. **Performance.** Per-node NumPy overhead dominates. A compiled inner loop (Numba or Rust behind
-   PyO3) could give 10–50× and allow 2–3 sizes per raise and more multiway lines.
-6. **Multiway postflop.** Only after 1–3: three-way flop subgames for the most frequent multiway
-   terminals.
+1. **Postflop.** Connect heads-up flop terminals to GTOpen's postflop solver, starting with the
+   highest-reach lines in these trees. Ranges come from the exported reach; stacks come from the
+   per-seat remainders.
+2. **Action translation** for off-tree opponent sizes, validated by measuring the exploitability of
+   translated strategies before any decision is labelled "approximate".
+3. **Generalization across stacks.** Solve small grids (one position's stack varied) and test
+   interpolation against direct solves.
+4. **Richer abstraction.** Two open sizes, a fourth raise level, and SB limps. The re-jam tree (103k
+   nodes) needs about 24 minutes per 400 iterations; budget it on mains power.
+5. **Upstream-quality fixes.** The pruning issue also affects GTOpen's equal-stack engine in principle,
+   since stale averages occur off-path. Quantify it, and report both findings to the author if a
+   license is added.
+6. **Multiway postflop**, only after the above.
+
+## Reproducing
+
+```bash
+# in ../gtopen-asymmetric
+cargo build --release -p solver --bin preflop-cli
+cargo test --release -p solver --lib asym_tests
+# in pokerlab
+python -m pytest
+python -m pokerlab strategies generate --config configs/6max_gtopen_asymmetric.yaml
+python -m pokerlab simulate --config configs/6max_gtopen_asymmetric.yaml --hands 10000
+python tools/phase3_experiments.py compare
+```
+
+The earlier NumPy solver (`pokerlab/solver/cfr.py`, configs `6max_equal` and `6max_asymmetric`) remains
+as an independent cross-check. Its sampled convergence estimates are far noisier: on the asymmetric
+game, the held-out best-response estimate was −15 bb/100 (a lower bound) and the in-sample estimate
++456 bb/100 (an upper estimate).

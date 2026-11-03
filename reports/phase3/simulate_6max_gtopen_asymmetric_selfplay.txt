@@ -1,0 +1,82 @@
+
+POKER AI SIMULATION REPORT
+==========================
+Experiment:        6max_gtopen_asymmetric_selfplay
+Hands completed:   10,000
+Players:           6
+Blinds:            2500/5000 chips, stacks by position UTG 100bb HJ 150bb CO 70bb BTN 115bb SB 40bb BB 200bb (independent)
+Rake:              4.5%, capped at 300 chips (0.06bb), no flop no drop
+Seed:              42
+
+Solver1 (Experimental)
+----------------------
+Net profit:        -2,689,365 chips (-537.9 bb)
+Net bb/100:        -5.38  (95% CI -39.21 to +28.46, SE 17.26)
+Gross bb/100:      -4.87  (before attributed rake)
+Rake attributed:   254,315 chips (0.51 bb/100)
+Hands won:         1,707 (17.1%)
+VPIP / PFR:        28.4% / 18.5%
+3-bet:             6.5% of 4,217 opportunities
+Fold to 3-bet:     50.0% of 318 opportunities
+Aggression:        AFq 47.5%, AF 1.48
+WTSD / W$SD:       56.6% / 48.4%
+Note: the 95% interval includes 0 bb/100; this win rate is not distinguishable from break-even.
+
+ALL AGENTS (sorted by net bb/100)
+
+agent               hands  net bb/100    ±95%    gross   rake   VPIP    PFR     3B    F3B    AFq   WTSD  inval
+--------------------------------------------------------------------------------------------------------------
+Solver2            10,000      +23.65    32.9    +24.2    0.5  27.2%  17.2%   6.5%  51.3%  47.7%  56.6%      0
+Solver4            10,000      +19.77    31.7    +20.3    0.5  26.7%  17.0%   7.1%  50.9%  48.3%  56.3%      0
+Solver5            10,000       +2.00    32.8     +2.5    0.5  27.5%  17.4%   6.7%  56.3%  48.9%  57.0%      0
+Solver1            10,000       -5.38    33.8     -4.9    0.5  28.4%  18.5%   6.5%  50.0%  47.5%  56.6%      0
+Solver6            10,000      -14.89    32.5    -14.4    0.5  27.9%  17.9%   7.1%  48.7%  49.3%  57.0%      0
+Solver3            10,000      -28.23    33.8    -27.7    0.5  27.6%  17.9%   7.5%  51.7%  49.0%  57.4%      0
+
+Solver1 BY POSITION
+position      hands  net bb/100     ±95%
+LJ            1,667        -3.9     71.1
+HJ            1,667        +3.9    102.7
+CO            1,667       -63.6     62.3
+BTN           1,667       +79.0     82.3
+SB            1,666       -20.7     50.4
+BB            1,666       -27.1    111.3
+
+Solver1 DECISION SOURCES (15,675 decisions)
+  exact:f57301d4b8b7                             10,184   65.0%
+  fallback:postflop                               5,491   35.0%
+  preflop decisions from an exact solved model: 100.0%
+
+Solver2 DECISION SOURCES (15,494 decisions)
+  exact:f57301d4b8b7                             10,155   65.5%
+  fallback:postflop                               5,339   34.5%
+  preflop decisions from an exact solved model: 100.0%
+
+Solver3 DECISION SOURCES (15,587 decisions)
+  exact:f57301d4b8b7                             10,153   65.1%
+  fallback:postflop                               5,434   34.9%
+  preflop decisions from an exact solved model: 100.0%
+
+Solver4 DECISION SOURCES (15,400 decisions)
+  exact:f57301d4b8b7                             10,130   65.8%
+  fallback:postflop                               5,270   34.2%
+  preflop decisions from an exact solved model: 100.0%
+
+Solver5 DECISION SOURCES (15,469 decisions)
+  exact:f57301d4b8b7                             10,138   65.5%
+  fallback:postflop                               5,331   34.5%
+  preflop decisions from an exact solved model: 100.0%
+
+Solver6 DECISION SOURCES (15,617 decisions)
+  exact:f57301d4b8b7                             10,135   64.9%
+  fallback:postflop                               5,482   35.1%
+  preflop decisions from an exact solved model: 100.0%
+
+TABLE
+Rake removed:      1,541,398 chips (3.08 bb/100 hands, 51.4% of hands raked)
+Players' net sum:  -1,541,398 chips (equals -rake: True)
+Average pot:       25.9 bb; flops seen 51.4%, showdowns 31.2%
+Problems:          0 invalid actions, 0 stalled hands, 0 engine errors
+Simulation runtime: 17.3s on 8 worker(s)
+Hands per second:  577
+Decisions per sec: 5,379
