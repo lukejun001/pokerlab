@@ -1,0 +1,174 @@
+{
+  "config": "6max_equal",
+  "players": 6,
+  "positions": [
+    "UTG",
+    "HJ",
+    "CO",
+    "BTN",
+    "SB",
+    "BB"
+  ],
+  "stacks_bb": [
+    100.0,
+    100.0,
+    100.0,
+    100.0,
+    100.0,
+    100.0
+  ],
+  "abstraction": {
+    "name": "6max-a-v1",
+    "open_sizes_bb": [
+      2.5
+    ],
+    "sb_open_sizes_bb": [
+      3.0
+    ],
+    "reraise_multipliers": [
+      3.0
+    ],
+    "later_multipliers": [
+      2.25
+    ],
+    "max_sized_raises": 2,
+    "max_raises": 3,
+    "allow_allin": true,
+    "allin_threshold": 0.5,
+    "allow_limp": false,
+    "max_calls_per_raise": 1
+  },
+  "tree": {
+    "nodes": 2077,
+    "decision_nodes": 1193,
+    "fold_terminals": 262,
+    "flop_terminals": 622,
+    "multiway_flops": 0,
+    "side_pot_terminals": 0,
+    "infosets": 201617,
+    "action_edges": 2076
+  },
+  "tree_build_s": 0.019,
+  "iterations": 1200,
+  "deals_sampled": 39321600,
+  "batch_size": 4096,
+  "workers": 8,
+  "seed": 1,
+  "stopped_by_time_limit": false,
+  "solve_s": 490.1,
+  "wall_s": 803.12,
+  "cpu_s": 4523.9,
+  "cpu_utilization": 0.563,
+  "cores": 10,
+  "gpu": "not used (no GPU code path; CPU NumPy only)",
+  "peak_memory_parent_mb": 194.9,
+  "peak_memory_worker_mb": 393.0,
+  "convergence": [
+    {
+      "ev_bb": [
+        0.14463,
+        0.17772,
+        0.18753,
+        0.13886,
+        -0.26757,
+        -0.42031
+      ],
+      "br_gain_bb100": [
+        33.742,
+        37.091,
+        57.855,
+        76.566,
+        125.026,
+        160.322
+      ],
+      "nash_conv_bb100": 490.602,
+      "holdout_br_gain_bb100": [
+        0.052,
+        -1.227,
+        -3.193,
+        0.449,
+        -0.253,
+        -3.841
+      ],
+      "holdout_nash_conv_bb100": -8.012,
+      "eval_deals": 50000,
+      "iteration": 400,
+      "solve_s": 155.91,
+      "eval_s": 80.51,
+      "max_strategy_change": null,
+      "mean_strategy_change": null
+    },
+    {
+      "ev_bb": [
+        0.13454,
+        0.16371,
+        0.18562,
+        0.1415,
+        -0.26437,
+        -0.40189
+      ],
+      "br_gain_bb100": [
+        35.785,
+        39.678,
+        64.434,
+        80.858,
+        133.905,
+        167.356
+      ],
+      "nash_conv_bb100": 522.016,
+      "holdout_br_gain_bb100": [
+        -0.758,
+        -1.108,
+        -5.111,
+        0.372,
+        -4.001,
+        -6.567
+      ],
+      "holdout_nash_conv_bb100": -17.172,
+      "eval_deals": 50000,
+      "iteration": 800,
+      "solve_s": 306.39,
+      "eval_s": 84.76,
+      "max_strategy_change": 0.9968,
+      "mean_strategy_change": 0.05507
+    },
+    {
+      "ev_bb": [
+        0.12955,
+        0.16459,
+        0.17378,
+        0.14153,
+        -0.25365,
+        -0.39757
+      ],
+      "br_gain_bb100": [
+        37.357,
+        42.777,
+        70.055,
+        83.443,
+        138.109,
+        171.745
+      ],
+      "nash_conv_bb100": 543.487,
+      "holdout_br_gain_bb100": [
+        -1.25,
+        -1.768,
+        -4.93,
+        -1.252,
+        -4.78,
+        -8.229
+      ],
+      "holdout_nash_conv_bb100": -22.21,
+      "eval_deals": 50000,
+      "iteration": 1200,
+      "solve_s": 490.1,
+      "eval_s": 146.94,
+      "max_strategy_change": 0.9962,
+      "mean_strategy_change": 0.03174
+    }
+  ],
+  "solver_version": "pokerlab-cs-dcfr-1",
+  "continuation_version": "showdown-v1",
+  "key": "8c1fef02294582a3032738b41af3e60e156c3585f761e3988da5969f36ac04c7",
+  "strategy_bytes": 963711
+}

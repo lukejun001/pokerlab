@@ -33,7 +33,7 @@ from pokerlab.simulation.configurations import CONFIG_DIR, resolve_config_path
 from pokerlab.solver.game import GAME_VARIANT, BettingAbstraction, PreflopGame, position_names
 
 STRATEGY_MODEL_VERSION = "approx-eq-preflop-1"
-SUPPORTED_SOLVERS = ("pokerlab-cfr",)
+SUPPORTED_SOLVERS = ("pokerlab-cfr", "gtopen")
 
 
 @dataclass
@@ -78,6 +78,14 @@ def _rake(data: dict[str, Any], chips_per_bb: int) -> RakeConfig:
                       no_flop_no_drop=bool(data.get("no_flop_no_drop", True)))
 
 
+def _abstraction(solver_name: str, data: dict[str, Any] | None):
+    if solver_name == "gtopen":
+        from pokerlab.solver.gtopen import GTOpenAbstraction
+
+        return GTOpenAbstraction.from_dict(data)
+    return BettingAbstraction.from_dict(data)
+
+
 def load_solver_config(name_or_path: str | Path) -> SolverConfig:
     path = resolve_config_path(str(name_or_path))
     data = yaml.safe_load(path.read_text()) or {}
@@ -108,9 +116,6 @@ def solver_config_from_dict(data: dict[str, Any], name: str = "solver", path: Pa
             raise ValueError(f"need {n} stacks, got {len(stacks_bb)}")
     strategy = dict(data.get("strategy") or {})
     solver_name = strategy.get("preflop_solver", "pokerlab-cfr")
-    if solver_name == "gtopen":
-        raise ValueError("preflop_solver: gtopen is not usable here: GTOpen has no license (all rights reserved) "
-                         "and supports only equal stacks. Use pokerlab-cfr; see docs/phase3_report.md.")
     if solver_name not in SUPPORTED_SOLVERS:
         raise ValueError(f"preflop_solver must be one of {SUPPORTED_SOLVERS}")
     if strategy.get("opponent_specific_exploitation"):
@@ -122,7 +127,7 @@ def solver_config_from_dict(data: dict[str, Any], name: str = "solver", path: Pa
         small_blind=sb,
         big_blind=chips_per_bb,
         rake=_rake(data.get("rake") or {}, chips_per_bb),
-        abstraction=BettingAbstraction.from_dict(data.get("abstraction")),
+        abstraction=_abstraction(solver_name, data.get("abstraction")),
         ante=ante,
     )
     solve = SolveSettings(**(data.get("solve") or {}))

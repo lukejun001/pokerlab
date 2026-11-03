@@ -73,12 +73,19 @@ def button_index(players: int) -> int:
     return 0 if players == 2 else players - 3
 
 
-def model_description(game: PreflopGame, solver_version: str = SOLVER_VERSION,
-                      continuation_version: str = CONTINUATION_VERSION,
+def model_description(game: PreflopGame, solver_version: str | None = None,
+                      continuation_version: str | None = None,
                       strategy_model_version: str = STRATEGY_MODEL_VERSION) -> dict[str, Any]:
+    """Every key field. The abstraction may carry its own engine versions
+    (``versions``: e.g. GTOpen's), which then replace this solver's defaults."""
+    versions = dict(getattr(game.abstraction, "versions", {}) or {})
     desc = game.describe()
-    desc.update(button_index=button_index(game.n), solver_version=solver_version,
-                continuation_version=continuation_version, strategy_model_version=strategy_model_version)
+    desc.update(button_index=button_index(game.n),
+                solver_version=solver_version or versions.get("solver_version", SOLVER_VERSION),
+                continuation_version=continuation_version or versions.get("continuation_version", CONTINUATION_VERSION),
+                strategy_model_version=strategy_model_version)
+    if "tree_version" in versions:
+        desc["tree_version"] = versions["tree_version"]
     return desc
 
 
@@ -121,9 +128,8 @@ class StoredStrategy:
 
 @dataclass
 class LookupResult:
-    kind: str  # "exact" | "approximate"
+    kind: str  # "exact" (approximate candidates come from ``nearest``)
     strategy: StoredStrategy
-    distance_bb: float = 0.0
 
 
 class StrategyStore:
@@ -140,25 +146,29 @@ class StrategyStore:
     # --- writing ----------------------------------------------------------------------
 
     def save(self, solver, metrics: dict[str, Any] | None = None) -> str:
-        """Store ``solver``'s average strategy; returns its key."""
-        game: PreflopGame = solver.game
-        key = strategy_key(game)
-        probs = solver.average_strategy().astype(np.float32)
+        """Store a ``PreflopSolver``'s average strategy; returns its key."""
         nodes = [[nd.key, solver.offset[nd.id], list(nd.actions), nd.actor] for nd in solver.tree.decision_nodes]
+        return self.save_strategy(solver.game, nodes, solver.average_strategy(), solver.tree.stats()["nodes"], metrics)
+
+    def save_strategy(self, game: PreflopGame, nodes: list, probs: np.ndarray, total_nodes: int,
+                      metrics: dict[str, Any] | None = None) -> str:
+        """Store any solver's output: ``nodes`` are ``[history, offset, actions,
+        actor]`` rows into ``probs`` (edges x 169, pokerlab class order)."""
+        key = strategy_key(game)
+        probs = np.asarray(probs, dtype=np.float32)
         buf = io.BytesIO()
         np.savez_compressed(buf, probs=probs,
                             nodes=np.frombuffer(zlib.compress(json.dumps(nodes).encode()), dtype=np.uint8))
         rel = f"files/{key[:24]}.npz"
         (self.root / rel).write_bytes(buf.getvalue())
         desc = model_description(game)
-        stats = solver.tree.stats()
         self.db.execute(
             "INSERT OR REPLACE INTO strategies VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (key, desc["variant"], game.n, json.dumps(desc["positions"]), desc["button_index"],
              json.dumps(desc["stacks"]), json.dumps(list(game.stacks_bb())), game.small_blind, game.big_blind,
              game.ante, json.dumps(desc["rake"], sort_keys=True), json.dumps(desc["abstraction"], sort_keys=True),
              game.abstraction.name, desc["tree_version"], desc["solver_version"], desc["continuation_version"],
-             desc["strategy_model_version"], family_key(game), rel, stats["nodes"], stats["decision_nodes"],
+             desc["strategy_model_version"], family_key(game), rel, total_nodes, len(nodes),
              len(buf.getvalue()), time.time(), json.dumps(metrics or {})),
         )
         self.db.commit()

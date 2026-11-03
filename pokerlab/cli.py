@@ -170,14 +170,19 @@ def cmd_strategies(args: argparse.Namespace) -> int:
         tree_note = f"{config.game.n} players, stacks {config.stacks_by_position_bb}"
         print(f"Solving '{config.name}': {tree_note}", file=sys.stderr)
         metrics = generate(config, store, iterations=args.iterations, workers=args.workers, progress=not args.quiet)
-        final = metrics["convergence"][-1]
-        print(f"Stored strategy {metrics['key'][:12]}: {metrics['tree']['decision_nodes']:,} decision nodes, "
-              f"{metrics['iterations']} iterations, {metrics['deals_sampled']:,} sampled deals")
+        final = metrics["convergence"][-1] if metrics["convergence"] else {}
+        engine = metrics.get("engine", "pokerlab-cfr")
+        print(f"Stored {engine} strategy {metrics['key'][:12]}: {metrics['tree']['decision_nodes']:,} decision nodes, "
+              f"{metrics['iterations']} iterations")
+        memory = (f"{metrics['peak_memory_mb']} MB" if "peak_memory_mb" in metrics else
+                  f"{metrics['peak_memory_parent_mb']} MB parent / {metrics['peak_memory_worker_mb']} MB per worker")
         print(f"Solve {metrics['solve_s']}s (wall {metrics['wall_s']}s, CPU utilization {metrics['cpu_utilization']:.0%} "
-              f"of {metrics['cores']} cores), peak memory {metrics['peak_memory_parent_mb']} MB parent / "
-              f"{metrics['peak_memory_worker_mb']} MB per worker, file {metrics['strategy_bytes'] / 1e6:.2f} MB")
-        print(f"Sampled NashConv: {final['nash_conv_bb100']:.2f} bb/100 in-sample (biased up), "
-              f"{final['holdout_nash_conv_bb100']:.2f} bb/100 holdout (lower bound)")
+              f"of {metrics['cores']} cores), peak memory {memory}, file {metrics['strategy_bytes'] / 1e6:.2f} MB")
+        if engine == "gtopen":
+            print(f"Exact NashConv of the modeled game: {final.get('nash_conv_bb100', float('nan')):.2f} bb/100")
+        elif final:
+            print(f"Sampled NashConv: {final['nash_conv_bb100']:.2f} bb/100 in-sample (biased up), "
+                  f"{final['holdout_nash_conv_bb100']:.2f} bb/100 holdout (lower bound)")
         if args.out:
             print(f"Metrics written to {write_json(args.out, metrics)}")
         return 0

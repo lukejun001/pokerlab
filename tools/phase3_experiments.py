@@ -26,7 +26,8 @@ from pokerlab.solver.pipeline import first_in_summary, generate, inspect, simula
 from pokerlab.solver.store import StrategyStore, strategy_key
 
 OUT = Path(__file__).resolve().parents[1] / "reports" / "phase3"
-SOLVE = ["6max_equal", "6max_asymmetric", "6max_asymmetric_zero_rake", "6max_asymmetric_allin"]
+SOLVE = ["6max_gtopen_equal", "6max_gtopen_asymmetric", "6max_gtopen_asymmetric_allin"]
+SOLVE_POKERLAB = ["6max_equal", "6max_asymmetric", "6max_asymmetric_zero_rake", "6max_asymmetric_allin"]
 SIMULATE = ["6max_asymmetric", "6max_asymmetric_selfplay", "6max_equal"]
 
 

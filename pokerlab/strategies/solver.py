@@ -43,6 +43,10 @@ class SolverStrategy(Strategy):
         super().__init__(seed, **params)
         if config is not None:
             self.abstraction = load_solver_config(config).game.abstraction
+        elif abstraction and abstraction.get("engine") == "gtopen":
+            from pokerlab.solver.gtopen import GTOpenAbstraction
+
+            self.abstraction = GTOpenAbstraction.from_dict({k: v for k, v in abstraction.items() if k != "engine"})
         else:
             self.abstraction = BettingAbstraction.from_dict(abstraction)
         self.store = StrategyStore(store or DEFAULT_STORE)

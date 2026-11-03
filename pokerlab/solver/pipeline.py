@@ -30,6 +30,12 @@ def _children_peak_mb() -> float:
 def generate(config: SolverConfig, store: StrategyStore, iterations: int | None = None,
              workers: int | None = None, progress: bool = True) -> dict[str, Any]:
     """Solve ``config``'s game, store the average strategy, return measured metrics."""
+    from pokerlab.solver.gtopen import GTOpenAbstraction
+
+    if isinstance(config.game.abstraction, GTOpenAbstraction):
+        from pokerlab.solver import gtopen
+
+        return gtopen.generate(config, store, iterations=iterations, threads=workers, progress=progress)
     s = config.solve
     iterations = iterations or s.iterations
     workers = s.workers if workers is None else workers

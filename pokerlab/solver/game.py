@@ -50,16 +50,6 @@ def position_names(n: int) -> tuple[str, ...]:
     return (*middle, "BTN", "SB", "BB")
 
 
-def engine_label_aliases(n: int) -> dict[str, str]:
-    """Simulator position label -> solver label (the simulator calls 6-max UTG "LJ")."""
-    from pokerlab.engine.observations import position_labels
-
-    engine = position_labels(n)
-    order = preflop_order_from_pokerkit(n)
-    names = position_names(n)
-    return {engine[pk]: names[order[pk]] for pk in range(n)}
-
-
 def preflop_order_from_pokerkit(n: int) -> tuple[int, ...]:
     """PokerKit player index (0 = left of the button) -> preflop order index."""
     if n == 2:
