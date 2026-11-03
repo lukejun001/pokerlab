@@ -1,0 +1,66 @@
+
+== 6max_gtopen_equal: stacks {'UTG': 100.0, 'HJ': 100.0, 'CO': 100.0, 'BTN': 100.0, 'SB': 100.0, 'BB': 100.0}
+built 20656 nodes (9723 action nodes, 27.9 MB arena) in 0.03s
+  iter     50  solve    153.7s  NashConv 0.1658 bb/hand (16.58 bb/100)
+  iter    100  solve    331.4s  NashConv 0.0355 bb/hand (3.55 bb/100)
+  iter    150  solve    563.5s  NashConv 0.0167 bb/hand (1.67 bb/100)
+  iter    200  solve    741.4s  NashConv 0.0109 bb/hand (1.09 bb/100)
+  iter    250  solve    967.5s  NashConv 0.0086 bb/hand (0.86 bb/100)
+  iter    300  solve   1144.4s  NashConv 0.0075 bb/hand (0.75 bb/100)
+  iter    350  solve   1276.9s  NashConv 0.0067 bb/hand (0.67 bb/100)
+  iter    400  solve   1399.2s  NashConv 0.0062 bb/hand (0.62 bb/100)
+{
+ "key": "9ba1ccfef468e8de5de1f86ee14ab186c6281580a41476edf2fd5881fbbd6aa3",
+ "iterations": 400,
+ "solve_s": 1399.2,
+ "wall_s": 1438.81,
+ "cpu_utilization": 0.579,
+ "peak_memory_mb": 372.3,
+ "final_nash_conv_bb100": 0.616,
+ "strategy_bytes": 3770408
+}
+
+== 6max_gtopen_asymmetric: stacks {'UTG': 100.0, 'HJ': 150.0, 'CO': 70.0, 'BTN': 115.0, 'SB': 40.0, 'BB': 200.0}
+built 20863 nodes (9764 action nodes, 28.2 MB arena) in 0.04s
+  iter     50  solve    155.4s  NashConv 0.1739 bb/hand (17.39 bb/100)
+  iter    100  solve    305.4s  NashConv 0.0522 bb/hand (5.22 bb/100)
+  iter    150  solve    422.1s  NashConv 0.0197 bb/hand (1.97 bb/100)
+  iter    200  solve    524.4s  NashConv 0.0100 bb/hand (1.00 bb/100)
+  iter    250  solve    621.6s  NashConv 0.0060 bb/hand (0.60 bb/100)
+  iter    300  solve    729.6s  NashConv 0.0041 bb/hand (0.41 bb/100)
+  iter    350  solve    843.1s  NashConv 0.0032 bb/hand (0.32 bb/100)
+  iter    400  solve    949.2s  NashConv 0.0026 bb/hand (0.26 bb/100)
+{
+ "key": "b02ac05cd3108296b479afcde8187071882997a0cbdd87925662ffd5b24c2065",
+ "iterations": 400,
+ "solve_s": 949.17,
+ "wall_s": 991.06,
+ "cpu_utilization": 0.707,
+ "peak_memory_mb": 376.8,
+ "final_nash_conv_bb100": 0.258,
+ "strategy_bytes": 3941666
+}
+
+== 6max_gtopen_asymmetric_rot1: stacks {'UTG': 200.0, 'HJ': 100.0, 'CO': 150.0, 'BTN': 70.0, 'SB': 115.0, 'BB': 40.0}
+built 21620 nodes (10085 action nodes, 29.2 MB arena) in 0.03s
+  iter     50  solve    169.0s  NashConv 0.2209 bb/hand (22.09 bb/100)
+  iter    100  solve    305.0s  NashConv 0.0436 bb/hand (4.36 bb/100)
+  iter    150  solve    435.0s  NashConv 0.0153 bb/hand (1.53 bb/100)
+  iter    200  solve    563.0s  NashConv 0.0077 bb/hand (0.77 bb/100)
+  iter    250  solve    686.8s  NashConv 0.0048 bb/hand (0.48 bb/100)
+  iter    300  solve    844.7s  NashConv 0.0033 bb/hand (0.33 bb/100)
+  iter    350  solve    974.7s  NashConv 0.0024 bb/hand (0.24 bb/100)
+  iter    400  solve   1096.0s  NashConv 0.0021 bb/hand (0.21 bb/100)
+{
+ "key": "54229b8ef7d33c8523f4f49dea53522aa620e42ad5253383f4ec311584b86b89",
+ "iterations": 400,
+ "solve_s": 1096.02,
+ "wall_s": 1141.78,
+ "cpu_utilization": 0.649,
+ "peak_memory_mb": 387.6,
+ "final_nash_conv_bb100": 0.208,
+ "strategy_bytes": 3956991
+}
+
+== 6max_gtopen_asymmetric_allin: stacks {'UTG': 100.0, 'HJ': 150.0, 'CO': 70.0, 'BTN': 115.0, 'SB': 40.0, 'BB': 200.0}
+built 102756 nodes (47431 action nodes, 138.9 MB arena) in 0.08s

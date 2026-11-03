@@ -33,7 +33,7 @@ GTOPEN_DIR = Path(os.environ.get("GTOPEN_DIR", Path(__file__).resolve().parents[
 BINARY = GTOPEN_DIR / "target" / "release" / "preflop-cli"
 UPSTREAM_COMMIT = "6c70502"
 # Bump when the fork's game rules or terminal values change: it is part of every strategy key.
-FORK_VERSION = "asym-2"
+FORK_VERSION = "asym-3"
 
 
 @dataclass(frozen=True)

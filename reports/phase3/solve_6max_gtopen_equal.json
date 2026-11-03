@@ -1,0 +1,236 @@
+{
+  "config": "6max_gtopen_equal",
+  "engine": "gtopen",
+  "players": 6,
+  "positions": [
+    "UTG",
+    "HJ",
+    "CO",
+    "BTN",
+    "SB",
+    "BB"
+  ],
+  "stacks_bb": [
+    100.0,
+    100.0,
+    100.0,
+    100.0,
+    100.0,
+    100.0
+  ],
+  "abstraction": {
+    "name": "gtopen-6max-v1",
+    "open_raises": [
+      2.5
+    ],
+    "sb_open_raises": [
+      3.0
+    ],
+    "raise_mults": [
+      3.0
+    ],
+    "fourbet_mults": null,
+    "max_raises": 3,
+    "add_allin": true,
+    "allin_threshold": 0.5,
+    "limp": false,
+    "realization": "balanced",
+    "multiway_equity_model": "coupled_deck_v1",
+    "engine": "gtopen"
+  },
+  "tree": {
+    "nodes": 20656,
+    "decision_nodes": 9723,
+    "infosets": 1643187
+  },
+  "arena_mb": 27.92556,
+  "iterations": 400,
+  "threads": 10,
+  "solve_s": 1399.2,
+  "eval_s": 39.25,
+  "wall_s": 1438.81,
+  "cpu_s": 8331.13,
+  "cpu_utilization": 0.579,
+  "cores": 10,
+  "peak_memory_mb": 372.3,
+  "gpu": "not used (CPU build)",
+  "fork_commit": "0bb1cbc",
+  "realization_note": "",
+  "convergence": [
+    {
+      "iteration": 50,
+      "solve_s": 153.73,
+      "br_gap_bb100": [
+        4.724,
+        1.583,
+        2.423,
+        1.999,
+        3.089,
+        2.764
+      ],
+      "nash_conv_bb100": 16.583,
+      "ev_bb": [
+        0.10883,
+        0.12865,
+        0.15805,
+        0.19915,
+        -0.23594,
+        -0.39091
+      ]
+    },
+    {
+      "iteration": 100,
+      "solve_s": 331.37,
+      "br_gap_bb100": [
+        0.993,
+        0.329,
+        0.469,
+        0.525,
+        0.641,
+        0.596
+      ],
+      "nash_conv_bb100": 3.553,
+      "ev_bb": [
+        0.10787,
+        0.12818,
+        0.15673,
+        0.19985,
+        -0.22707,
+        -0.39783
+      ]
+    },
+    {
+      "iteration": 150,
+      "solve_s": 563.49,
+      "br_gap_bb100": [
+        0.524,
+        0.131,
+        0.234,
+        0.279,
+        0.251,
+        0.249
+      ],
+      "nash_conv_bb100": 1.668,
+      "ev_bb": [
+        0.10759,
+        0.12813,
+        0.15682,
+        0.2,
+        -0.2262,
+        -0.39869
+      ]
+    },
+    {
+      "iteration": 200,
+      "solve_s": 741.36,
+      "br_gap_bb100": [
+        0.386,
+        0.068,
+        0.141,
+        0.22,
+        0.14,
+        0.135
+      ],
+      "nash_conv_bb100": 1.09,
+      "ev_bb": [
+        0.10763,
+        0.12808,
+        0.15678,
+        0.19991,
+        -0.22602,
+        -0.3988
+      ]
+    },
+    {
+      "iteration": 250,
+      "solve_s": 967.48,
+      "br_gap_bb100": [
+        0.334,
+        0.044,
+        0.11,
+        0.199,
+        0.091,
+        0.085
+      ],
+      "nash_conv_bb100": 0.864,
+      "ev_bb": [
+        0.10753,
+        0.12793,
+        0.15662,
+        0.19982,
+        -0.2259,
+        -0.39847
+      ]
+    },
+    {
+      "iteration": 300,
+      "solve_s": 1144.37,
+      "br_gap_bb100": [
+        0.308,
+        0.031,
+        0.091,
+        0.186,
+        0.069,
+        0.061
+      ],
+      "nash_conv_bb100": 0.746,
+      "ev_bb": [
+        0.10745,
+        0.1278,
+        0.15645,
+        0.19968,
+        -0.22583,
+        -0.39804
+      ]
+    },
+    {
+      "iteration": 350,
+      "solve_s": 1276.9,
+      "br_gap_bb100": [
+        0.294,
+        0.023,
+        0.084,
+        0.177,
+        0.046,
+        0.043
+      ],
+      "nash_conv_bb100": 0.667,
+      "ev_bb": [
+        0.10738,
+        0.12771,
+        0.15638,
+        0.19954,
+        -0.22583,
+        -0.39767
+      ]
+    },
+    {
+      "iteration": 400,
+      "solve_s": 1399.2,
+      "br_gap_bb100": [
+        0.282,
+        0.018,
+        0.076,
+        0.172,
+        0.037,
+        0.032
+      ],
+      "nash_conv_bb100": 0.616,
+      "ev_bb": [
+        0.10736,
+        0.12763,
+        0.15633,
+        0.19942,
+        -0.22585,
+        -0.39739
+      ]
+    }
+  ],
+  "final_nash_conv_bb100": 0.616,
+  "solver_version": "gtopen-6c70502+asym-3",
+  "continuation_version": "gtopen-balanced+coupled_deck_v1+raw-side-pots",
+  "tree_version": "gtopen-preflop+asym-3",
+  "key": "d861399d6747f5adae36fb6837975cfc4181eccccfcabd38eb105e95b461f93a",
+  "strategy_bytes": 3770408,
+  "note": "Solved with fork asym-2. asym-3 only changes terminals with an uncalled-bet refund, which equal-stack games cannot reach (all stacks equal: every call matches every bet), so the strategy is unchanged and is re-keyed rather than re-solved."
+}

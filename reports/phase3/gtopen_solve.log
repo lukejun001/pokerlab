@@ -1,0 +1,3 @@
+
+== 6max_gtopen_asymmetric: stacks {'UTG': 100.0, 'HJ': 150.0, 'CO': 70.0, 'BTN': 115.0, 'SB': 40.0, 'BB': 200.0}
+built 20863 nodes (9764 action nodes, 28.2 MB arena) in 0.04s
