@@ -1,0 +1,97 @@
+{
+  "library_size": 16,
+  "runs": [
+    {
+      "stacks_bb": [
+        63,
+        82,
+        206,
+        65,
+        72,
+        88
+      ],
+      "variant": "r1000s1000t1000",
+      "approximation": {
+        "distance": 0.462,
+        "node_distance_mean": 0.28,
+        "node_distance_p90": 0.462,
+        "node_distance_max": 1.3863,
+        "first_in_distance_max": 0.4308,
+        "untranslated_nodes": 48
+      },
+      "approximation_s": 5.5,
+      "warm_start": {
+        "cold_nodes": 48,
+        "regret_scale": 1000.0,
+        "seeded_nodes": 10374,
+        "sum_scale": 1000.0,
+        "warm_iterations": 1000
+      },
+      "threads": 4,
+      "wall_s": 32.64,
+      "curve": [
+        {
+          "iteration": 2,
+          "solve_s": 5.5,
+          "nash_conv_bb100": 13.488
+        },
+        {
+          "iteration": 3,
+          "solve_s": 7.7,
+          "nash_conv_bb100": 13.485
+        },
+        {
+          "iteration": 4,
+          "solve_s": 9.7,
+          "nash_conv_bb100": 13.414
+        }
+      ]
+    },
+    {
+      "stacks_bb": [
+        63,
+        82,
+        206,
+        65,
+        72,
+        88
+      ],
+      "variant": "r1s1000t1000",
+      "approximation": {
+        "distance": 0.462,
+        "node_distance_mean": 0.28,
+        "node_distance_p90": 0.462,
+        "node_distance_max": 1.3863,
+        "first_in_distance_max": 0.4308,
+        "untranslated_nodes": 48
+      },
+      "approximation_s": 5.5,
+      "warm_start": {
+        "cold_nodes": 48,
+        "regret_scale": 1.0,
+        "seeded_nodes": 10374,
+        "sum_scale": 1000.0,
+        "warm_iterations": 1000
+      },
+      "threads": 4,
+      "wall_s": 31.73,
+      "curve": [
+        {
+          "iteration": 2,
+          "solve_s": 5.4,
+          "nash_conv_bb100": 13.488
+        },
+        {
+          "iteration": 3,
+          "solve_s": 7.6,
+          "nash_conv_bb100": 13.608
+        },
+        {
+          "iteration": 4,
+          "solve_s": 9.3,
+          "nash_conv_bb100": 13.296
+        }
+      ]
+    }
+  ]
+}
