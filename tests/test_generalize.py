@@ -102,3 +102,32 @@ def test_library_games_share_a_family():
     assert family_key(a) == family_key(b) and strategy_key(a) != strategy_key(b)
     c = dataclasses.replace(b, small_blind=2000)
     assert family_key(c) != family_key(a)
+
+
+@needs_fork
+@pytest.mark.parametrize("mode, expected", [("always", "approximate:"), ("validated", "fallback:no_validated_approximation"),
+                                            ("off", "fallback:no_matching_strategy")])
+def test_agent_borrows_only_as_configured(tmp_path, mode, expected):
+    from pokerlab.simulation.batch import run_batch
+    from pokerlab.simulation.configurations import SimulationConfig
+    from pokerlab.solver.config import solver_config_from_dict
+    from pokerlab.solver.store import StrategyStore
+
+    ab = {"name": "hu-test", "open_raises": [2.5], "sb_open_raises": [], "raise_mults": [3.0], "max_raises": 2}
+    store = StrategyStore(tmp_path)
+    for stacks in ({"SB": 30, "BB": 60}, {"SB": 50, "BB": 50}):
+        cfg = solver_config_from_dict({"game": {"active_players": 2, "chips_per_bb": 100, "starting_stacks_bb": stacks},
+                                       "rake": {"percentage": 0.05, "cap_bb": 3}, "strategy": {"preflop_solver": "gtopen"},
+                                       "abstraction": ab, "solve": {"iterations": 20, "workers": 2}})
+        gtopen.generate(cfg, store, progress=False)
+    params = {"strategy": "solver", "strategy_params": {
+        "abstraction": {**ab, "engine": "gtopen"}, "store": str(tmp_path), "approximate": mode}}
+    sim = SimulationConfig(players=2, hands=60, chunk_size=60, workers=1, strict=True, small_blind=50, big_blind=100,
+                           stacks_by_position_bb={"SB": 40, "BB": 55},
+                           rake={"percentage": 0.05, "cap": 300, "no_flop_no_drop": True},
+                           lineup=[{"type": "Experimental", "id": "Hero", "params": params}, {"type": "TAG"}])
+    result = run_batch(sim, progress=False)
+    sources = result.stats.agents["Hero"].decision_sources
+    assert any(k.startswith(expected) for k in sources), sources
+    assert not any(k.startswith("exact:") for k in sources)
+    assert result.stats.table.invalid_actions == 0

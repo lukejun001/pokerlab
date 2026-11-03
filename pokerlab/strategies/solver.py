@@ -13,10 +13,16 @@ Decision flow for each preflop decision:
    action with the strategy's seeded RNG.
 
 Every decision is tagged and counted in ``decision_sources``:
-``exact:<key prefix>`` for solver output, ``approximate:<key prefix>`` only
-when ``allow_approximate`` is on (off by default: no approximation has been
-validated yet), and ``fallback:<reason>`` when the heuristic fallback decides.
-Fallback decisions are never labeled as solver/GTO output.
+``exact:<key prefix>`` for solver output, ``approximate:<key prefix>`` for a
+strategy borrowed from solved games with similar effective stacks (see
+``solver/generalize.py``), and ``fallback:<reason>`` when the heuristic
+fallback decides. Fallback decisions are never labeled as solver/GTO output.
+
+``approximate`` controls borrowing for unsolved stack vectors:
+``"validated"`` (default) borrows only when the game's matching statistic is
+within the radius calibrated by measured exact exploitability
+(``strategies/approximation.json``); ``"off"`` never borrows; ``"always"``
+borrows from the nearest games regardless (for experiments only).
 """
 
 from __future__ import annotations
@@ -38,7 +44,7 @@ class SolverStrategy(Strategy):
     name = "solver"
 
     def __init__(self, seed: int | str = 0, config: str | None = None, store: str | None = None,
-                 fallback: str = "equity", allow_approximate: bool = False,
+                 fallback: str = "equity", approximate: str = "validated",
                  abstraction: dict[str, Any] | None = None, **params: Any) -> None:
         super().__init__(seed, **params)
         if config is not None:
@@ -51,9 +57,11 @@ class SolverStrategy(Strategy):
             self.abstraction = BettingAbstraction.from_dict(abstraction)
         self.store = StrategyStore(store or DEFAULT_STORE)
         self.fallback = load_strategy(fallback, seed)
-        self.allow_approximate = allow_approximate
+        if approximate not in ("validated", "off", "always"):
+            raise ValueError("approximate must be validated, off or always")
+        self.approximate = approximate
         self.decision_sources: Counter[str] = Counter()
-        self._games: dict[tuple, tuple[PreflopGame, object]] = {}
+        self._games: dict[tuple, tuple] = {}
 
     def reset(self, seed: int | str) -> None:
         super().reset(seed)
@@ -102,6 +110,36 @@ class SolverStrategy(Strategy):
         self.decision_sources[f"fallback:{reason}"] += 1
         return self.fallback.decide(obs)
 
+    def _resolve(self, obs: Observation, seats: list[int]) -> tuple:
+        """(kind, source, label) for this hand's game: an exact stored strategy,
+        a validated approximate profile, or (None, None, fallback reason)."""
+        try:
+            game = self.modeled_game(obs, seats)
+        except (ValueError, NotImplementedError):
+            return None, None, "no_matching_strategy"
+        match = self.store.lookup(game)
+        if match is not None:
+            return "exact", match.strategy, f"exact:{match.strategy.key[:12]}"
+        if self.approximate == "off" or not hasattr(self.abstraction, "versions"):
+            return None, None, "no_matching_strategy"
+        from pokerlab.solver.generalize import Calibration, Library, approximate_profile, python_tree
+
+        calibration = Calibration.load(self.store.root / "approximation.json")
+        library = Library(self.store, game)
+        if not len(library):
+            return None, None, "no_matching_strategy"
+        if self.approximate == "validated" and (calibration is None or calibration.family != library.family
+                                               or calibration.radius <= 0):
+            return None, None, "no_validated_approximation"
+        tree = python_tree(game)
+        k = calibration.k if calibration else 1
+        profile, info = approximate_profile(library, game, tree, k=k)
+        if self.approximate == "validated" and info[calibration.stat] > calibration.radius:
+            return None, None, "approximation_outside_validated_radius"
+        nearest = library.neighbors(game.stacks_bb(), k=1)[0]
+        table = {h: (tuple(tree[h]), t) for h, t in profile.items()}
+        return "approximate", table, f"approximate:{nearest.key[:12]}@{info[calibration.stat if calibration else 'node_distance_p90']:.2f}"
+
     def decide(self, obs: Observation) -> Action:
         if obs.street != Street.PREFLOP:
             return self._fall_back(obs, "postflop")
@@ -109,25 +147,19 @@ class SolverStrategy(Strategy):
         cache_key = (tuple(obs.stacks[s] + obs.bets[s] for s in seats), obs.game)
         cached = self._games.get(cache_key)
         if cached is None:
-            try:
-                game = self.modeled_game(obs, seats)
-            except (ValueError, NotImplementedError):
-                game = None
-            match = self.store.lookup(game) if game else None
-            label = "exact"
-            if match is None and game is not None and self.allow_approximate:
-                near = self.store.nearest(game, limit=1)
-                if near:
-                    strategy = self.store.load(near[0][1])
-                    match, label = (strategy, "approximate") if strategy else (None, label)
-            else:
-                match = match.strategy if match else None
-            cached = self._games[cache_key] = (match, label)
-        strategy, label = cached
-        if strategy is None:
-            return self._fall_back(obs, "no_matching_strategy")
+            cached = self._games[cache_key] = self._resolve(obs, seats)
+            if len(self._games) > 8:  # approximate profiles are large; keep the most recent games
+                self._games.pop(next(iter(self._games)))
+        kind, source, label = cached
+        if kind is None:
+            return self._fall_back(obs, label)
         history = "-".join(self.history_tokens(obs, seats))
-        found = strategy.action_probabilities(history, class_of(obs.hole_cards))
+        hand = class_of(obs.hole_cards)
+        if kind == "exact":
+            found = source.action_probabilities(history, hand)
+        else:
+            node = source.get(history)
+            found = None if node is None else (node[0], node[1][:, hand])
         if found is None:
             return self._fall_back(obs, "history_not_in_abstraction")
         actions, probs = found
@@ -139,7 +171,7 @@ class SolverStrategy(Strategy):
             if x < cumulative:
                 choice = token
                 break
-        self.decision_sources[f"{label}:{strategy.key[:12]}"] += 1
+        self.decision_sources[label] += 1
         kind = action_kind(choice)
         if kind == "f":
             return Action.fold()

@@ -89,6 +89,23 @@ def replay(game: PreflopGame, history: list[str]) -> BettingState | None:
     return state
 
 
+def python_tree(game: PreflopGame) -> dict[str, list[str]]:
+    """GTOpen's abstract tree for ``game`` built in Python: history -> action tokens."""
+    out: dict[str, list[str]] = {}
+    stack: list[tuple[list[str], BettingState]] = [([], BettingState.initial(game))]
+    while stack:
+        history, state = stack.pop()
+        if state.closed:
+            continue
+        tokens = gtopen_tokens(game, state)
+        out["-".join(history)] = tokens
+        for token in tokens:
+            child = state.copy()
+            child.apply(action_kind(token), action_amount(token))
+            stack.append((history + [token], child))
+    return out
+
+
 # --- translation between trees ------------------------------------------------------------
 
 
