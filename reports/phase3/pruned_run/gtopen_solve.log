@@ -1,0 +1,19 @@
+
+== 6max_gtopen_equal: stacks {'UTG': 100.0, 'HJ': 100.0, 'CO': 100.0, 'BTN': 100.0, 'SB': 100.0, 'BB': 100.0}
+built 20656 nodes (9723 action nodes, 27.9 MB arena) in 0.02s
+  iter     50  solve    104.1s  NashConv 0.1658 bb/hand (16.58 bb/100)
+  iter    100  solve    203.2s  NashConv 0.0355 bb/hand (3.55 bb/100)
+  iter    150  solve    297.0s  NashConv 0.0167 bb/hand (1.67 bb/100)
+  iter    200  solve    378.5s  NashConv 0.0109 bb/hand (1.09 bb/100)
+  iter    250  solve    458.2s  NashConv 0.0086 bb/hand (0.86 bb/100)
+  iter    300  solve    534.9s  NashConv 0.0075 bb/hand (0.75 bb/100)
+  iter    350  solve    610.6s  NashConv 0.0067 bb/hand (0.67 bb/100)
+  iter    400  solve    687.7s  NashConv 0.0062 bb/hand (0.62 bb/100)
+Traceback (most recent call last):
+  File "/Users/LukeJun/Developer/Coding Projects/pokerlab/tools/phase3_experiments.py", line 203, in <module>
+  File "/Users/LukeJun/Developer/Coding Projects/pokerlab/tools/phase3_experiments.py", line 199, in main
+  File "/Users/LukeJun/Developer/Coding Projects/pokerlab/tools/phase3_experiments.py", line 41, in cmd_solve
+    write_json(OUT / f"solve_{name}.json", metrics)
+                         ^^^^^^^^^^
+KeyError: 'peak_memory_parent_mb'
+exit 1

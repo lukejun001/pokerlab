@@ -1,0 +1,235 @@
+{
+  "config": "6max_gtopen_asymmetric",
+  "engine": "gtopen",
+  "players": 6,
+  "positions": [
+    "UTG",
+    "HJ",
+    "CO",
+    "BTN",
+    "SB",
+    "BB"
+  ],
+  "stacks_bb": [
+    100.0,
+    150.0,
+    70.0,
+    115.0,
+    40.0,
+    200.0
+  ],
+  "abstraction": {
+    "name": "gtopen-6max-v1",
+    "open_raises": [
+      2.5
+    ],
+    "sb_open_raises": [
+      3.0
+    ],
+    "raise_mults": [
+      3.0
+    ],
+    "fourbet_mults": null,
+    "max_raises": 3,
+    "add_allin": true,
+    "allin_threshold": 0.5,
+    "limp": false,
+    "realization": "balanced",
+    "multiway_equity_model": "coupled_deck_v1",
+    "engine": "gtopen"
+  },
+  "tree": {
+    "nodes": 20863,
+    "decision_nodes": 9764,
+    "infosets": 1650116
+  },
+  "arena_mb": 28.205424,
+  "iterations": 400,
+  "threads": 10,
+  "solve_s": 504.23,
+  "eval_s": 27.95,
+  "wall_s": 532.39,
+  "cpu_s": 3754.16,
+  "cpu_utilization": 0.705,
+  "cores": 10,
+  "peak_memory_mb": 375.5,
+  "gpu": "not used (CPU build)",
+  "fork_commit": "d512652",
+  "realization_note": "",
+  "convergence": [
+    {
+      "iteration": 50,
+      "solve_s": 95.5,
+      "br_gap_bb100": [
+        1.483,
+        5.301,
+        3.486,
+        2.629,
+        4.48,
+        2.025
+      ],
+      "nash_conv_bb100": 19.404,
+      "ev_bb": [
+        1.41972,
+        1.44072,
+        1.50313,
+        1.25327,
+        11.91754,
+        0.90808
+      ]
+    },
+    {
+      "iteration": 100,
+      "solve_s": 174.83,
+      "br_gap_bb100": [
+        0.711,
+        0.77,
+        1.586,
+        0.655,
+        2.728,
+        0.803
+      ],
+      "nash_conv_bb100": 7.252,
+      "ev_bb": [
+        1.41367,
+        1.36595,
+        1.4332,
+        1.27999,
+        11.60612,
+        0.92531
+      ]
+    },
+    {
+      "iteration": 150,
+      "solve_s": 244.81,
+      "br_gap_bb100": [
+        0.597,
+        0.385,
+        0.827,
+        0.279,
+        2.137,
+        0.526
+      ],
+      "nash_conv_bb100": 4.752,
+      "ev_bb": [
+        1.41231,
+        1.33977,
+        1.3913,
+        1.28103,
+        11.5761,
+        0.92798
+      ]
+    },
+    {
+      "iteration": 200,
+      "solve_s": 304.58,
+      "br_gap_bb100": [
+        0.569,
+        0.256,
+        0.5,
+        0.187,
+        1.907,
+        0.419
+      ],
+      "nash_conv_bb100": 3.838,
+      "ev_bb": [
+        1.41079,
+        1.33465,
+        1.36525,
+        1.2689,
+        11.60763,
+        0.92708
+      ]
+    },
+    {
+      "iteration": 250,
+      "solve_s": 360.65,
+      "br_gap_bb100": [
+        0.593,
+        0.232,
+        0.397,
+        0.202,
+        1.848,
+        0.342
+      ],
+      "nash_conv_bb100": 3.615,
+      "ev_bb": [
+        1.4083,
+        1.32982,
+        1.35245,
+        1.26007,
+        11.61832,
+        0.92443
+      ]
+    },
+    {
+      "iteration": 300,
+      "solve_s": 415.85,
+      "br_gap_bb100": [
+        0.574,
+        0.19,
+        0.319,
+        0.127,
+        1.818,
+        0.314
+      ],
+      "nash_conv_bb100": 3.342,
+      "ev_bb": [
+        1.40785,
+        1.33025,
+        1.34834,
+        1.25944,
+        11.63472,
+        0.92473
+      ]
+    },
+    {
+      "iteration": 350,
+      "solve_s": 463.82,
+      "br_gap_bb100": [
+        0.563,
+        0.196,
+        0.308,
+        0.168,
+        1.809,
+        0.301
+      ],
+      "nash_conv_bb100": 3.344,
+      "ev_bb": [
+        1.40706,
+        1.32986,
+        1.34325,
+        1.25613,
+        11.64737,
+        0.92315
+      ]
+    },
+    {
+      "iteration": 400,
+      "solve_s": 504.23,
+      "br_gap_bb100": [
+        0.576,
+        0.17,
+        0.265,
+        0.115,
+        1.798,
+        0.294
+      ],
+      "nash_conv_bb100": 3.219,
+      "ev_bb": [
+        1.40693,
+        1.32918,
+        1.34059,
+        1.25541,
+        11.65841,
+        0.92118
+      ]
+    }
+  ],
+  "final_nash_conv_bb100": 3.219,
+  "solver_version": "gtopen-6c70502+asym-1",
+  "continuation_version": "gtopen-balanced+coupled_deck_v1+raw-side-pots",
+  "tree_version": "gtopen-preflop+asym-1",
+  "key": "fe666e156c17b173cfc5be9f7cd8c173287eac742ca658d0002ecbc9368d8e25",
+  "strategy_bytes": 4136950
+}

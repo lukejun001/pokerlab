@@ -5,19 +5,22 @@ source and documentation. Nothing from GTOpen is copied, vendored or modified in
 
 ## Summary
 
-GTOpen cannot be the base of the asymmetric-stack solver here. There are two independent blockers:
+GTOpen is the preflop solver for Phase 3. It runs as a **private, modified fork**,
+[`lukejun001/gtopen-asymmetric`](https://github.com/lukejun001/gtopen-asymmetric), that is used only
+for this offline research project. Two findings shaped how:
 
 1. **License.** The repository has no license file, and GitHub reports `license: null`. Without a license,
-   default copyright applies: there is no permission to modify or redistribute the code. A modified fork
-   in this public repository is therefore not an option, however small the patch.
-2. **Architecture.** The preflop solver models one shared stack. The code says so explicitly:
-   `PreflopConfig.stack: f64`, documented as *"v1: must be equal for all seats — no side pots"*.
-   Supporting six different stacks is not a configuration change. It means rewriting action generation,
-   terminal payouts, the GPU kernels, the continuation model and the save formats (detailed below).
+   default copyright applies and nothing grants permission to modify or redistribute the code.
+   - The project owner chose to use it anyway for private research.
+   - The modified code therefore lives only in the private fork, and none of it is copied into this
+     (public) repository.
+   - pokerlab only calls the fork's binary as a subprocess (`pokerlab/solver/gtopen.py`).
+2. **Architecture.** Upstream, the preflop solver models one shared stack. The code says so explicitly:
+   `PreflopConfig.stack: f64`, documented as *"v1: must be equal for all seats — no side pots"*. The fork
+   adds per-seat stacks (see "What the fork changes" below).
 
-We therefore used the alternative the brief allows: our own solver (`pokerlab/solver/`). It is validated
-node by node against PokerKit, the rules engine the simulator already uses. OpenSpiel was also evaluated;
-see the final section.
+An earlier stage of Phase 3 built a separate NumPy solver (`pokerlab/solver/cfr.py`) because of finding 1.
+It remains as an independent cross-check. The fork is the production path.
 
 ## How GTOpen's preflop solver works
 
@@ -35,30 +38,37 @@ see the final section.
 | Python integration | Possible only over HTTP or a subprocess, at the cost of a Rust (and optionally CUDA) build. |
 | License | **None**, so modification and redistribution are not permitted. |
 
-## Changes GTOpen would need for asymmetric stacks
+## What the fork changes (`crates/solver/src/preflop/mod.rs`)
 
-Listed for completeness: these are what a licensed fork would have to change.
+All changes are opt-in through a new `PreflopConfig.stacks: Option<Vec<f64>>`. Without it, every code path
+is the original one, and GTOpen's own tests still pass: 61 library tests and 56 preflop integration tests.
 
-1. `PreflopConfig.stack` becomes a per-seat vector, with matching validation, estimator and save-format
-   changes (`GTOPREFLOP2`–`4` all assume a scalar).
-2. `legal_actions_of`:
-   - jam to *each actor's* stack;
-   - all-in calls for less than the bet;
-   - no raise option when covered or when every opponent is all-in;
-   - PokerKit/NLHE short-all-in rules: an incomplete raise does not reopen betting for players who
-     already acted.
-3. `next_state_of`: per-player all-in and needs-to-act logic, refunds of uncalled excess, and the raise
-   increment counted only for full raises.
-4. Terminal evaluation (CPU and `kernels.cu`):
-   - layered main and side pots, each with its own eligible players;
-   - rake per pot under a whole-hand cap;
-   - equity of each hand class against *only the players eligible for each pot*.
+1. **`legal_actions_asym` and `next_state_asym`.** These port PokerKit's no-limit rules:
+   - a call is capped at the caller's stack;
+   - jams go to the actor's own stack;
+   - the minimum raise is `max(largest full raise, bb) + current bet`;
+   - no raise when covered or when every opponent is all-in or folded;
+   - an all-in smaller than a full raise does not reopen betting for players who already acted.
 
-   This is the deepest change. GTOpen's terminals work on aggregated class distributions (an equity
-   table and latent strength samples), which cannot give a separate, exact expected share for each pot
-   when three or more players are eligible with different stacks.
-5. Per-player SPR and effective stacks in the realization model, contextual keys, player profiles,
-   exports (`eff_stack_bb`) and the HTTP and UI layers.
+   `BuildState` gains `acted`, `raise_amount` and `short_allins` to support this.
+2. **`side_pots`.** Refunds the uncalled bet (the largest bet above the second-largest, folded seats
+   included), layers pots at every contribution level, and merges adjacent layers with the same eligible
+   players (PokerKit's construction).
+3. **`side_pot_values`.** Terminals with more than one pot, or with an uncalled bet, value each pot over
+   only its eligible players, after that pot's pro-rata share of the whole-hand rake:
+   - two players: raw heads-up equity (the `balanced` model's antisymmetric pairwise table);
+   - three or more: the coupled-deck model;
+   - no positional realization multiplier is applied in side-pot spots.
+
+   Single-pot terminals keep GTOpen's original valuation.
+4. **Per-seat stacks elsewhere.** Realization SPR, node views and exports use each seat's own stack.
+   Player models (seat profiles) are rejected with per-seat stacks for now. Antes and straddles are also
+   rejected.
+5. **`preflop-cli`.** A command-line binary that solves a JSON config on the CPU and exports exact
+   best-response gaps, every action node's average strategy, and optionally every terminal's pots.
+6. **`asym_tests.rs`.** Rust tests for own-stack jams and all-in calls, side-pot chip conservation, and
+   exact equal-stack equivalence. Node-by-node checks against PokerKit live in pokerlab
+   (`tests/test_gtopen.py`).
 
 ## Alternative evaluated: OpenSpiel `universal_poker`
 
@@ -72,14 +82,8 @@ environment, not a project dependency:
   compute budget.
 
 OpenSpiel is a usable rules reference but cannot solve this game as configured. PokerKit serves as the
-independent rules oracle instead (`tests/test_solver_game.py`).
+independent rules oracle instead (`tests/test_solver_game.py`, `tests/test_gtopen.py`).
 
-## What was built instead
+## Results
 
-`pokerlab/solver/` contains:
-
-- an asymmetric-stack preflop game model that ports PokerKit's betting and pot-building rules;
-- a chance-sampled Discounted CFR solver that deals real hole cards and boards (exact card removal) and
-  pays every main and side pot to its eligible best hand after that pot's rake.
-
-Results and limitations are in [`phase3_report.md`](phase3_report.md).
+See [`phase3_report.md`](phase3_report.md).

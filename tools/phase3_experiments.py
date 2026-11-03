@@ -20,7 +20,7 @@ import numpy as np
 from pokerlab.analysis.reporting import agent_table, export, render_report
 from pokerlab.simulation.batch import run_batch
 from pokerlab.solver.config import load_solver_config
-from pokerlab.solver.game import PreflopTree, action_kind
+from pokerlab.solver.game import action_kind
 from pokerlab.solver.hands import CLASS_COMBOS, CLASS_INDEX
 from pokerlab.solver.pipeline import first_in_summary, generate, inspect, simulation_config, write_json
 from pokerlab.solver.store import StrategyStore, strategy_key
@@ -28,7 +28,8 @@ from pokerlab.solver.store import StrategyStore, strategy_key
 OUT = Path(__file__).resolve().parents[1] / "reports" / "phase3"
 SOLVE = ["6max_gtopen_equal", "6max_gtopen_asymmetric", "6max_gtopen_asymmetric_allin"]
 SOLVE_POKERLAB = ["6max_equal", "6max_asymmetric", "6max_asymmetric_zero_rake", "6max_asymmetric_allin"]
-SIMULATE = ["6max_asymmetric", "6max_asymmetric_selfplay", "6max_equal"]
+SIMULATE = ["6max_gtopen_asymmetric", "6max_gtopen_asymmetric_selfplay", "6max_gtopen_equal"]
+COMPARE_EXTRA = ["6max_gtopen_asymmetric_rot1"]
 
 
 def cmd_solve(args) -> None:
@@ -38,9 +39,9 @@ def cmd_solve(args) -> None:
         print(f"\n== {name}: stacks {config.stacks_by_position_bb}", file=sys.stderr)
         metrics = generate(config, store, iterations=args.iterations, workers=args.workers)
         write_json(OUT / f"solve_{name}.json", metrics)
-        print(json.dumps({k: metrics[k] for k in ("key", "iterations", "solve_s", "wall_s", "cpu_utilization",
-                                                   "peak_memory_parent_mb", "peak_memory_worker_mb",
-                                                   "strategy_bytes")}, indent=1))
+        summary = ("key", "iterations", "solve_s", "wall_s", "cpu_utilization", "peak_memory_mb",
+                   "peak_memory_parent_mb", "peak_memory_worker_mb", "final_nash_conv_bb100", "strategy_bytes")
+        print(json.dumps({k: metrics[k] for k in summary if k in metrics}, indent=1))
 
 
 def weighted(row: np.ndarray, mask: np.ndarray | None = None) -> float:
@@ -67,7 +68,7 @@ def hand_rows(strategy, history: str, hands: list[str]) -> dict[str, dict[str, f
 def cmd_compare(args) -> None:
     store = StrategyStore()
     solved = {}
-    for name in SOLVE:
+    for name in SOLVE + COMPARE_EXTRA:
         config = load_solver_config(name)
         strategy = store.load(strategy_key(config.game))
         if strategy is not None:
@@ -92,49 +93,43 @@ def cmd_compare(args) -> None:
     }
     probe = ["AA", "AKs", "AQo", "TT", "77", "A5s", "KJo", "QTs", "98s", "55", "K9o", "J8o", "72o"]
     for name, (config, strategy) in solved.items():
-        tree = PreflopTree(config.game)
         for label, pattern in spots.items():
-            history = resolve(tree, pattern)
+            history = resolve(strategy, pattern)
             if history is None:
                 continue
             report["spots"].setdefault(label, {})[name] = {"history": history, "freq": node_summary(strategy, history)}
             report["hands"].setdefault(label, {})[name] = hand_rows(strategy, history, probe)
     # Distance between solutions of the equal and asymmetric games at shared spots.
-    if "6max_equal" in solved and "6max_asymmetric" in solved:
-        diffs = {}
-        for label, by_game in report["hands"].items():
-            if "6max_equal" in by_game and "6max_asymmetric" in by_game:
-                diffs[label] = strategy_distance(solved, label, report)
-        report["equal_vs_asymmetric_distance"] = diffs
-    if "6max_asymmetric" in solved and "6max_asymmetric_zero_rake" in solved:
-        report["rake_vs_zero_rake_distance"] = {
-            label: strategy_distance(solved, label, report, a="6max_asymmetric", b="6max_asymmetric_zero_rake")
-            for label in report["spots"] if {"6max_asymmetric", "6max_asymmetric_zero_rake"} <= set(report["spots"][label])
-        }
+    pairs = {
+        "equal_vs_asymmetric_distance": ("6max_gtopen_equal", "6max_gtopen_asymmetric"),
+        "asymmetric_vs_rotated_distance": ("6max_gtopen_asymmetric", "6max_gtopen_asymmetric_rot1"),
+        "asymmetric_vs_rejam_tree_distance": ("6max_gtopen_asymmetric", "6max_gtopen_asymmetric_allin"),
+    }
+    for field, (a, b) in pairs.items():
+        if a in solved and b in solved:
+            report[field] = {label: strategy_distance(solved, label, report, a=a, b=b)
+                             for label, by_game in report["spots"].items() if {a, b} <= set(by_game)}
     write_json(OUT / "comparison.json", report)
-    print(json.dumps({k: report[k] for k in ("first_in", "equal_vs_asymmetric_distance", "rake_vs_zero_rake_distance")
-                      if k in report}, indent=1))
+    print(json.dumps({k: v for k, v in report.items() if k not in ("hands", "spots")}, indent=1))
 
 
-def resolve(tree: PreflopTree, pattern: list[str]) -> str | None:
-    """Follow a history where ``a*`` means "the all-in action, whatever its size"."""
-    node = tree.nodes[0]
+def resolve(strategy, pattern: list[str]) -> str | None:
+    """Follow a history through a stored strategy; ``a*`` means "the all-in
+    action, whatever its size", so games with different stacks line up."""
     history: list[str] = []
     for token in pattern:
-        if node.is_terminal:
+        node = strategy.nodes.get("-".join(history))
+        if node is None:
             return None
-        if token == "a*":
-            match = [t for t in node.actions if action_kind(t) == "a"]
-        else:
-            match = [t for t in node.actions if t == token]
+        actions = node[1]
+        match = [t for t in actions if (action_kind(t) == "a" if token == "a*" else t == token)]
         if not match:
             return None
         history.append(match[0])
-        node = tree.nodes[node.children[node.actions.index(match[0])]]
-    return "-".join(history) if not node.is_terminal else None
+    return "-".join(history) if "-".join(history) in strategy.nodes else None
 
 
-def strategy_distance(solved, label, report, a="6max_equal", b="6max_asymmetric") -> dict:
+def strategy_distance(solved, label, report, a="6max_gtopen_equal", b="6max_gtopen_asymmetric") -> dict:
     """Combo-weighted total variation distance between two games' strategies at one spot,
     comparing actions by kind (fold / call / sized raise / all-in)."""
     out = {}
