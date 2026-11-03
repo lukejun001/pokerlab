@@ -208,6 +208,9 @@ class StrategyStore:
             self._cache.popitem(last=False)
         return strategy
 
+    def has(self, key: str) -> bool:
+        return self.db.execute("SELECT 1 FROM strategies WHERE key = ?", (key,)).fetchone() is not None
+
     def lookup(self, game: PreflopGame) -> LookupResult | None:
         """Exact match only: every key field identical."""
         strategy = self.load(strategy_key(game))

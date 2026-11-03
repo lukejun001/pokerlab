@@ -128,8 +128,13 @@ def fork_commit() -> str:
 
 
 def run(game: PreflopGame, iterations: int, check_every: int = 0, threads: int | None = None,
-        dump_terminals: bool = False, per_seat: bool = True, progress: bool = True) -> dict[str, Any]:
-    """Run ``preflop-cli`` on ``game``; returns its JSON output plus process metrics."""
+        dump_terminals: bool = False, per_seat: bool = True, progress: bool = True,
+        warm_start: WarmStart | None = None) -> dict[str, Any]:
+    """Run ``preflop-cli`` on ``game``; returns its JSON output plus process metrics.
+
+    ``warm_start`` starts the solve from a given profile (e.g. one borrowed
+    from the nearest solved stack vector) instead of from uniform play.
+    """
     if not BINARY.exists():
         raise FileNotFoundError(f"{BINARY} not found: build it with `cargo build --release -p solver "
                                 f"--bin preflop-cli` in {GTOPEN_DIR}")
@@ -141,6 +146,8 @@ def run(game: PreflopGame, iterations: int, check_every: int = 0, threads: int |
         "chips_per_bb": game.big_blind,
         "dump_terminals": dump_terminals,
     }
+    if warm_start is not None:
+        request.update(warm_start.request())
     env = dict(os.environ)
     if threads:
         env["RAYON_NUM_THREADS"] = str(threads)
@@ -199,6 +206,30 @@ def gtopen_class_labels() -> list[str]:
 TO_GTOPEN = [CLASS_LABELS.index(label) for label in gtopen_class_labels()]
 
 
+def to_gtopen_profile(strategy: dict[str, np.ndarray]) -> dict[str, list]:
+    """Profile in pokerlab class order -> the CLI's JSON form (GTOpen class order)."""
+    return {h: np.asarray(t, dtype=np.float64)[:, TO_GTOPEN].round(6).tolist() for h, t in strategy.items()}
+
+
+@dataclass
+class WarmStart:
+    """A profile to start a solve from (pokerlab class order), and how hard to trust it.
+
+    ``regret_scale`` and ``sum_scale`` multiply each node's per-hand regret and
+    strategy-sum mass after the first iteration; ``iterations`` is how much
+    history DCFR's discounting treats the prior as. See ``preflop-cli``.
+    """
+
+    profile: dict[str, np.ndarray]
+    regret_scale: float = 1.0
+    sum_scale: float = 1.0
+    iterations: int = 0
+
+    def request(self) -> dict[str, Any]:
+        return {"warm_start": to_gtopen_profile(self.profile), "warm_regret_scale": self.regret_scale,
+                "warm_sum_scale": self.sum_scale, "warm_iterations": self.iterations}
+
+
 def evaluate(game: PreflopGame, strategy: dict[str, np.ndarray], threads: int | None = None) -> dict[str, Any]:
     """Exact best-response gaps of a fixed strategy profile in ``game``.
 
@@ -213,7 +244,7 @@ def evaluate(game: PreflopGame, strategy: dict[str, np.ndarray], threads: int | 
         "iterations": 0,
         "multiway_equity_model": game.abstraction.multiway_equity_model,
         "chips_per_bb": game.big_blind,
-        "evaluate": {h: np.asarray(t, dtype=np.float64)[:, TO_GTOPEN].round(6).tolist() for h, t in strategy.items()},
+        "evaluate": to_gtopen_profile(strategy),
     }
     env = dict(os.environ)
     if threads:
@@ -247,12 +278,13 @@ def strategy_rows(out: dict[str, Any]) -> tuple[list, np.ndarray]:
 
 
 def generate(config, store, iterations: int | None = None, threads: int | None = None,
-             progress: bool = True) -> dict[str, Any]:
+             progress: bool = True, warm_start: WarmStart | None = None,
+             extra_metrics: dict[str, Any] | None = None) -> dict[str, Any]:
     """Solve a solver config with GTOpen and store the strategy; returns metrics."""
     s = config.solve
     iterations = iterations or s.iterations
     out = run(config.game, iterations, check_every=s.eval_every, threads=threads or s.workers or None,
-              progress=progress)
+              progress=progress, warm_start=warm_start)
     m = out["metrics"]
     final = m["checkpoints"][-1] if m["checkpoints"] else {}
     metrics = {
@@ -283,6 +315,8 @@ def generate(config, store, iterations: int | None = None, threads: int | None =
             "ev_bb": [round(e, 5) for e in c["evs_bb"]],
         } for c in m["checkpoints"]],
         "final_nash_conv_bb100": round(100 * final.get("nash_conv_bb", float("nan")), 3),
+        "warm_start": m.get("warm_start"),
+        **(extra_metrics or {}),
         **config.game.abstraction.versions,
     }
     rows, probs = strategy_rows(out)

@@ -23,6 +23,14 @@ fallback decides. Fallback decisions are never labeled as solver/GTO output.
 within the radius calibrated by measured exact exploitability
 (``strategies/approximation.json``); ``"off"`` never borrows; ``"always"``
 borrows from the nearest games regardless (for experiments only).
+
+``on_demand`` controls what happens to a game with no stored strategy
+(GTOpen abstractions only; see ``solver/ondemand.py``): ``"off"`` (default)
+nothing; ``"queue"`` records it in the store's pending queue for
+``pokerlab strategies solve-pending`` and plays this hand as above;
+``"solve"`` solves it right away, warm-started from the library, and plays
+the exact result (minutes per new stack vector: interactive use, not batch
+simulations). ``on_demand_iterations`` and ``on_demand_threads`` size that solve.
 """
 
 from __future__ import annotations
@@ -45,7 +53,9 @@ class SolverStrategy(Strategy):
 
     def __init__(self, seed: int | str = 0, config: str | None = None, store: str | None = None,
                  fallback: str = "equity", approximate: str = "validated",
-                 abstraction: dict[str, Any] | None = None, **params: Any) -> None:
+                 abstraction: dict[str, Any] | None = None, on_demand: str = "off",
+                 on_demand_iterations: int | None = None, on_demand_threads: int | None = None,
+                 **params: Any) -> None:
         super().__init__(seed, **params)
         if config is not None:
             self.abstraction = load_solver_config(config).game.abstraction
@@ -60,6 +70,11 @@ class SolverStrategy(Strategy):
         if approximate not in ("validated", "off", "always"):
             raise ValueError("approximate must be validated, off or always")
         self.approximate = approximate
+        if on_demand not in ("off", "queue", "solve"):
+            raise ValueError("on_demand must be off, queue or solve")
+        self.on_demand = on_demand
+        self.on_demand_iterations = on_demand_iterations
+        self.on_demand_threads = on_demand_threads
         self.decision_sources: Counter[str] = Counter()
         self._games: dict[tuple, tuple] = {}
 
@@ -118,6 +133,15 @@ class SolverStrategy(Strategy):
         except (ValueError, NotImplementedError):
             return None, None, "no_matching_strategy"
         match = self.store.lookup(game)
+        if match is None and self.on_demand != "off" and hasattr(self.abstraction, "versions"):
+            from pokerlab.solver import ondemand
+
+            if self.on_demand == "queue":
+                ondemand.PendingSolves(self.store).add(game)
+            else:
+                ondemand.solve_on_demand(self.store, game, threads=self.on_demand_threads,
+                                         iterations=self.on_demand_iterations or ondemand.DEFAULT_ITERATIONS)
+                match = self.store.lookup(game)
         if match is not None:
             return "exact", match.strategy, f"exact:{match.strategy.key[:12]}"
         if self.approximate == "off" or not hasattr(self.abstraction, "versions"):

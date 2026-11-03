@@ -153,6 +153,21 @@ def cmd_strategies(args: argparse.Namespace) -> int:
     from pokerlab.solver.store import DEFAULT_STORE, StrategyStore
 
     store = StrategyStore(args.store or DEFAULT_STORE)
+    if args.action == "solve-pending":
+        from pokerlab.solver.ondemand import PendingSolves, game_from_dict, solve_on_demand
+
+        queue = PendingSolves(store)
+        pending = sorted(queue.items(), key=lambda r: -r["count"])[: args.limit]
+        print(f"{len(pending)} pending games to solve", file=sys.stderr)
+        for row in pending:
+            print(f"Solving {row['stacks_bb']} (met {row['count']}x)", file=sys.stderr, flush=True)
+            m = solve_on_demand(store, game_from_dict(row["game"]), iterations=args.iterations or 200,
+                                threads=args.workers, progress=not args.quiet)
+            od = m.get("on_demand", {})
+            print(f"Stored {m['key'][:12]}: NashConv {m['final_nash_conv_bb100']} bb/100 in {m['solve_s']}s"
+                  + (f", warm-started from {od['nearest_key'][:12]}" if od.get("warm_started") else ", cold start"))
+        queue.compact()
+        return 0
     if args.action == "list":
         rows = store.list()
         print(f"{len(rows)} strategies in {store.root} ({store.database_bytes() / 1e6:.2f} MB)")
@@ -231,11 +246,12 @@ def main(argv: list[str] | None = None) -> int:
     presets.set_defaults(func=cmd_presets)
 
     strat = sub.add_parser("strategies", help="generate, inspect or list precomputed solver strategies")
-    strat.add_argument("action", choices=["generate", "inspect", "list"])
+    strat.add_argument("action", choices=["generate", "inspect", "list", "solve-pending"])
     strat.add_argument("--config", help="solver config (YAML with a `game:` section)")
     strat.add_argument("--store", help="strategy store directory (default strategies/)")
-    strat.add_argument("--iterations", type=int, help="override solve.iterations")
-    strat.add_argument("--workers", type=int, help="override solve.workers (1 = single process)")
+    strat.add_argument("--iterations", type=int, help="override solve.iterations (solve-pending: default 200)")
+    strat.add_argument("--workers", type=int, help="override solve.workers (1 = single process); solve-pending: threads")
+    strat.add_argument("--limit", type=int, default=10, help="solve-pending: most-met games first, at most this many")
     strat.add_argument("--history", help="inspect: per-hand-class strategy at this betting history ('' = root)")
     strat.add_argument("--json", action="store_true", help="inspect: print JSON")
     strat.add_argument("--out", help="generate: also write the metrics JSON here")

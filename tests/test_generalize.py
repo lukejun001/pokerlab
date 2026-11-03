@@ -131,3 +131,91 @@ def test_agent_borrows_only_as_configured(tmp_path, mode, expected):
     assert any(k.startswith(expected) for k in sources), sources
     assert not any(k.startswith("exact:") for k in sources)
     assert result.stats.table.invalid_actions == 0
+
+
+# --- on-demand solving with warm starts --------------------------------------------------------
+
+
+def _hu_config(stacks, iterations=30):
+    from pokerlab.solver.config import solver_config_from_dict
+
+    ab = {"name": "hu-test", "open_raises": [2.5], "sb_open_raises": [], "raise_mults": [3.0], "max_raises": 2}
+    return solver_config_from_dict({"game": {"active_players": 2, "chips_per_bb": 100, "starting_stacks_bb": stacks},
+                                    "rake": {"percentage": 0.05, "cap_bb": 3}, "strategy": {"preflop_solver": "gtopen"},
+                                    "abstraction": ab, "solve": {"iterations": iterations, "workers": 2}}), ab
+
+
+@needs_fork
+def test_warm_start_from_the_solution_stays_converged():
+    """Seeded with its own converged strategy, a solve starts near equilibrium;
+    seeded with nothing it starts from uniform play."""
+    cfg, _ = _hu_config({"SB": 40, "BB": 55})
+    game = cfg.game
+    solved = gtopen.run(game, 300, progress=False, threads=2)
+    exact = solved["metrics"]["checkpoints"][-1]["nash_conv_bb"]
+    order = [solved["class_labels"].index(label) for label in gtopen.CLASS_LABELS]
+    profile = {n["history"]: np.asarray(n["strategy"])[:, order] for n in solved["nodes"]}
+    warm = gtopen.run(game, 5, check_every=1, progress=False, threads=2,
+                      warm_start=gtopen.WarmStart(profile, regret_scale=5, sum_scale=5, iterations=100))
+    cold = gtopen.run(game, 5, check_every=1, progress=False, threads=2)
+    w = [c["nash_conv_bb"] for c in warm["metrics"]["checkpoints"]]
+    c = [c["nash_conv_bb"] for c in cold["metrics"]["checkpoints"]]
+    assert warm["metrics"]["warm_start"]["seeded_nodes"] == len(profile)
+    assert w[0] < c[0] / 5 and w[-1] < c[-1]
+    assert w[-1] < 5 * exact + 0.01
+
+
+def test_game_round_trips_through_the_queue_format():
+    from pokerlab.solver.ondemand import game_from_dict, game_to_dict
+    from pokerlab.solver.store import strategy_key
+
+    g = game([100, 150, 70, 115, 40, 200])
+    assert strategy_key(game_from_dict(game_to_dict(g))) == strategy_key(g)
+
+
+@needs_fork
+def test_on_demand_solve_warm_starts_from_the_library(tmp_path):
+    from pokerlab.solver.ondemand import PendingSolves, solve_on_demand
+    from pokerlab.solver.store import StrategyStore
+
+    store = StrategyStore(tmp_path)
+    cfg, _ = _hu_config({"SB": 30, "BB": 60})
+    gtopen.generate(cfg, store, progress=False)
+    target, _ = _hu_config({"SB": 40, "BB": 55})
+    queue = PendingSolves(store)
+    queue.add(target.game)
+    queue.add(target.game)
+    assert [r["count"] for r in queue.items()] == [2]
+    m = solve_on_demand(store, target.game, iterations=20, threads=2)
+    assert m["on_demand"]["warm_started"] and m["warm_start"]["seeded_nodes"] > 0
+    assert store.lookup(target.game) is not None and queue.items() == []
+    assert solve_on_demand(store, target.game)["cached"]
+
+
+@needs_fork
+@pytest.mark.parametrize("mode", ["queue", "solve"])
+def test_agent_on_demand_modes(tmp_path, mode):
+    from pokerlab.simulation.batch import run_batch
+    from pokerlab.simulation.configurations import SimulationConfig
+    from pokerlab.solver.ondemand import PendingSolves
+    from pokerlab.solver.store import StrategyStore
+
+    store = StrategyStore(tmp_path)
+    cfg, ab = _hu_config({"SB": 30, "BB": 60}, iterations=20)
+    gtopen.generate(cfg, store, progress=False)
+    params = {"strategy": "solver", "strategy_params": {
+        "abstraction": {**ab, "engine": "gtopen"}, "store": str(tmp_path), "approximate": "off",
+        "on_demand": mode, "on_demand_iterations": 20, "on_demand_threads": 2}}
+    sim = SimulationConfig(players=2, hands=20, chunk_size=20, workers=1, strict=True, small_blind=50, big_blind=100,
+                           stacks_by_position_bb={"SB": 40, "BB": 55},
+                           rake={"percentage": 0.05, "cap": 300, "no_flop_no_drop": True},
+                           lineup=[{"type": "Experimental", "id": "Hero", "params": params}, {"type": "TAG"}])
+    result = run_batch(sim, progress=False)
+    sources = result.stats.agents["Hero"].decision_sources
+    pending = PendingSolves(store).items()
+    if mode == "queue":
+        assert any(k.startswith("fallback:") for k in sources) and not any(k.startswith("exact:") for k in sources)
+        assert len(pending) >= 1
+    else:
+        assert any(k.startswith("exact:") for k in sources) and pending == []
+    assert result.stats.table.invalid_actions == 0
