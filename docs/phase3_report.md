@@ -109,7 +109,10 @@ distinct games, not one game relabelled.
   a miss, and the agent falls back to its heuristic.
 - **Off-tree histories.** An opponent's raise size that isn't in the tree is not mapped to the nearest
   size; the agent falls back.
-- **Database:** 5 strategies, 13.7 MB in total: three GTOpen strategies (3.8–3.9 MB each) and two from the cross-check solver.
+- **Database:** 18 strategies, 51 MB in total:
+  - three GTOpen strategies for the named configs (3.8–3.9 MB each);
+  - 13 GTOpen library strategies (next sections);
+  - two from the cross-check solver.
 
 ### Simulations (offline, PokerKit engine, 10,000 hands each, stacks dealt by position every hand)
 
@@ -164,8 +167,73 @@ before raking. With per-pot rounding down, the total rake can differ by at most 
 - **All postflop decisions.** The agent uses its heuristic fallback.
 - **Preflop histories outside the tree:** other raise sizes, limps, a fourth raise.
 - **Any game not solved exactly:** other stacks, other rake, a different player count.
-- Approximate matching (nearest solved stacks) exists in the store as `nearest()`, but it is off in the
-  agent, because nothing has validated it yet.
+- Unsolved stack vectors can be approximated from a library (next section), but no approximation has
+  met the 1 bb/100 bar yet, so in the default `validated` mode the agent still falls back for them.
+
+## Generalizing to any stack vector (pilot)
+
+**Method** (`pokerlab/solver/generalize.py`, version `effstack-knn-1`):
+- **Per-decision matching.** Each decision borrows from the library game whose effective stacks (the
+  actor against each opponent still in the hand, log scale) are closest at that decision.
+- **Translation.** Actions are mapped by role (fold, call, the n-th raise size, all-in), with a relaxed
+  second pass when a size doesn't exist.
+- **Exact scoring.** The fork's evaluate mode installs the borrowed profile in the target game and
+  reports its exact NashConv, in about 5 s per vector.
+- **Calibration.** The agent uses an approximation only inside a radius where measured NashConv stayed
+  under the threshold (1 bb/100).
+
+**Library:** 13 random vectors (log-uniform 20–250 bb per seat, seed 7, 200 iterations), plus the
+three earlier GTOpen games, 16 in all.
+- Every library solve converged below 1 bb/100 (0.10–0.90).
+- Solves took 5.5–17 minutes each on battery with Low Power Mode on.
+- The planned 16 random vectors were cut to 13 because the Mac kept sleeping.
+
+**Measured error of borrowed strategies** (exact NashConv in the target game, k = 1):
+
+| Test set | Vectors | Median | Best | Worst | Under 1 bb/100 |
+|---|---|---|---|---|---|
+| Held out (seed 11) | 20 | 19.3 | 5.7 | 38.0 | 0 |
+| Leave one out (library games) | 16 | 18.1 | 10.2 | 38.3 | 0 |
+
+**Result: the method does not yet produce validated approximations.**
+- **Radius 0.** No vector came within 1 bb/100, so calibration chose a radius of 0 and the agent
+  keeps falling back in `validated` mode (`strategies/approximation.json`).
+- **Reference points.** With only 2–3 library games the rotated game scored about 190 bb/100. A converged
+  solve scores 0.1–0.9.
+- **The matching statistic doesn't predict the error.** Across the held-out vectors, the error
+  correlates 0.58 with the whole-table distance but only 0.19 with the per-decision p90 distance used
+  for calibration. Leave-one-out gives 0.56 and −0.29.
+- **Low coverage.** The nearest library vector is typically 0.5–1.4 apart in log effective stack (a
+  factor of 1.6–4). Thirteen points cannot cover a six-dimensional space at the resolution this needs.
+
+**Error versus library size** (partial: the first 4–5 held-out vectors only, random sub-libraries, k = 1;
+stopped because the battery ran low; `reports/phase3/library/curve.log`):
+
+| Library games | 1 | 2 | 4 | 8 | 16 |
+|---|---|---|---|---|---|
+| Median NashConv, bb/100 | 404 | 258 | 58 | 28 | 25 |
+| Rows measured | 10 | 10 | 8 | 8 | 4 |
+
+- **The error falls steeply up to 8 games, then flattens:** 28 at 8 games, 25 at 16.
+- **Extrapolating is unreliable from this sample, but it isn't promising:**
+  - the 8→16 step suggests a floor well above 1 bb/100;
+  - even error ∝ 1/n would need about 400 games to reach 1 bb/100;
+  - error ∝ 1/√n would need thousands.
+- **Likely source of the floor: translation.** Borrowed trees have different all-in and raise
+  structures, so even a close stack match plays some lines that don't fit the target tree.
+
+**Before scaling this up in the cloud**, check three things:
+1. **Finish the curve** on all 10 held-out vectors, then add 16→64 games. This shows whether the
+   floor is real.
+2. **A better calibration statistic.** Whole-table distance or reach-weighted node distance, for
+   example.
+3. **Blending (k = 3)** against borrowing from the single nearest game.
+
+If the floor holds, the practical route to "any stack size" is to solve each new stack vector directly:
+- one solve takes about 6 minutes at 200 iterations on this Mac, and a cloud machine can do it on
+  demand;
+- warm-starting from the nearest library game should shorten that;
+- once solved, a vector is an exact cache hit.
 
 ## Phase 4 roadmap (prioritized)
 
