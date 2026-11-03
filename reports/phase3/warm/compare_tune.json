@@ -1,0 +1,50 @@
+{
+  "library_size": 16,
+  "runs": [
+    {
+      "stacks_bb": [
+        63,
+        82,
+        206,
+        65,
+        72,
+        88
+      ],
+      "variant": "cold",
+      "approximation": {
+        "distance": 0.462,
+        "node_distance_mean": 0.28,
+        "node_distance_p90": 0.462,
+        "node_distance_max": 1.3863,
+        "first_in_distance_max": 0.4308,
+        "untranslated_nodes": 48
+      },
+      "approximation_s": 5.3,
+      "warm_start": null,
+      "threads": 4,
+      "wall_s": 185.64,
+      "curve": [
+        {
+          "iteration": 10,
+          "solve_s": 25.7,
+          "nash_conv_bb100": 148.711
+        },
+        {
+          "iteration": 20,
+          "solve_s": 65.5,
+          "nash_conv_bb100": 57.78
+        },
+        {
+          "iteration": 30,
+          "solve_s": 110.2,
+          "nash_conv_bb100": 31.028
+        },
+        {
+          "iteration": 40,
+          "solve_s": 156.7,
+          "nash_conv_bb100": 18.145
+        }
+      ]
+    }
+  ]
+}
