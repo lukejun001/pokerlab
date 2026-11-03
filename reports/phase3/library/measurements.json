@@ -1,0 +1,1298 @@
+{
+  "library": [
+    [
+      "d861399d6747f5adae36fb6837975cfc4181eccccfcabd38eb105e95b461f93a",
+      [
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ]
+    ],
+    [
+      "f57301d4b8b78cd769cd8a4ca52b5c45500f6e19947d459f37b4ca7ad9bd5bdb",
+      [
+        100.0,
+        150.0,
+        70.0,
+        115.0,
+        40.0,
+        200.0
+      ]
+    ],
+    [
+      "e7012923d7a87a330037ce25ab3845bce2eb823cfe0c6a945510712ac513f2f6",
+      [
+        200.0,
+        100.0,
+        150.0,
+        70.0,
+        115.0,
+        40.0
+      ]
+    ],
+    [
+      "ac7907c2e727a054bb52794c519f19913280777bfd4ceff2feb30b889ea3d250",
+      [
+        45.0,
+        29.0,
+        104.0,
+        24.0,
+        77.0,
+        50.0
+      ]
+    ],
+    [
+      "88dfa9bb89c24e7e42ebbf771a9db8f3b984bc15a18845daddff516065d56fda",
+      [
+        23.0,
+        72.0,
+        22.0,
+        60.0,
+        24.0,
+        25.0
+      ]
+    ],
+    [
+      "a42e8ba5d5e009d9e9ec31dfc75c8a8fa4b6c8bd8ae59fa3e321adbbb17db792",
+      [
+        58.0,
+        161.0,
+        27.0,
+        35.0,
+        98.0,
+        219.0
+      ]
+    ],
+    [
+      "6d2a0bef679d8d79836a48eeeb462d91d6c8bf041ae55e7dd87b4c92387881e8",
+      [
+        86.0,
+        54.0,
+        235.0,
+        22.0,
+        175.0,
+        42.0
+      ]
+    ],
+    [
+      "af7dc75a6609cc40af2bc136b59feead3c30ede47e747b9efb69d5e7ead68d55",
+      [
+        29.0,
+        27.0,
+        44.0,
+        157.0,
+        32.0,
+        87.0
+      ]
+    ],
+    [
+      "9bd624b321a7eef320fdea621eb9c743381cc5e32f8b5f93156a9fdb369335c2",
+      [
+        100.0,
+        51.0,
+        80.0,
+        23.0,
+        23.0,
+        34.0
+      ]
+    ],
+    [
+      "937da493627eb8d8db61c076df7e3e845860557a29b7b0a2fc823de2781f5361",
+      [
+        112.0,
+        59.0,
+        44.0,
+        88.0,
+        63.0,
+        43.0
+      ]
+    ],
+    [
+      "3a102dc5d202c2f796fd195bf807a939b11bf4fb767d0a360bfc092f0f9d8d59",
+      [
+        149.0,
+        117.0,
+        37.0,
+        85.0,
+        75.0,
+        182.0
+      ]
+    ],
+    [
+      "38246d2b14adfee2aadd5b5e4cfa1cc51289a9eede04795d555e8644914dd0ae",
+      [
+        126.0,
+        41.0,
+        238.0,
+        27.0,
+        58.0,
+        135.0
+      ]
+    ],
+    [
+      "47fad90283444f2503375a666caf67dfb50c9a4320646597daf6402c53bc14b4",
+      [
+        29.0,
+        69.0,
+        22.0,
+        108.0,
+        138.0,
+        85.0
+      ]
+    ],
+    [
+      "2bf145717b6c1bad6e656b20c06d8ad56ac4e62fd0e39b6ab9c38ec10eb4d4dc",
+      [
+        183.0,
+        44.0,
+        116.0,
+        90.0,
+        87.0,
+        63.0
+      ]
+    ],
+    [
+      "73589e80fd188c480638a9a30d3c0feaa1231ea54e743961882d5b568f146373",
+      [
+        167.0,
+        217.0,
+        66.0,
+        107.0,
+        23.0,
+        118.0
+      ]
+    ],
+    [
+      "4bc8f2b7fcf953531fa9cb0a65bb3522eb20eae56e2ad611615f22dc2bf6a53b",
+      [
+        103.0,
+        246.0,
+        159.0,
+        41.0,
+        53.0,
+        108.0
+      ]
+    ]
+  ],
+  "rows": [
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        63,
+        82,
+        206,
+        65,
+        72,
+        88
+      ],
+      "k": 1,
+      "nash_conv_bb100": 12.817,
+      "max_gap_bb100": 3.995,
+      "br_gap_bb100": [
+        0.445,
+        0.529,
+        3.033,
+        2.629,
+        2.185,
+        3.995
+      ],
+      "uniform_nodes": 48,
+      "nodes": 10422,
+      "distance": 0.462,
+      "node_distance_mean": 0.28,
+      "node_distance_p90": 0.462,
+      "node_distance_max": 1.3863,
+      "first_in_distance_max": 0.4308,
+      "untranslated_nodes": 48,
+      "seconds": 6.3
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        32,
+        73,
+        98,
+        148,
+        25,
+        43
+      ],
+      "k": 1,
+      "nash_conv_bb100": 29.728,
+      "max_gap_bb100": 14.305,
+      "br_gap_bb100": [
+        14.305,
+        0.735,
+        2.854,
+        1.282,
+        8.341,
+        2.211
+      ],
+      "uniform_nodes": 12,
+      "nodes": 8611,
+      "distance": 0.9946,
+      "node_distance_mean": 0.2779,
+      "node_distance_p90": 0.6702,
+      "node_distance_max": 1.4633,
+      "first_in_distance_max": 0.5653,
+      "untranslated_nodes": 12,
+      "seconds": 3.7
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        25,
+        155,
+        115,
+        22,
+        239,
+        229
+      ],
+      "k": 1,
+      "nash_conv_bb100": 19.854,
+      "max_gap_bb100": 8.322,
+      "br_gap_bb100": [
+        1.654,
+        1.305,
+        1.345,
+        8.322,
+        3.94,
+        3.288
+      ],
+      "uniform_nodes": 207,
+      "nodes": 9402,
+      "distance": 1.4491,
+      "node_distance_mean": 0.5435,
+      "node_distance_p90": 1.2264,
+      "node_distance_max": 2.2557,
+      "first_in_distance_max": 1.0731,
+      "untranslated_nodes": 207,
+      "seconds": 4.3
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        104,
+        95,
+        30,
+        21,
+        76,
+        23
+      ],
+      "k": 1,
+      "nash_conv_bb100": 38.05,
+      "max_gap_bb100": 18.019,
+      "br_gap_bb100": [
+        0.607,
+        1.492,
+        6.691,
+        9.688,
+        1.553,
+        18.019
+      ],
+      "uniform_nodes": 0,
+      "nodes": 8505,
+      "distance": 1.1866,
+      "node_distance_mean": 0.2707,
+      "node_distance_p90": 0.6022,
+      "node_distance_max": 1.1952,
+      "first_in_distance_max": 0.9249,
+      "untranslated_nodes": 0,
+      "seconds": 4.4
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        32,
+        37,
+        22,
+        65,
+        61,
+        168
+      ],
+      "k": 1,
+      "nash_conv_bb100": 9.488,
+      "max_gap_bb100": 4.719,
+      "br_gap_bb100": [
+        0.365,
+        1.388,
+        0.281,
+        1.14,
+        1.596,
+        4.719
+      ],
+      "uniform_nodes": 0,
+      "nodes": 8089,
+      "distance": 0.6232,
+      "node_distance_mean": 0.2418,
+      "node_distance_p90": 0.5713,
+      "node_distance_max": 0.9555,
+      "first_in_distance_max": 0.3151,
+      "untranslated_nodes": 0,
+      "seconds": 3.7
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        74,
+        101,
+        71,
+        107,
+        63,
+        40
+      ],
+      "k": 1,
+      "nash_conv_bb100": 5.686,
+      "max_gap_bb100": 2.19,
+      "br_gap_bb100": [
+        0.258,
+        0.505,
+        1.214,
+        0.584,
+        0.933,
+        2.19
+      ],
+      "uniform_nodes": 0,
+      "nodes": 10096,
+      "distance": 0.5376,
+      "node_distance_mean": 0.199,
+      "node_distance_p90": 0.456,
+      "node_distance_max": 1.1716,
+      "first_in_distance_max": 0.4785,
+      "untranslated_nodes": 0,
+      "seconds": 4.5
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        249,
+        247,
+        167,
+        120,
+        44,
+        36
+      ],
+      "k": 1,
+      "nash_conv_bb100": 15.724,
+      "max_gap_bb100": 8.411,
+      "br_gap_bb100": [
+        1.039,
+        1.335,
+        1.639,
+        2.153,
+        1.147,
+        8.411
+      ],
+      "uniform_nodes": 0,
+      "nodes": 9545,
+      "distance": 0.9607,
+      "node_distance_mean": 0.3787,
+      "node_distance_p90": 0.9042,
+      "node_distance_max": 1.1872,
+      "first_in_distance_max": 0.9607,
+      "untranslated_nodes": 0,
+      "seconds": 4.4
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        42,
+        24,
+        139,
+        55,
+        170,
+        53
+      ],
+      "k": 1,
+      "nash_conv_bb100": 21.69,
+      "max_gap_bb100": 7.565,
+      "br_gap_bb100": [
+        0.456,
+        1.091,
+        3.0,
+        4.679,
+        7.565,
+        4.9
+      ],
+      "uniform_nodes": 18,
+      "nodes": 8850,
+      "distance": 0.8293,
+      "node_distance_mean": 0.2879,
+      "node_distance_p90": 0.5907,
+      "node_distance_max": 1.4687,
+      "first_in_distance_max": 0.3704,
+      "untranslated_nodes": 18,
+      "seconds": 3.8
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        225,
+        170,
+        20,
+        34,
+        199,
+        66
+      ],
+      "k": 1,
+      "nash_conv_bb100": 16.484,
+      "max_gap_bb100": 5.299,
+      "br_gap_bb100": [
+        0.273,
+        0.707,
+        4.551,
+        2.728,
+        2.927,
+        5.299
+      ],
+      "uniform_nodes": 0,
+      "nodes": 9199,
+      "distance": 0.9758,
+      "node_distance_mean": 0.4102,
+      "node_distance_p90": 0.9163,
+      "node_distance_max": 1.2329,
+      "first_in_distance_max": 0.9758,
+      "untranslated_nodes": 0,
+      "seconds": 4.3
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        238,
+        55,
+        24,
+        98,
+        143,
+        40
+      ],
+      "k": 1,
+      "nash_conv_bb100": 6.652,
+      "max_gap_bb100": 2.33,
+      "br_gap_bb100": [
+        0.214,
+        0.462,
+        1.612,
+        1.118,
+        0.916,
+        2.33
+      ],
+      "uniform_nodes": 0,
+      "nodes": 9247,
+      "distance": 0.8197,
+      "node_distance_mean": 0.2823,
+      "node_distance_p90": 0.6061,
+      "node_distance_max": 1.0296,
+      "first_in_distance_max": 0.8197,
+      "untranslated_nodes": 0,
+      "seconds": 4.1
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        25,
+        46,
+        228,
+        136,
+        27,
+        37
+      ],
+      "k": 1,
+      "nash_conv_bb100": 22.728,
+      "max_gap_bb100": 9.67,
+      "br_gap_bb100": [
+        0.545,
+        5.228,
+        1.839,
+        2.542,
+        9.67,
+        2.903
+      ],
+      "uniform_nodes": 52,
+      "nodes": 8708,
+      "distance": 1.1285,
+      "node_distance_mean": 0.3135,
+      "node_distance_p90": 0.7376,
+      "node_distance_max": 1.4159,
+      "first_in_distance_max": 0.6642,
+      "untranslated_nodes": 52,
+      "seconds": 3.9
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        26,
+        23,
+        150,
+        31,
+        82,
+        62
+      ],
+      "k": 1,
+      "nash_conv_bb100": 10.026,
+      "max_gap_bb100": 5.749,
+      "br_gap_bb100": [
+        0.456,
+        1.295,
+        0.518,
+        0.647,
+        1.361,
+        5.749
+      ],
+      "uniform_nodes": 10,
+      "nodes": 8078,
+      "distance": 0.5486,
+      "node_distance_mean": 0.2239,
+      "node_distance_p90": 0.5486,
+      "node_distance_max": 1.3157,
+      "first_in_distance_max": 0.2559,
+      "untranslated_nodes": 10,
+      "seconds": 4.1
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        32,
+        127,
+        28,
+        102,
+        27,
+        58
+      ],
+      "k": 1,
+      "nash_conv_bb100": 24.953,
+      "max_gap_bb100": 9.898,
+      "br_gap_bb100": [
+        0.486,
+        1.043,
+        3.311,
+        1.617,
+        9.898,
+        8.597
+      ],
+      "uniform_nodes": 0,
+      "nodes": 8269,
+      "distance": 0.8416,
+      "node_distance_mean": 0.2492,
+      "node_distance_p90": 0.5306,
+      "node_distance_max": 1.1394,
+      "first_in_distance_max": 0.7817,
+      "untranslated_nodes": 0,
+      "seconds": 3.8
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        34,
+        40,
+        232,
+        152,
+        43,
+        187
+      ],
+      "k": 1,
+      "nash_conv_bb100": 18.81,
+      "max_gap_bb100": 7.123,
+      "br_gap_bb100": [
+        0.417,
+        0.516,
+        5.362,
+        2.816,
+        2.576,
+        7.123
+      ],
+      "uniform_nodes": 69,
+      "nodes": 8251,
+      "distance": 1.0788,
+      "node_distance_mean": 0.4009,
+      "node_distance_p90": 0.9826,
+      "node_distance_max": 2.1401,
+      "first_in_distance_max": 0.844,
+      "untranslated_nodes": 69,
+      "seconds": 4.2
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        34,
+        54,
+        173,
+        101,
+        26,
+        243
+      ],
+      "k": 1,
+      "nash_conv_bb100": 27.549,
+      "max_gap_bb100": 18.65,
+      "br_gap_bb100": [
+        0.428,
+        2.59,
+        1.743,
+        1.012,
+        18.65,
+        3.127
+      ],
+      "uniform_nodes": 39,
+      "nodes": 9288,
+      "distance": 1.0788,
+      "node_distance_mean": 0.3863,
+      "node_distance_p90": 0.9048,
+      "node_distance_max": 2.0622,
+      "first_in_distance_max": 0.9015,
+      "untranslated_nodes": 39,
+      "seconds": 4.1
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        34,
+        38,
+        141,
+        46,
+        42,
+        24
+      ],
+      "k": 1,
+      "nash_conv_bb100": 27.621,
+      "max_gap_bb100": 16.808,
+      "br_gap_bb100": [
+        0.36,
+        0.585,
+        5.292,
+        2.45,
+        2.125,
+        16.808
+      ],
+      "uniform_nodes": 20,
+      "nodes": 7866,
+      "distance": 0.734,
+      "node_distance_mean": 0.2443,
+      "node_distance_p90": 0.5108,
+      "node_distance_max": 1.5041,
+      "first_in_distance_max": 0.4329,
+      "untranslated_nodes": 20,
+      "seconds": 3.3
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        25,
+        87,
+        37,
+        91,
+        51,
+        63
+      ],
+      "k": 1,
+      "nash_conv_bb100": 9.257,
+      "max_gap_bb100": 3.122,
+      "br_gap_bb100": [
+        0.319,
+        0.495,
+        1.162,
+        1.872,
+        2.287,
+        3.122
+      ],
+      "uniform_nodes": 88,
+      "nodes": 8954,
+      "distance": 0.7503,
+      "node_distance_mean": 0.2616,
+      "node_distance_p90": 0.47,
+      "node_distance_max": 1.458,
+      "first_in_distance_max": 0.3884,
+      "untranslated_nodes": 88,
+      "seconds": 3.8
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        225,
+        68,
+        85,
+        178,
+        32,
+        30
+      ],
+      "k": 1,
+      "nash_conv_bb100": 22.069,
+      "max_gap_bb100": 14.539,
+      "br_gap_bb100": [
+        0.506,
+        0.599,
+        1.848,
+        2.443,
+        2.133,
+        14.539
+      ],
+      "uniform_nodes": 0,
+      "nodes": 9520,
+      "distance": 0.7044,
+      "node_distance_mean": 0.3106,
+      "node_distance_p90": 0.6774,
+      "node_distance_max": 1.204,
+      "first_in_distance_max": 0.7044,
+      "untranslated_nodes": 0,
+      "seconds": 4.2
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        198,
+        158,
+        38,
+        32,
+        129,
+        215
+      ],
+      "k": 1,
+      "nash_conv_bb100": 14.475,
+      "max_gap_bb100": 8.714,
+      "br_gap_bb100": [
+        0.368,
+        0.474,
+        1.036,
+        8.714,
+        1.879,
+        2.005
+      ],
+      "uniform_nodes": 1,
+      "nodes": 9030,
+      "distance": 0.9769,
+      "node_distance_mean": 0.3552,
+      "node_distance_p90": 0.7994,
+      "node_distance_max": 1.3249,
+      "first_in_distance_max": 0.9769,
+      "untranslated_nodes": 1,
+      "seconds": 4.2
+    },
+    {
+      "set": "holdout",
+      "stacks_bb": [
+        33,
+        220,
+        186,
+        92,
+        58,
+        26
+      ],
+      "k": 1,
+      "nash_conv_bb100": 27.517,
+      "max_gap_bb100": 20.645,
+      "br_gap_bb100": [
+        0.578,
+        1.275,
+        1.686,
+        1.372,
+        1.961,
+        20.645
+      ],
+      "uniform_nodes": 36,
+      "nodes": 9520,
+      "distance": 1.3471,
+      "node_distance_mean": 0.3767,
+      "node_distance_p90": 0.7376,
+      "node_distance_max": 1.9299,
+      "first_in_distance_max": 0.6845,
+      "untranslated_nodes": 36,
+      "seconds": 4.2
+    },
+    {
+      "set": "leave_one_out",
+      "stacks_bb": [
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ],
+      "k": 1,
+      "nash_conv_bb100": 16.546,
+      "max_gap_bb100": 11.419,
+      "br_gap_bb100": [
+        0.214,
+        1.263,
+        0.498,
+        1.312,
+        1.839,
+        11.419
+      ],
+      "uniform_nodes": 0,
+      "nodes": 9723,
+      "distance": 0.821,
+      "node_distance_mean": 0.3022,
+      "node_distance_p90": 0.6349,
+      "node_distance_max": 0.821,
+      "first_in_distance_max": 0.821,
+      "untranslated_nodes": 0,
+      "seconds": 3.7
+    },
+    {
+      "set": "leave_one_out",
+      "stacks_bb": [
+        100.0,
+        150.0,
+        70.0,
+        115.0,
+        40.0,
+        200.0
+      ],
+      "k": 1,
+      "nash_conv_bb100": 15.83,
+      "max_gap_bb100": 4.886,
+      "br_gap_bb100": [
+        3.034,
+        1.561,
+        4.886,
+        0.763,
+        1.166,
+        4.419
+      ],
+      "uniform_nodes": 0,
+      "nodes": 9764,
+      "distance": 0.5534,
+      "node_distance_mean": 0.3082,
+      "node_distance_p90": 0.5534,
+      "node_distance_max": 1.2379,
+      "first_in_distance_max": 0.5534,
+      "untranslated_nodes": 0,
+      "seconds": 4.3
+    },
+    {
+      "set": "leave_one_out",
+      "stacks_bb": [
+        200.0,
+        100.0,
+        150.0,
+        70.0,
+        115.0,
+        40.0
+      ],
+      "k": 1,
+      "nash_conv_bb100": 21.798,
+      "max_gap_bb100": 11.851,
+      "br_gap_bb100": [
+        1.624,
+        2.971,
+        0.538,
+        3.524,
+        1.29,
+        11.851
+      ],
+      "uniform_nodes": 0,
+      "nodes": 10085,
+      "distance": 0.821,
+      "node_distance_mean": 0.3188,
+      "node_distance_p90": 0.6162,
+      "node_distance_max": 1.2264,
+      "first_in_distance_max": 0.821,
+      "untranslated_nodes": 0,
+      "seconds": 4.5
+    },
+    {
+      "set": "leave_one_out",
+      "stacks_bb": [
+        45.0,
+        29.0,
+        104.0,
+        24.0,
+        77.0,
+        50.0
+      ],
+      "k": 1,
+      "nash_conv_bb100": 16.384,
+      "max_gap_bb100": 8.835,
+      "br_gap_bb100": [
+        0.441,
+        0.992,
+        2.502,
+        1.671,
+        8.835,
+        1.942
+      ],
+      "uniform_nodes": 0,
+      "nodes": 8065,
+      "distance": 0.821,
+      "node_distance_mean": 0.2308,
+      "node_distance_p90": 0.4394,
+      "node_distance_max": 0.9651,
+      "first_in_distance_max": 0.6061,
+      "untranslated_nodes": 0,
+      "seconds": 3.5
+    },
+    {
+      "set": "leave_one_out",
+      "stacks_bb": [
+        23.0,
+        72.0,
+        22.0,
+        60.0,
+        24.0,
+        25.0
+      ],
+      "k": 1,
+      "nash_conv_bb100": 38.342,
+      "max_gap_bb100": 12.879,
+      "br_gap_bb100": [
+        6.417,
+        3.758,
+        4.192,
+        5.691,
+        5.405,
+        12.879
+      ],
+      "uniform_nodes": 0,
+      "nodes": 7651,
+      "distance": 1.247,
+      "node_distance_mean": 0.2382,
+      "node_distance_p90": 0.5785,
+      "node_distance_max": 1.8625,
+      "first_in_distance_max": 0.6931,
+      "untranslated_nodes": 0,
+      "seconds": 3.2
+    },
+    {
+      "set": "leave_one_out",
+      "stacks_bb": [
+        58.0,
+        161.0,
+        27.0,
+        35.0,
+        98.0,
+        219.0
+      ],
+      "k": 1,
+      "nash_conv_bb100": 10.749,
+      "max_gap_bb100": 3.781,
+      "br_gap_bb100": [
+        0.551,
+        0.876,
+        1.512,
+        1.178,
+        2.85,
+        3.781
+      ],
+      "uniform_nodes": 4,
+      "nodes": 8995,
+      "distance": 0.9435,
+      "node_distance_mean": 0.368,
+      "node_distance_p90": 0.6931,
+      "node_distance_max": 1.8625,
+      "first_in_distance_max": 0.8473,
+      "untranslated_nodes": 4,
+      "seconds": 3.8
+    },
+    {
+      "set": "leave_one_out",
+      "stacks_bb": [
+        86.0,
+        54.0,
+        235.0,
+        22.0,
+        175.0,
+        42.0
+      ],
+      "k": 1,
+      "nash_conv_bb100": 10.152,
+      "max_gap_bb100": 5.668,
+      "br_gap_bb100": [
+        0.288,
+        0.358,
+        2.375,
+        5.668,
+        0.955,
+        0.508
+      ],
+      "uniform_nodes": 0,
+      "nodes": 9414,
+      "distance": 0.821,
+      "node_distance_mean": 0.2569,
+      "node_distance_p90": 0.821,
+      "node_distance_max": 1.1575,
+      "first_in_distance_max": 0.821,
+      "untranslated_nodes": 0,
+      "seconds": 4.2
+    },
+    {
+      "set": "leave_one_out",
+      "stacks_bb": [
+        29.0,
+        27.0,
+        44.0,
+        157.0,
+        32.0,
+        87.0
+      ],
+      "k": 1,
+      "nash_conv_bb100": 31.369,
+      "max_gap_bb100": 14.436,
+      "br_gap_bb100": [
+        0.913,
+        1.985,
+        1.265,
+        1.429,
+        14.436,
+        11.341
+      ],
+      "uniform_nodes": 16,
+      "nodes": 7331,
+      "distance": 1.11,
+      "node_distance_mean": 0.2868,
+      "node_distance_p90": 0.7047,
+      "node_distance_max": 1.3863,
+      "first_in_distance_max": 0.279,
+      "untranslated_nodes": 16,
+      "seconds": 3.0
+    },
+    {
+      "set": "leave_one_out",
+      "stacks_bb": [
+        100.0,
+        51.0,
+        80.0,
+        23.0,
+        23.0,
+        34.0
+      ],
+      "k": 1,
+      "nash_conv_bb100": 22.457,
+      "max_gap_bb100": 9.698,
+      "br_gap_bb100": [
+        1.165,
+        0.86,
+        9.698,
+        5.31,
+        1.652,
+        3.77
+      ],
+      "uniform_nodes": 0,
+      "nodes": 8494,
+      "distance": 1.1558,
+      "node_distance_mean": 0.2175,
+      "node_distance_p90": 0.5645,
+      "node_distance_max": 1.3189,
+      "first_in_distance_max": 0.6712,
+      "untranslated_nodes": 0,
+      "seconds": 3.4
+    },
+    {
+      "set": "leave_one_out",
+      "stacks_bb": [
+        112.0,
+        59.0,
+        44.0,
+        88.0,
+        63.0,
+        43.0
+      ],
+      "k": 1,
+      "nash_conv_bb100": 23.773,
+      "max_gap_bb100": 7.473,
+      "br_gap_bb100": [
+        2.593,
+        7.473,
+        1.771,
+        3.294,
+        3.203,
+        5.439
+      ],
+      "uniform_nodes": 0,
+      "nodes": 9262,
+      "distance": 0.844,
+      "node_distance_mean": 0.2142,
+      "node_distance_p90": 0.4643,
+      "node_distance_max": 1.2264,
+      "first_in_distance_max": 0.844,
+      "untranslated_nodes": 0,
+      "seconds": 4.0
+    },
+    {
+      "set": "leave_one_out",
+      "stacks_bb": [
+        149.0,
+        117.0,
+        37.0,
+        85.0,
+        75.0,
+        182.0
+      ],
+      "k": 1,
+      "nash_conv_bb100": 16.999,
+      "max_gap_bb100": 5.553,
+      "br_gap_bb100": [
+        0.703,
+        5.553,
+        2.212,
+        1.139,
+        4.052,
+        3.34
+      ],
+      "uniform_nodes": 1,
+      "nodes": 9662,
+      "distance": 0.6376,
+      "node_distance_mean": 0.3167,
+      "node_distance_p90": 0.6286,
+      "node_distance_max": 1.2238,
+      "first_in_distance_max": 0.6376,
+      "untranslated_nodes": 1,
+      "seconds": 4.5
+    },
+    {
+      "set": "leave_one_out",
+      "stacks_bb": [
+        126.0,
+        41.0,
+        238.0,
+        27.0,
+        58.0,
+        135.0
+      ],
+      "k": 1,
+      "nash_conv_bb100": 12.522,
+      "max_gap_bb100": 4.844,
+      "br_gap_bb100": [
+        0.536,
+        1.767,
+        1.333,
+        4.844,
+        1.484,
+        2.559
+      ],
+      "uniform_nodes": 0,
+      "nodes": 9000,
+      "distance": 1.0296,
+      "node_distance_mean": 0.3067,
+      "node_distance_p90": 0.7621,
+      "node_distance_max": 1.1211,
+      "first_in_distance_max": 0.9212,
+      "untranslated_nodes": 0,
+      "seconds": 3.9
+    },
+    {
+      "set": "leave_one_out",
+      "stacks_bb": [
+        29.0,
+        69.0,
+        22.0,
+        108.0,
+        138.0,
+        85.0
+      ],
+      "k": 1,
+      "nash_conv_bb100": 20.782,
+      "max_gap_bb100": 13.171,
+      "br_gap_bb100": [
+        0.352,
+        2.304,
+        2.781,
+        1.118,
+        1.055,
+        13.171
+      ],
+      "uniform_nodes": 12,
+      "nodes": 8829,
+      "distance": 1.11,
+      "node_distance_mean": 0.347,
+      "node_distance_p90": 0.7758,
+      "node_distance_max": 1.5041,
+      "first_in_distance_max": 0.5281,
+      "untranslated_nodes": 12,
+      "seconds": 3.6
+    },
+    {
+      "set": "leave_one_out",
+      "stacks_bb": [
+        183.0,
+        44.0,
+        116.0,
+        90.0,
+        87.0,
+        63.0
+      ],
+      "k": 1,
+      "nash_conv_bb100": 26.4,
+      "max_gap_bb100": 16.082,
+      "br_gap_bb100": [
+        0.537,
+        0.231,
+        2.323,
+        5.678,
+        1.549,
+        16.082
+      ],
+      "uniform_nodes": 2,
+      "nodes": 9668,
+      "distance": 0.821,
+      "node_distance_mean": 0.3248,
+      "node_distance_p90": 0.4643,
+      "node_distance_max": 1.3863,
+      "first_in_distance_max": 0.821,
+      "untranslated_nodes": 2,
+      "seconds": 4.1
+    },
+    {
+      "set": "leave_one_out",
+      "stacks_bb": [
+        167.0,
+        217.0,
+        66.0,
+        107.0,
+        23.0,
+        118.0
+      ],
+      "k": 1,
+      "nash_conv_bb100": 13.039,
+      "max_gap_bb100": 9.39,
+      "br_gap_bb100": [
+        0.362,
+        0.198,
+        1.071,
+        0.705,
+        9.39,
+        1.313
+      ],
+      "uniform_nodes": 0,
+      "nodes": 10010,
+      "distance": 0.5534,
+      "node_distance_mean": 0.3008,
+      "node_distance_p90": 0.5534,
+      "node_distance_max": 1.0405,
+      "first_in_distance_max": 0.5534,
+      "untranslated_nodes": 0,
+      "seconds": 4.4
+    },
+    {
+      "set": "leave_one_out",
+      "stacks_bb": [
+        103.0,
+        246.0,
+        159.0,
+        41.0,
+        53.0,
+        108.0
+      ],
+      "k": 1,
+      "nash_conv_bb100": 19.15,
+      "max_gap_bb100": 8.935,
+      "br_gap_bb100": [
+        0.405,
+        2.943,
+        1.14,
+        2.358,
+        3.37,
+        8.935
+      ],
+      "uniform_nodes": 10,
+      "nodes": 9778,
+      "distance": 0.8916,
+      "node_distance_mean": 0.3563,
+      "node_distance_p90": 0.7746,
+      "node_distance_max": 1.7016,
+      "first_in_distance_max": 0.8916,
+      "untranslated_nodes": 10,
+      "seconds": 4.4
+    }
+  ]
+}

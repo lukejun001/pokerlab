@@ -1,0 +1,12 @@
+{
+  "family": "3aa68841b79f9f0e597f8b9badf90de1eeedbf52061b3d279ca721d48a9dd7d2",
+  "version": "effstack-knn-1",
+  "k": 1,
+  "stat": "node_distance_p90",
+  "threshold_bb100": 1.0,
+  "radius": 0.0,
+  "coverage": 0.0,
+  "measurements": 20,
+  "within_radius_max_bb100": null,
+  "note": "90% of measured games within the radius meet the threshold"
+}

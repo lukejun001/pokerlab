@@ -2,6 +2,7 @@
 
     python tools/stack_library.py build --count 16 --iterations 200      # solve random stack vectors
     python tools/stack_library.py measure --tests 30                      # score approximations exactly
+    python tools/stack_library.py curve --tests 10                        # error versus library size
     python tools/stack_library.py calibrate --threshold 1.0               # write strategies/approximation.json
 
 Stacks are drawn log-uniformly per seat from [20, 250] bb (integers), with a
@@ -90,6 +91,34 @@ def cmd_measure(args) -> None:
     write_json(OUT / "measurements.json", {"library": library.entries, "rows": rows})
 
 
+def cmd_curve(args) -> None:
+    """Error versus library size: random sub-libraries scored on the same
+    held-out vectors, plus the all-uniform profile as a floor-of-skill baseline."""
+    store = StrategyStore()
+    _, template = game_for([100] * 6)
+    library = Library(store, template)
+    everything = list(library.entries)
+    rng = random.Random(args.seed)
+    tests = [random_stacks(rng) for _ in range(args.tests)]
+    plan = [(n, draw) for n in args.sizes if n < len(everything) for draw in range(args.draws)]
+    plan.append((len(everything), 0))
+    rows = []
+    for stacks in tests:
+        _, target = game_for(stacks)
+        tree = gtopen.tree(target)
+        ev = gtopen.evaluate(target, {}, threads=args.threads)
+        rows.append({"stacks_bb": stacks, "library_size": 0, "draw": 0, "nash_conv_bb100": round(100 * ev["nash_conv_bb"], 3)})
+        for n, draw in plan:
+            library.entries = random.Random(1000 * n + draw).sample(everything, n)
+            profile, info = approximate_profile(library, target, tree, k=1)
+            ev = gtopen.evaluate(target, profile, threads=args.threads)
+            rows.append({"stacks_bb": stacks, "library_size": n, "draw": draw,
+                         "nash_conv_bb100": round(100 * ev["nash_conv_bb"], 3), **info})
+            print(json.dumps({k: rows[-1][k] for k in ("stacks_bb", "library_size", "draw", "nash_conv_bb100")}), flush=True)
+    library.entries = everything
+    write_json(OUT / "curve.json", {"library": everything, "rows": rows})
+
+
 def cmd_calibrate(args) -> None:
     data = json.loads((OUT / "measurements.json").read_text())
     rows = [r for r in data["rows"] if r["set"] == "holdout"]
@@ -118,6 +147,13 @@ def main() -> None:
     m.add_argument("--seed", type=int, default=11)
     m.add_argument("--leave-one-out", action="store_true")
     m.set_defaults(func=cmd_measure)
+    v = sub.add_parser("curve")
+    v.add_argument("--tests", type=int, default=10)
+    v.add_argument("--sizes", type=int, nargs="+", default=[1, 2, 4, 8])
+    v.add_argument("--draws", type=int, default=2)
+    v.add_argument("--threads", type=int, default=10)
+    v.add_argument("--seed", type=int, default=11)
+    v.set_defaults(func=cmd_curve)
     c = sub.add_parser("calibrate")
     c.add_argument("--threshold", type=float, default=1.0)
     c.add_argument("--k", type=int, default=1)

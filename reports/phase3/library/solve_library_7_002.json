@@ -1,0 +1,88 @@
+{
+  "config": "library_7_002",
+  "engine": "gtopen",
+  "players": 6,
+  "positions": [
+    "UTG",
+    "HJ",
+    "CO",
+    "BTN",
+    "SB",
+    "BB"
+  ],
+  "stacks_bb": [
+    58.0,
+    161.0,
+    27.0,
+    35.0,
+    98.0,
+    219.0
+  ],
+  "abstraction": {
+    "name": "gtopen-6max-v1",
+    "open_raises": [
+      2.5
+    ],
+    "sb_open_raises": [
+      3.0
+    ],
+    "raise_mults": [
+      3.0
+    ],
+    "fourbet_mults": null,
+    "max_raises": 3,
+    "add_allin": true,
+    "allin_threshold": 0.5,
+    "limp": false,
+    "realization": "balanced",
+    "multiway_equity_model": "coupled_deck_v1",
+    "engine": "gtopen"
+  },
+  "tree": {
+    "nodes": 19178,
+    "decision_nodes": 8995,
+    "infosets": 1520155
+  },
+  "arena_mb": 25.927304,
+  "iterations": 200,
+  "threads": 10,
+  "solve_s": 409.64,
+  "eval_s": 3.35,
+  "wall_s": 413.17,
+  "cpu_s": 3187.46,
+  "cpu_utilization": 0.771,
+  "cores": 10,
+  "peak_memory_mb": 344.6,
+  "gpu": "not used (CPU build)",
+  "fork_commit": "6989407",
+  "realization_note": "",
+  "convergence": [
+    {
+      "iteration": 200,
+      "solve_s": 409.64,
+      "br_gap_bb100": [
+        0.067,
+        0.12,
+        0.026,
+        0.043,
+        0.197,
+        0.284
+      ],
+      "nash_conv_bb100": 0.736,
+      "ev_bb": [
+        0.11242,
+        0.12603,
+        0.14323,
+        0.18344,
+        -0.22491,
+        -0.3702
+      ]
+    }
+  ],
+  "final_nash_conv_bb100": 0.736,
+  "solver_version": "gtopen-6c70502+asym-3",
+  "continuation_version": "gtopen-balanced+coupled_deck_v1+raw-side-pots",
+  "tree_version": "gtopen-preflop+asym-3",
+  "key": "a42e8ba5d5e009d9e9ec31dfc75c8a8fa4b6c8bd8ae59fa3e321adbbb17db792",
+  "strategy_bytes": 3332895
+}
