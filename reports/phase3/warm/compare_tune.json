@@ -45,6 +45,57 @@
           "nash_conv_bb100": 18.145
         }
       ]
+    },
+    {
+      "stacks_bb": [
+        63,
+        82,
+        206,
+        65,
+        72,
+        88
+      ],
+      "variant": "r1s1t0",
+      "approximation": {
+        "distance": 0.462,
+        "node_distance_mean": 0.28,
+        "node_distance_p90": 0.462,
+        "node_distance_max": 1.3863,
+        "first_in_distance_max": 0.4308,
+        "untranslated_nodes": 48
+      },
+      "approximation_s": 5.3,
+      "warm_start": {
+        "cold_nodes": 48,
+        "regret_scale": 1.0,
+        "seeded_nodes": 10374,
+        "sum_scale": 1.0,
+        "warm_iterations": 0
+      },
+      "threads": 4,
+      "wall_s": 180.56,
+      "curve": [
+        {
+          "iteration": 10,
+          "solve_s": 26.6,
+          "nash_conv_bb100": 117.304
+        },
+        {
+          "iteration": 20,
+          "solve_s": 63.0,
+          "nash_conv_bb100": 55.809
+        },
+        {
+          "iteration": 30,
+          "solve_s": 107.3,
+          "nash_conv_bb100": 34.216
+        },
+        {
+          "iteration": 40,
+          "solve_s": 151.6,
+          "nash_conv_bb100": 25.504
+        }
+      ]
     }
   ]
 }
