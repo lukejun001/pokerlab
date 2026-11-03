@@ -179,6 +179,61 @@ def run(game: PreflopGame, iterations: int, check_every: int = 0, threads: int |
     return out
 
 
+_RANKS = "23456789TJQKA"
+
+
+def gtopen_class_labels() -> list[str]:
+    """GTOpen's class order: index ``r*13 + c`` is a pair (r == c), suited (r > c) or offsuit (r < c)."""
+    labels = []
+    for idx in range(169):
+        r, c = divmod(idx, 13)
+        if r == c:
+            labels.append(_RANKS[r] * 2)
+        elif r > c:
+            labels.append(_RANKS[r] + _RANKS[c] + "s")
+        else:
+            labels.append(_RANKS[c] + _RANKS[r] + "o")
+    return labels
+
+
+TO_GTOPEN = [CLASS_LABELS.index(label) for label in gtopen_class_labels()]
+
+
+def evaluate(game: PreflopGame, strategy: dict[str, np.ndarray], threads: int | None = None) -> dict[str, Any]:
+    """Exact best-response gaps of a fixed strategy profile in ``game``.
+
+    ``strategy`` maps betting histories of ``game``'s tree to (actions x 169)
+    probability tables in pokerlab class order. Nodes not listed play
+    uniformly (reported as ``uniform_nodes``).
+    """
+    if not BINARY.exists():
+        raise FileNotFoundError(f"{BINARY} not found")
+    request = {
+        "config": preflop_config(game),
+        "iterations": 0,
+        "multiway_equity_model": game.abstraction.multiway_equity_model,
+        "chips_per_bb": game.big_blind,
+        "evaluate": {h: np.asarray(t, dtype=np.float64)[:, TO_GTOPEN].round(6).tolist() for h, t in strategy.items()},
+    }
+    env = dict(os.environ)
+    if threads:
+        env["RAYON_NUM_THREADS"] = str(threads)
+    with tempfile.TemporaryDirectory() as tmp:
+        src, dst = Path(tmp) / "in.json", Path(tmp) / "out.json"
+        src.write_text(json.dumps(request))
+        proc = subprocess.run([str(BINARY), str(src), str(dst)], cwd=GTOPEN_DIR, env=env,
+                              capture_output=True, text=True)
+        if proc.returncode != 0:
+            raise RuntimeError(f"preflop-cli evaluate failed:\n{proc.stderr[-2000:]}")
+        return json.loads(dst.read_text())["evaluation"]
+
+
+def tree(game: PreflopGame) -> dict[str, list[str]]:
+    """GTOpen's abstract tree for ``game``: history -> action tokens (no solving)."""
+    out = run(game, iterations=0, progress=False, threads=2)
+    return {node["history"]: node["actions"] for node in out["nodes"]}
+
+
 def strategy_rows(out: dict[str, Any]) -> tuple[list, np.ndarray]:
     """GTOpen export -> store rows ``[history, offset, actions, actor]`` and probabilities (pokerlab class order)."""
     order = [out["class_labels"].index(label) for label in CLASS_LABELS]
