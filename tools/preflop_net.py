@@ -137,7 +137,21 @@ def train(files: list[Path], epochs: int, args, log=print):
     steps = epochs * ((len(X) + args.batch - 1) // args.batch)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=args.lr, total_steps=steps)
 
-    def loss_of(x, m, t, w, a=None):
+    def loss_of(x, m, t, w, a=None, sample: int = 0):
+        """Reach-weighted cross-entropy. With ``sample`` > 0, each row's hands are drawn in
+        proportion to their weights (an unbiased estimate of the same loss at sample/169 the cost)."""
+        if sample:
+            wsum = w.sum(-1)
+            keep = wsum > 0
+            x, m, t, w, wsum = x[keep], m[keep], t[keep], w[keep], wsum[keep]
+            a = None if a is None else a[keep]
+            hands = torch.multinomial(w, sample, replacement=True)  # (B, K)
+            rows = torch.arange(len(x))[:, None]
+            logp = torch.log_softmax(model.forward_hands(x, m, hands, None if a is None else a[rows, hands].float()),
+                                     dim=-1)
+            target = t[rows, hands].float() / 255.0
+            ce = -(target * logp.clamp_min(-30)).sum(-1).mean(-1)  # (B,)
+            return (ce * wsum).sum() / wsum.sum()
         logp = torch.log_softmax(model(x, m, None if a is None else a.float()), dim=-1)
         target = t.float() / 255.0
         ce = -(target * logp.clamp_min(-30)).sum(-1)  # (B, 169)
@@ -150,7 +164,7 @@ def train(files: list[Path], epochs: int, args, log=print):
         total = 0.0
         for s in range(0, len(X), args.batch):
             idx = perm[s:s + args.batch]
-            loss = loss_of(X[idx], M[idx], T[idx], W[idx], None if A is None else A[idx])
+            loss = loss_of(X[idx], M[idx], T[idx], W[idx], None if A is None else A[idx], sample=args.hand_samples)
             opt.zero_grad()
             loss.backward()
             opt.step()
@@ -282,6 +296,8 @@ def main() -> None:
         q.add_argument("--tests", type=int, default=10)
         q.add_argument("--torch-threads", type=int, default=2)
         q.add_argument("--arch", default="bilinear", choices=["bilinear", "mlp"])
+        q.add_argument("--hand-samples", type=int, default=0,
+                       help="hands drawn per node by loss weight in training (0 = all 169)")
         q.add_argument("--residual", action="store_true",
                        help="learn a correction to the nearest library game's strategy (anchor input)")
 

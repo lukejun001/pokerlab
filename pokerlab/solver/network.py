@@ -164,6 +164,22 @@ def build_model(hidden: int = 256, dim: int = 64, layers: int = 3, residual: boo
             self.residual = residual
             self.config = {"hidden": hidden, "dim": dim, "layers": layers, "residual": residual, "arch": arch}
 
+        def forward_hands(self, x, mask, hands, anchor=None):
+            """Logits for a subset of hand classes per row: ``hands`` (B, K) class indices -> (B, K, slots).
+            ``anchor``, if given, is (B, K, slots)."""
+            t = self.trunk(x)
+            emb = self.hand.weight[hands]  # (B, K, dim)
+            if self.arch == "bilinear":
+                z = self.head(t).view(x.shape[0], len(SLOTS), -1)
+                w, bias = z[..., :-1], z[..., -1]
+                logits = torch.einsum("bsd,bkd->bks", w, emb) + bias[:, None, :]
+            else:
+                logits = self.joint(self.state_in(t)[:, None, :] + self.hand_in(emb))
+            logits = logits + self.hand_bias[hands]
+            if self.residual and anchor is not None:
+                logits = logits + torch.log(anchor.clamp_min(1e-4))
+            return logits.masked_fill(~mask[:, None, :], -1e9)
+
         def forward(self, x, mask, anchor=None):
             b = x.shape[0]
             t = self.trunk(x)
