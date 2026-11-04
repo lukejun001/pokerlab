@@ -34,7 +34,32 @@ such as an opponent's off-size raise (`network:<model>:off_tree`).
 vectors): median **12.1 bb/100**, against **16.3** for k = 1 library borrowing on the same vectors.
 Inference takes under 1 second per new stack vector.
 
-Learning curve: pending (`tools/preflop_net.py curve`).
+**Results** (exact NashConv in bb/100, lower is better; held-out vectors from seed 11; library
+borrowing is the Phase 3 k = 1 approximation on the same vectors):
+
+| Model | Training solves | Held-out median | Worst | Beats borrowing | On training games |
+|---|---|---|---|---|---|
+| Bilinear head, 30 epochs | 8 / 16 / 26 | 26.8 / 18.8 / 24.1 | | | 5–27 |
+| Bilinear + anchor correction, 30 epochs | 8 / 16 / 26 | 20.1 / 17.4 / 17.7 | | | |
+| Bilinear head, 100 epochs | 26 | 17.4 (10 tests) | 56 | | 3.4 |
+| MLP head, 60 epochs | 26 | 11.3 (10 tests) | 23 | 7 of 10 | 3.3 |
+| **MLP head, 80 epochs** | **33** | **10.6 (20 tests)** | **28** | **17 of 20** | **3.3** |
+| MLP + anchor correction, 80 epochs | 33 | 25.8 (20 tests) | 57 | 6 of 20 | 8.6 |
+| Library borrowing (k = 1) | 16 solves | 16.1 (10 tests) / 19.3 (20 tests) | 38 | | |
+
+What the table shows:
+- **The head was the bottleneck.** With the bilinear head, each hand's logits are a single dot product
+  with the state vector. That underfit even the training games (5–27 bb/100, against 0.3–1.1 for the
+  solves themselves). The MLP head (state and hand vectors meet in a hidden layer) generalizes far
+  better.
+- **The direct network now beats borrowing** on 17 of 20 held-out vectors, at about half the median
+  exploitability. It is `models/preflop_net.pt`.
+- **Learning a correction to the nearest library strategy did worse.** The anchors are themselves about
+  19 bb/100 off, and off-tree or other-family nodes get a uniform anchor. Correcting large,
+  inconsistent errors seems harder than learning the strategy directly.
+- **The fitting gap remains.** Training games sit at 3.3 bb/100 against about 0.5 for the solves, so
+  more capacity, more epochs and more data are all still open. Generation continues at about 5 solves
+  an hour.
 
 ## Stage 2: heads-up postflop search
 

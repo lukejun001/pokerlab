@@ -62,7 +62,7 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--hands", type=int, default=200)
     p.add_argument("--seed", type=int, default=7)
-    p.add_argument("--network", default="models/lib16.pt")
+    p.add_argument("--network", default="models/preflop_net.pt")
     p.add_argument("--flop-s", type=float, default=10)
     p.add_argument("--turn-s", type=float, default=15)
     p.add_argument("--river-s", type=float, default=5)
