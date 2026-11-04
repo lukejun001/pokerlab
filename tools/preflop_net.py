@@ -173,7 +173,15 @@ def train(files: list[Path], epochs: int, args, log=print):
         if val is not None and (epoch + 1) % max(1, epochs // 5) == 0:
             model.eval()
             with torch.no_grad():
-                msg += f" val {loss_of(*val).item():.4f}"
+                vx, vm, vt, vw, va = val
+                num = den = 0.0
+                for s in range(0, len(vx), args.batch):  # batched: one pass over everything needs ~13 GB
+                    sl = slice(s, s + args.batch)
+                    w_sum = float(vw[sl].sum())
+                    if w_sum > 0:
+                        num += loss_of(vx[sl], vm[sl], vt[sl], vw[sl], None if va is None else va[sl]).item() * w_sum
+                        den += w_sum
+                msg += f" val {num / max(den, 1e-12):.4f}"
         log(f"{msg} ({time.perf_counter() - t0:.0f}s)")
     model.eval()
     return model, {"train_solves": [p.name for p in train_files], "val_solves": [p.name for p in val_files],
