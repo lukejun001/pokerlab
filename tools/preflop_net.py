@@ -64,13 +64,56 @@ def encoded(path: Path, opp_power: float) -> dict[str, np.ndarray]:
     return arrays
 
 
-def dataset(files: list[Path], opp_power: float):
+_LIBRARY = None
+
+
+def library():
+    """The 16-game library (k=1 per-decision borrowing supplies the residual model's anchors)."""
+    global _LIBRARY
+    if _LIBRARY is None:
+        from pokerlab.solver.generalize import Library
+        from pokerlab.solver.store import StrategyStore
+
+        _, template = game_for([100] * 6)
+        _LIBRARY = Library(StrategyStore(), template)
+    return _LIBRARY
+
+
+def anchor_tables(game, tree: dict[str, list[str]], exclude: str | None = None) -> dict[str, np.ndarray]:
+    from pokerlab.solver.generalize import approximate_profile
+
+    profile, _ = approximate_profile(library(), game, tree, k=1, exclude=exclude)
+    return profile
+
+
+def anchors(path: Path) -> np.ndarray:
+    """(nodes, 169, slots) borrowed strategy at each kept node of one solve (leave-one-out for library solves)."""
+    cache = CACHE / (path.stem + "_anchor.npz")
+    if cache.exists() and cache.stat().st_mtime >= path.stat().st_mtime:
+        with np.load(cache) as d:
+            return d["anchor"]
+    d = load(path)
+    _, game = game_for(d["meta"]["stacks_bb"])
+    tree = dict(zip(d["histories"], d["actions"]))
+    profile = anchor_tables(game, tree, exclude=d["meta"].get("key"))
+    out = np.full((len(d["histories"]), net.NUM_CLASSES, len(net.SLOTS)), 0.25, dtype=np.float16)
+    for k, h in enumerate(d["histories"]):
+        if h in profile:
+            out[k] = net.slot_table(tree[h], profile[h])
+    CACHE.mkdir(parents=True, exist_ok=True)
+    np.savez(cache, anchor=out)
+    return out
+
+
+def dataset(files: list[Path], opp_power: float, residual: bool = False):
     import torch
 
     parts = [encoded(p, opp_power) for p in files]
     cat = {k: np.concatenate([p[k] for p in parts]) for k in ("feats", "masks", "targets", "weights")}
-    return (torch.from_numpy(cat["feats"]), torch.from_numpy(cat["masks"]), torch.from_numpy(cat["targets"]),
-            torch.from_numpy(cat["weights"]))
+    out = [torch.from_numpy(cat["feats"]), torch.from_numpy(cat["masks"]), torch.from_numpy(cat["targets"]),
+           torch.from_numpy(cat["weights"])]
+    out.append(torch.from_numpy(np.concatenate([anchors(p) for p in files])) if residual else None)
+    return tuple(out)
 
 
 def train(files: list[Path], epochs: int, args, log=print):
@@ -84,16 +127,16 @@ def train(files: list[Path], epochs: int, args, log=print):
     rng.shuffle(files)
     n_val = max(1, len(files) // 10) if len(files) >= 10 else 0
     val_files, train_files = files[:n_val], files[n_val:]
-    X, M, T, W = dataset(train_files, args.opp_power)
+    X, M, T, W, A = dataset(train_files, args.opp_power, args.residual)
     W = W / W.mean()
-    val = dataset(val_files, args.opp_power) if val_files else None
+    val = dataset(val_files, args.opp_power, args.residual) if val_files else None
     model = build(args)
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4)
     steps = epochs * ((len(X) + args.batch - 1) // args.batch)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=args.lr, total_steps=steps)
 
-    def loss_of(x, m, t, w):
-        logp = torch.log_softmax(model(x, m), dim=-1)
+    def loss_of(x, m, t, w, a=None):
+        logp = torch.log_softmax(model(x, m, None if a is None else a.float()), dim=-1)
         target = t.float() / 255.0
         ce = -(target * logp.clamp_min(-30)).sum(-1)  # (B, 169)
         return (ce * w).sum() / w.sum()
@@ -105,7 +148,7 @@ def train(files: list[Path], epochs: int, args, log=print):
         total = 0.0
         for s in range(0, len(X), args.batch):
             idx = perm[s:s + args.batch]
-            loss = loss_of(X[idx], M[idx], T[idx], W[idx])
+            loss = loss_of(X[idx], M[idx], T[idx], W[idx], None if A is None else A[idx])
             opt.zero_grad()
             loss.backward()
             opt.step()
@@ -115,8 +158,7 @@ def train(files: list[Path], epochs: int, args, log=print):
         if val is not None and (epoch + 1) % max(1, epochs // 5) == 0:
             model.eval()
             with torch.no_grad():
-                vx, vm, vt, vw = val
-                msg += f" val {loss_of(vx, vm, vt, vw).item():.4f}"
+                msg += f" val {loss_of(*val).item():.4f}"
         log(f"{msg} ({time.perf_counter() - t0:.0f}s)")
     model.eval()
     return model, {"train_solves": [p.name for p in train_files], "val_solves": [p.name for p in val_files],
@@ -124,7 +166,7 @@ def train(files: list[Path], epochs: int, args, log=print):
 
 
 def build(args):
-    return net.build_model(hidden=args.hidden, dim=args.dim, layers=args.layers)
+    return net.build_model(hidden=args.hidden, dim=args.dim, layers=args.layers, residual=args.residual)
 
 
 def knn_reference() -> dict[tuple, float]:
@@ -142,7 +184,8 @@ def evaluate(model, tests: int, threads: int, seed: int = 11, log=print) -> list
         _, game = game_for(stacks)
         t0 = time.perf_counter()
         tree = python_tree(game)
-        profile = net.profile_for(model, game, tree)
+        anchor = anchor_tables(game, tree) if getattr(model, "residual", False) else None
+        profile = net.profile_for(model, game, tree, anchors=anchor)
         infer_s = time.perf_counter() - t0
         ev = gtopen.evaluate(game, profile, threads=threads)
         row = {"stacks_bb": stacks, "nash_conv_bb100": round(100 * ev["nash_conv_bb"], 3),
@@ -212,6 +255,8 @@ def main() -> None:
         q.add_argument("--threads", type=int, default=4)
         q.add_argument("--tests", type=int, default=10)
         q.add_argument("--torch-threads", type=int, default=2)
+        q.add_argument("--residual", action="store_true",
+                       help="learn a correction to the nearest library game's strategy (anchor input)")
 
     t = sub.add_parser("train")
     common(t)
