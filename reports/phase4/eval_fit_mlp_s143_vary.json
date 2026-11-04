@@ -1,0 +1,591 @@
+{
+  "model": "models/fit_mlp_s143.pt",
+  "extra": {
+    "train_solves": [
+      "solve_101_0034.npz",
+      "solve_102_0035.npz",
+      "solve_lib_47fad9028344.npz",
+      "solve_102_0049.npz",
+      "solve_101_0043.npz",
+      "solve_102_0029.npz",
+      "solve_101_0037.npz",
+      "solve_102_0006.npz",
+      "solve_lib_e7012923d7a8.npz",
+      "solve_101_0042.npz",
+      "solve_102_0012.npz",
+      "solve_102_0057.npz",
+      "solve_101_0032.npz",
+      "solve_101_0005.npz",
+      "solve_102_0065.npz",
+      "solve_lib_73589e80fd18.npz",
+      "solve_101_0011.npz",
+      "solve_101_0033.npz",
+      "solve_101_0001.npz",
+      "solve_101_0009.npz",
+      "solve_101_0038.npz",
+      "solve_101_0028.npz",
+      "solve_102_0036.npz",
+      "solve_102_0048.npz",
+      "solve_102_0028.npz",
+      "solve_lib_4bc8f2b7fcf9.npz",
+      "solve_102_0042.npz",
+      "solve_101_0000.npz",
+      "solve_101_0048.npz",
+      "solve_102_0046.npz",
+      "solve_lib_3a102dc5d202.npz",
+      "solve_101_0031.npz",
+      "solve_102_0064.npz",
+      "solve_101_0057.npz",
+      "solve_101_0058.npz",
+      "solve_102_0017.npz",
+      "solve_101_0020.npz",
+      "solve_101_0004.npz",
+      "solve_102_0011.npz",
+      "solve_101_0059.npz",
+      "solve_102_0032.npz",
+      "solve_lib_6d2a0bef679d.npz",
+      "solve_102_0009.npz",
+      "solve_101_0060.npz",
+      "solve_102_0020.npz",
+      "solve_102_0051.npz",
+      "solve_101_0051.npz",
+      "solve_102_0056.npz",
+      "solve_102_0022.npz",
+      "solve_102_0024.npz",
+      "solve_102_0007.npz",
+      "solve_lib_f57301d4b8b7.npz",
+      "solve_101_0021.npz",
+      "solve_101_0022.npz",
+      "solve_lib_d861399d6747.npz",
+      "solve_101_0046.npz",
+      "solve_101_0049.npz",
+      "solve_102_0027.npz",
+      "solve_102_0063.npz",
+      "solve_102_0015.npz",
+      "solve_101_0041.npz",
+      "solve_101_0053.npz",
+      "solve_102_0040.npz",
+      "solve_101_0014.npz",
+      "solve_101_0012.npz",
+      "solve_102_0054.npz",
+      "solve_102_0050.npz",
+      "solve_lib_937da493627e.npz",
+      "solve_101_0025.npz",
+      "solve_101_0015.npz",
+      "solve_102_0033.npz",
+      "solve_101_0047.npz",
+      "solve_102_0043.npz",
+      "solve_lib_2bf145717b6c.npz",
+      "solve_102_0003.npz",
+      "solve_102_0008.npz",
+      "solve_102_0044.npz",
+      "solve_101_0035.npz",
+      "solve_lib_ac7907c2e727.npz",
+      "solve_lib_38246d2b14ad.npz",
+      "solve_102_0023.npz",
+      "solve_lib_88dfa9bb89c2.npz",
+      "solve_101_0017.npz",
+      "solve_102_0062.npz",
+      "solve_101_0040.npz",
+      "solve_101_0045.npz",
+      "solve_101_0054.npz",
+      "solve_101_0010.npz",
+      "solve_102_0004.npz",
+      "solve_102_0001.npz",
+      "solve_101_0024.npz",
+      "solve_102_0055.npz",
+      "solve_101_0029.npz",
+      "solve_102_0041.npz",
+      "solve_101_0055.npz",
+      "solve_101_0044.npz",
+      "solve_101_0026.npz",
+      "solve_102_0010.npz",
+      "solve_102_0031.npz",
+      "solve_lib_9bd624b321a7.npz",
+      "solve_102_0016.npz",
+      "solve_lib_af7dc75a6609.npz",
+      "solve_101_0023.npz",
+      "solve_101_0002.npz",
+      "solve_102_0038.npz",
+      "solve_102_0058.npz",
+      "solve_102_0059.npz",
+      "solve_102_0013.npz",
+      "solve_101_0052.npz",
+      "solve_102_0039.npz",
+      "solve_101_0016.npz",
+      "solve_102_0025.npz",
+      "solve_102_0002.npz",
+      "solve_101_0008.npz",
+      "solve_102_0061.npz",
+      "solve_101_0056.npz",
+      "solve_101_0019.npz",
+      "solve_102_0052.npz",
+      "solve_101_0039.npz",
+      "solve_102_0014.npz",
+      "solve_102_0045.npz",
+      "solve_102_0000.npz",
+      "solve_102_0026.npz",
+      "solve_102_0047.npz",
+      "solve_102_0053.npz",
+      "solve_101_0050.npz",
+      "solve_lib_a42e8ba5d5e0.npz",
+      "solve_102_0030.npz",
+      "solve_102_0021.npz"
+    ],
+    "val_solves": [
+      "solve_101_0006.npz",
+      "solve_101_0007.npz",
+      "solve_102_0019.npz",
+      "solve_101_0013.npz",
+      "solve_101_0036.npz",
+      "solve_102_0018.npz",
+      "solve_101_0030.npz",
+      "solve_102_0037.npz",
+      "solve_101_0027.npz",
+      "solve_102_0034.npz",
+      "solve_101_0003.npz",
+      "solve_102_0005.npz",
+      "solve_101_0018.npz",
+      "solve_102_0060.npz"
+    ],
+    "nodes": 789771,
+    "epochs": 80,
+    "train_s": 10872.3,
+    "opp_power": 0.5
+  },
+  "rows": [
+    {
+      "stacks_bb": [
+        105,
+        108,
+        29,
+        21,
+        52
+      ],
+      "rake_pct": 0.045,
+      "rake_cap_bb": 2.0,
+      "nash_conv_bb100": 10.176,
+      "br_gap_bb100": [
+        0.59,
+        0.53,
+        0.55,
+        3.66,
+        4.85
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.15,
+      "nodes": 1805
+    },
+    {
+      "stacks_bb": [
+        91,
+        82,
+        106,
+        29
+      ],
+      "rake_pct": 0.05,
+      "rake_cap_bb": 1.0,
+      "nash_conv_bb100": 7.909,
+      "br_gap_bb100": [
+        0.59,
+        0.81,
+        1.06,
+        5.45
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.04,
+      "nodes": 365
+    },
+    {
+      "stacks_bb": [
+        197,
+        23,
+        158,
+        24,
+        113,
+        47
+      ],
+      "rake_pct": 0.05,
+      "rake_cap_bb": null,
+      "nash_conv_bb100": 4.548,
+      "br_gap_bb100": [
+        0.61,
+        0.36,
+        0.6,
+        0.66,
+        1.21,
+        1.1
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.72,
+      "nodes": 9150
+    },
+    {
+      "stacks_bb": [
+        23,
+        202,
+        72,
+        25,
+        242,
+        219
+      ],
+      "rake_pct": 0.0,
+      "rake_cap_bb": 2.0,
+      "nash_conv_bb100": 11.017,
+      "br_gap_bb100": [
+        0.57,
+        1.68,
+        1.04,
+        0.9,
+        2.9,
+        3.93
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.84,
+      "nodes": 9558
+    },
+    {
+      "stacks_bb": [
+        78,
+        186
+      ],
+      "rake_pct": 0.06,
+      "rake_cap_bb": 0.06,
+      "nash_conv_bb100": 13.094,
+      "br_gap_bb100": [
+        9.44,
+        3.65
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.0,
+      "nodes": 7
+    },
+    {
+      "stacks_bb": [
+        187,
+        81
+      ],
+      "rake_pct": 0.06,
+      "rake_cap_bb": null,
+      "nash_conv_bb100": 9.774,
+      "br_gap_bb100": [
+        3.65,
+        6.12
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.0,
+      "nodes": 7
+    },
+    {
+      "stacks_bb": [
+        58,
+        90,
+        67,
+        53,
+        22
+      ],
+      "rake_pct": 0.0,
+      "rake_cap_bb": 0.06,
+      "nash_conv_bb100": 14.91,
+      "br_gap_bb100": [
+        0.4,
+        0.49,
+        1.01,
+        2.03,
+        10.98
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.15,
+      "nodes": 2016
+    },
+    {
+      "stacks_bb": [
+        107,
+        49
+      ],
+      "rake_pct": 0.045,
+      "rake_cap_bb": 2.0,
+      "nash_conv_bb100": 4.183,
+      "br_gap_bb100": [
+        1.97,
+        2.21
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.0,
+      "nodes": 7
+    },
+    {
+      "stacks_bb": [
+        27,
+        36,
+        50,
+        73
+      ],
+      "rake_pct": 0.06,
+      "rake_cap_bb": 0.06,
+      "nash_conv_bb100": 8.689,
+      "br_gap_bb100": [
+        0.56,
+        1.43,
+        2.05,
+        4.66
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.02,
+      "nodes": 308
+    },
+    {
+      "stacks_bb": [
+        160,
+        59,
+        74,
+        35,
+        59,
+        53
+      ],
+      "rake_pct": 0.06,
+      "rake_cap_bb": null,
+      "nash_conv_bb100": 6.171,
+      "br_gap_bb100": [
+        0.58,
+        0.71,
+        0.77,
+        1.01,
+        1.39,
+        1.72
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.75,
+      "nodes": 9760
+    },
+    {
+      "stacks_bb": [
+        35,
+        24,
+        40
+      ],
+      "rake_pct": 0.05,
+      "rake_cap_bb": 1.0,
+      "nash_conv_bb100": 2.791,
+      "br_gap_bb100": [
+        0.1,
+        1.72,
+        0.97
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.01,
+      "nodes": 44
+    },
+    {
+      "stacks_bb": [
+        92,
+        125,
+        73,
+        51,
+        47
+      ],
+      "rake_pct": 0.05,
+      "rake_cap_bb": 2.0,
+      "nash_conv_bb100": 6.168,
+      "br_gap_bb100": [
+        0.73,
+        0.82,
+        2.09,
+        1.14,
+        1.39
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.16,
+      "nodes": 2129
+    },
+    {
+      "stacks_bb": [
+        174,
+        37,
+        243,
+        65
+      ],
+      "rake_pct": 0.06,
+      "rake_cap_bb": 1.0,
+      "nash_conv_bb100": 10.984,
+      "br_gap_bb100": [
+        2.42,
+        1.21,
+        3.39,
+        3.96
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.02,
+      "nodes": 354
+    },
+    {
+      "stacks_bb": [
+        139,
+        35,
+        93,
+        219,
+        202,
+        151
+      ],
+      "rake_pct": 0.025,
+      "rake_cap_bb": 0.06,
+      "nash_conv_bb100": 10.604,
+      "br_gap_bb100": [
+        1.45,
+        1.78,
+        0.74,
+        1.52,
+        2.18,
+        2.93
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.79,
+      "nodes": 9567
+    },
+    {
+      "stacks_bb": [
+        71,
+        37,
+        27
+      ],
+      "rake_pct": 0.045,
+      "rake_cap_bb": 3.0,
+      "nash_conv_bb100": 2.029,
+      "br_gap_bb100": [
+        0.27,
+        0.44,
+        1.32
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.01,
+      "nodes": 52
+    },
+    {
+      "stacks_bb": [
+        21,
+        45,
+        146,
+        164,
+        101
+      ],
+      "rake_pct": 0.025,
+      "rake_cap_bb": 3.0,
+      "nash_conv_bb100": 10.517,
+      "br_gap_bb100": [
+        1.04,
+        1.96,
+        1.51,
+        1.95,
+        4.06
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.15,
+      "nodes": 1816
+    },
+    {
+      "stacks_bb": [
+        69,
+        49,
+        113,
+        62,
+        129
+      ],
+      "rake_pct": 0.05,
+      "rake_cap_bb": 1.0,
+      "nash_conv_bb100": 11.415,
+      "br_gap_bb100": [
+        1.31,
+        1.55,
+        2.22,
+        1.73,
+        4.6
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.16,
+      "nodes": 2103
+    },
+    {
+      "stacks_bb": [
+        22,
+        46,
+        177,
+        101
+      ],
+      "rake_pct": 0.05,
+      "rake_cap_bb": 0.06,
+      "nash_conv_bb100": 11.414,
+      "br_gap_bb100": [
+        0.57,
+        4.36,
+        2.38,
+        4.1
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.02,
+      "nodes": 353
+    },
+    {
+      "stacks_bb": [
+        75,
+        21,
+        20,
+        21
+      ],
+      "rake_pct": 0.06,
+      "rake_cap_bb": 1.0,
+      "nash_conv_bb100": 14.315,
+      "br_gap_bb100": [
+        3.42,
+        0.9,
+        6.54,
+        3.45
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.01,
+      "nodes": 292
+    },
+    {
+      "stacks_bb": [
+        37,
+        60,
+        237,
+        82,
+        97
+      ],
+      "rake_pct": 0.045,
+      "rake_cap_bb": null,
+      "nash_conv_bb100": 7.213,
+      "br_gap_bb100": [
+        0.51,
+        1.04,
+        1.8,
+        1.05,
+        2.81
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.14,
+      "nodes": 1937
+    }
+  ],
+  "train_rows": []
+}

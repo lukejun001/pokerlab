@@ -1,0 +1,682 @@
+{
+  "model": "models/fit_mlp_s143.pt",
+  "extra": {
+    "train_solves": [
+      "solve_101_0034.npz",
+      "solve_102_0035.npz",
+      "solve_lib_47fad9028344.npz",
+      "solve_102_0049.npz",
+      "solve_101_0043.npz",
+      "solve_102_0029.npz",
+      "solve_101_0037.npz",
+      "solve_102_0006.npz",
+      "solve_lib_e7012923d7a8.npz",
+      "solve_101_0042.npz",
+      "solve_102_0012.npz",
+      "solve_102_0057.npz",
+      "solve_101_0032.npz",
+      "solve_101_0005.npz",
+      "solve_102_0065.npz",
+      "solve_lib_73589e80fd18.npz",
+      "solve_101_0011.npz",
+      "solve_101_0033.npz",
+      "solve_101_0001.npz",
+      "solve_101_0009.npz",
+      "solve_101_0038.npz",
+      "solve_101_0028.npz",
+      "solve_102_0036.npz",
+      "solve_102_0048.npz",
+      "solve_102_0028.npz",
+      "solve_lib_4bc8f2b7fcf9.npz",
+      "solve_102_0042.npz",
+      "solve_101_0000.npz",
+      "solve_101_0048.npz",
+      "solve_102_0046.npz",
+      "solve_lib_3a102dc5d202.npz",
+      "solve_101_0031.npz",
+      "solve_102_0064.npz",
+      "solve_101_0057.npz",
+      "solve_101_0058.npz",
+      "solve_102_0017.npz",
+      "solve_101_0020.npz",
+      "solve_101_0004.npz",
+      "solve_102_0011.npz",
+      "solve_101_0059.npz",
+      "solve_102_0032.npz",
+      "solve_lib_6d2a0bef679d.npz",
+      "solve_102_0009.npz",
+      "solve_101_0060.npz",
+      "solve_102_0020.npz",
+      "solve_102_0051.npz",
+      "solve_101_0051.npz",
+      "solve_102_0056.npz",
+      "solve_102_0022.npz",
+      "solve_102_0024.npz",
+      "solve_102_0007.npz",
+      "solve_lib_f57301d4b8b7.npz",
+      "solve_101_0021.npz",
+      "solve_101_0022.npz",
+      "solve_lib_d861399d6747.npz",
+      "solve_101_0046.npz",
+      "solve_101_0049.npz",
+      "solve_102_0027.npz",
+      "solve_102_0063.npz",
+      "solve_102_0015.npz",
+      "solve_101_0041.npz",
+      "solve_101_0053.npz",
+      "solve_102_0040.npz",
+      "solve_101_0014.npz",
+      "solve_101_0012.npz",
+      "solve_102_0054.npz",
+      "solve_102_0050.npz",
+      "solve_lib_937da493627e.npz",
+      "solve_101_0025.npz",
+      "solve_101_0015.npz",
+      "solve_102_0033.npz",
+      "solve_101_0047.npz",
+      "solve_102_0043.npz",
+      "solve_lib_2bf145717b6c.npz",
+      "solve_102_0003.npz",
+      "solve_102_0008.npz",
+      "solve_102_0044.npz",
+      "solve_101_0035.npz",
+      "solve_lib_ac7907c2e727.npz",
+      "solve_lib_38246d2b14ad.npz",
+      "solve_102_0023.npz",
+      "solve_lib_88dfa9bb89c2.npz",
+      "solve_101_0017.npz",
+      "solve_102_0062.npz",
+      "solve_101_0040.npz",
+      "solve_101_0045.npz",
+      "solve_101_0054.npz",
+      "solve_101_0010.npz",
+      "solve_102_0004.npz",
+      "solve_102_0001.npz",
+      "solve_101_0024.npz",
+      "solve_102_0055.npz",
+      "solve_101_0029.npz",
+      "solve_102_0041.npz",
+      "solve_101_0055.npz",
+      "solve_101_0044.npz",
+      "solve_101_0026.npz",
+      "solve_102_0010.npz",
+      "solve_102_0031.npz",
+      "solve_lib_9bd624b321a7.npz",
+      "solve_102_0016.npz",
+      "solve_lib_af7dc75a6609.npz",
+      "solve_101_0023.npz",
+      "solve_101_0002.npz",
+      "solve_102_0038.npz",
+      "solve_102_0058.npz",
+      "solve_102_0059.npz",
+      "solve_102_0013.npz",
+      "solve_101_0052.npz",
+      "solve_102_0039.npz",
+      "solve_101_0016.npz",
+      "solve_102_0025.npz",
+      "solve_102_0002.npz",
+      "solve_101_0008.npz",
+      "solve_102_0061.npz",
+      "solve_101_0056.npz",
+      "solve_101_0019.npz",
+      "solve_102_0052.npz",
+      "solve_101_0039.npz",
+      "solve_102_0014.npz",
+      "solve_102_0045.npz",
+      "solve_102_0000.npz",
+      "solve_102_0026.npz",
+      "solve_102_0047.npz",
+      "solve_102_0053.npz",
+      "solve_101_0050.npz",
+      "solve_lib_a42e8ba5d5e0.npz",
+      "solve_102_0030.npz",
+      "solve_102_0021.npz"
+    ],
+    "val_solves": [
+      "solve_101_0006.npz",
+      "solve_101_0007.npz",
+      "solve_102_0019.npz",
+      "solve_101_0013.npz",
+      "solve_101_0036.npz",
+      "solve_102_0018.npz",
+      "solve_101_0030.npz",
+      "solve_102_0037.npz",
+      "solve_101_0027.npz",
+      "solve_102_0034.npz",
+      "solve_101_0003.npz",
+      "solve_102_0005.npz",
+      "solve_101_0018.npz",
+      "solve_102_0060.npz"
+    ],
+    "nodes": 789771,
+    "epochs": 80,
+    "train_s": 10872.3,
+    "opp_power": 0.5
+  },
+  "rows": [
+    {
+      "stacks_bb": [
+        63,
+        82,
+        206,
+        65,
+        72,
+        88
+      ],
+      "nash_conv_bb100": 5.382,
+      "br_gap_bb100": [
+        0.74,
+        0.54,
+        1.14,
+        0.68,
+        0.8,
+        1.47
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 12.817,
+      "inference_s": 1.08,
+      "nodes": 10422
+    },
+    {
+      "stacks_bb": [
+        32,
+        73,
+        98,
+        148,
+        25,
+        43
+      ],
+      "nash_conv_bb100": 3.094,
+      "br_gap_bb100": [
+        0.31,
+        0.46,
+        0.41,
+        0.69,
+        0.55,
+        0.68
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 29.728,
+      "inference_s": 0.71,
+      "nodes": 8611
+    },
+    {
+      "stacks_bb": [
+        25,
+        155,
+        115,
+        22,
+        239,
+        229
+      ],
+      "nash_conv_bb100": 9.984,
+      "br_gap_bb100": [
+        0.49,
+        0.89,
+        0.96,
+        0.69,
+        4.15,
+        2.81
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 19.854,
+      "inference_s": 0.79,
+      "nodes": 9402
+    },
+    {
+      "stacks_bb": [
+        104,
+        95,
+        30,
+        21,
+        76,
+        23
+      ],
+      "nash_conv_bb100": 3.56,
+      "br_gap_bb100": [
+        0.3,
+        0.47,
+        0.33,
+        0.43,
+        1.28,
+        0.75
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 38.05,
+      "inference_s": 0.85,
+      "nodes": 8505
+    },
+    {
+      "stacks_bb": [
+        32,
+        37,
+        22,
+        65,
+        61,
+        168
+      ],
+      "nash_conv_bb100": 4.251,
+      "br_gap_bb100": [
+        0.24,
+        0.33,
+        0.3,
+        1.06,
+        0.98,
+        1.34
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 9.488,
+      "inference_s": 0.73,
+      "nodes": 8089
+    },
+    {
+      "stacks_bb": [
+        74,
+        101,
+        71,
+        107,
+        63,
+        40
+      ],
+      "nash_conv_bb100": 4.39,
+      "br_gap_bb100": [
+        0.49,
+        0.45,
+        0.65,
+        1.04,
+        0.88,
+        0.87
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 5.686,
+      "inference_s": 0.87,
+      "nodes": 10096
+    },
+    {
+      "stacks_bb": [
+        249,
+        247,
+        167,
+        120,
+        44,
+        36
+      ],
+      "nash_conv_bb100": 3.736,
+      "br_gap_bb100": [
+        0.78,
+        0.51,
+        0.51,
+        0.66,
+        0.63,
+        0.64
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 15.724,
+      "inference_s": 0.82,
+      "nodes": 9545
+    },
+    {
+      "stacks_bb": [
+        42,
+        24,
+        139,
+        55,
+        170,
+        53
+      ],
+      "nash_conv_bb100": 6.369,
+      "br_gap_bb100": [
+        0.7,
+        0.73,
+        0.97,
+        0.91,
+        1.19,
+        1.86
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 21.69,
+      "inference_s": 0.84,
+      "nodes": 8850
+    },
+    {
+      "stacks_bb": [
+        225,
+        170,
+        20,
+        34,
+        199,
+        66
+      ],
+      "nash_conv_bb100": 5.127,
+      "br_gap_bb100": [
+        0.75,
+        0.69,
+        0.43,
+        0.77,
+        1.25,
+        1.23
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 16.484,
+      "inference_s": 0.86,
+      "nodes": 9199
+    },
+    {
+      "stacks_bb": [
+        238,
+        55,
+        24,
+        98,
+        143,
+        40
+      ],
+      "nash_conv_bb100": 4.1,
+      "br_gap_bb100": [
+        0.74,
+        0.5,
+        0.21,
+        0.87,
+        1.13,
+        0.65
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 6.652,
+      "inference_s": 0.78,
+      "nodes": 9247
+    },
+    {
+      "stacks_bb": [
+        25,
+        46,
+        228,
+        136,
+        27,
+        37
+      ],
+      "nash_conv_bb100": 7.196,
+      "br_gap_bb100": [
+        0.2,
+        0.31,
+        3.5,
+        1.37,
+        0.73,
+        1.09
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 22.728,
+      "inference_s": 0.81,
+      "nodes": 8708
+    },
+    {
+      "stacks_bb": [
+        26,
+        23,
+        150,
+        31,
+        82,
+        62
+      ],
+      "nash_conv_bb100": 4.167,
+      "br_gap_bb100": [
+        0.24,
+        0.59,
+        0.9,
+        0.6,
+        0.71,
+        1.13
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 10.026,
+      "inference_s": 0.72,
+      "nodes": 8078
+    },
+    {
+      "stacks_bb": [
+        32,
+        127,
+        28,
+        102,
+        27,
+        58
+      ],
+      "nash_conv_bb100": 3.886,
+      "br_gap_bb100": [
+        0.41,
+        0.65,
+        0.47,
+        0.58,
+        0.57,
+        1.2
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 24.953,
+      "inference_s": 0.71,
+      "nodes": 8269
+    },
+    {
+      "stacks_bb": [
+        34,
+        40,
+        232,
+        152,
+        43,
+        187
+      ],
+      "nash_conv_bb100": 7.92,
+      "br_gap_bb100": [
+        0.42,
+        0.5,
+        1.99,
+        2.2,
+        1.01,
+        1.79
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 18.81,
+      "inference_s": 0.78,
+      "nodes": 8251
+    },
+    {
+      "stacks_bb": [
+        34,
+        54,
+        173,
+        101,
+        26,
+        243
+      ],
+      "nash_conv_bb100": 3.9,
+      "br_gap_bb100": [
+        0.31,
+        0.71,
+        0.66,
+        0.58,
+        0.42,
+        1.21
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 27.549,
+      "inference_s": 0.79,
+      "nodes": 9288
+    },
+    {
+      "stacks_bb": [
+        34,
+        38,
+        141,
+        46,
+        42,
+        24
+      ],
+      "nash_conv_bb100": 6.529,
+      "br_gap_bb100": [
+        0.29,
+        0.37,
+        0.67,
+        0.55,
+        0.76,
+        3.89
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 27.621,
+      "inference_s": 0.55,
+      "nodes": 7866
+    },
+    {
+      "stacks_bb": [
+        25,
+        87,
+        37,
+        91,
+        51,
+        63
+      ],
+      "nash_conv_bb100": 4.97,
+      "br_gap_bb100": [
+        0.61,
+        0.94,
+        0.65,
+        0.87,
+        0.74,
+        1.16
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 9.257,
+      "inference_s": 0.88,
+      "nodes": 8954
+    },
+    {
+      "stacks_bb": [
+        225,
+        68,
+        85,
+        178,
+        32,
+        30
+      ],
+      "nash_conv_bb100": 3.05,
+      "br_gap_bb100": [
+        0.6,
+        0.33,
+        0.29,
+        0.61,
+        0.36,
+        0.85
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 22.069,
+      "inference_s": 0.83,
+      "nodes": 9520
+    },
+    {
+      "stacks_bb": [
+        198,
+        158,
+        38,
+        32,
+        129,
+        215
+      ],
+      "nash_conv_bb100": 8.079,
+      "br_gap_bb100": [
+        1.02,
+        1.53,
+        0.57,
+        0.83,
+        2.06,
+        2.07
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 14.475,
+      "inference_s": 0.83,
+      "nodes": 9030
+    },
+    {
+      "stacks_bb": [
+        33,
+        220,
+        186,
+        92,
+        58,
+        26
+      ],
+      "nash_conv_bb100": 6.429,
+      "br_gap_bb100": [
+        0.39,
+        0.93,
+        0.45,
+        0.67,
+        1.03,
+        2.96
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": 27.517,
+      "inference_s": 0.86,
+      "nodes": 9520
+    }
+  ],
+  "train_rows": [
+    {
+      "solve": "solve_101_0034.npz",
+      "stacks_bb": [
+        246,
+        92,
+        246,
+        55,
+        28,
+        23
+      ],
+      "nash_conv_bb100": 3.207,
+      "solve_bb100": 0.756
+    },
+    {
+      "solve": "solve_102_0035.npz",
+      "stacks_bb": [
+        50,
+        174,
+        191,
+        129,
+        42
+      ],
+      "nash_conv_bb100": 4.475,
+      "solve_bb100": 1.528
+    },
+    {
+      "solve": "solve_lib_47fad9028344.npz",
+      "stacks_bb": [
+        29.0,
+        69.0,
+        22.0,
+        108.0,
+        138.0,
+        85.0
+      ],
+      "nash_conv_bb100": 4.038,
+      "solve_bb100": 0.417
+    },
+    {
+      "solve": "solve_102_0049.npz",
+      "stacks_bb": [
+        45,
+        232,
+        54,
+        26
+      ],
+      "nash_conv_bb100": 2.402,
+      "solve_bb100": 0.457
+    },
+    {
+      "solve": "solve_101_0043.npz",
+      "stacks_bb": [
+        173,
+        22,
+        218,
+        22,
+        23,
+        20
+      ],
+      "nash_conv_bb100": 2.363,
+      "solve_bb100": 0.532
+    }
+  ]
+}

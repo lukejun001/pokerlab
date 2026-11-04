@@ -45,7 +45,8 @@ borrowing is the Phase 3 k = 1 approximation on the same vectors):
 | MLP head, 60 epochs | 26 | 11.3 (10 tests) | 23 | 7 of 10 | 3.3 |
 | MLP head, 80 epochs | 33 | 10.6 (20 tests) | 28 | 17 of 20 | 3.3 |
 | MLP head, 80 epochs | 44 | 6.6 (20 tests) | 19 | 19 of 20 | 3.05 |
-| **MLP head, 80 epochs** | **81 (61 six-max + 20 varied)** | **5.1 (20 tests)** | **15** | **20 of 20** | **3.1** |
+| MLP head, 80 epochs | 81 (61 six-max + 20 varied) | 5.1 (20 tests) | 15 | 20 of 20 | 3.1 |
+| **MLP head, 80 epochs, 32 sampled hands per node** | **143 (16 library + 56 six-max + 71 varied)** | **4.7 (20 tests)** | **10** | **20 of 20** | **3.2** |
 | MLP + anchor correction, 80 epochs | 33 | 25.8 (20 tests) | 57 | 6 of 20 | 8.6 |
 | Library borrowing (k = 1) | 16 solves | 16.1 (10 tests) / 19.3 (20 tests) | 38 | | |
 
@@ -77,6 +78,14 @@ After adding 20 varied solves (81 in total), the same varied held-out set scores
 - **By table size:** 6-max 4–16 bb/100; 3- and 5-handed 2–29; 4-handed and heads-up 9–45.
 - **6-max did not suffer:** its own held-out set improved to a median of 5.1, beating borrowing on all
   20 vectors.
+
+With 143 solves (71 of them varied) the varied set improved again:
+- **Overall:** median 10.0 bb/100.
+- **By table size** (medians): heads-up 9.8, 3-handed 2.4, 4-handed 11.0, 5-handed 10.3, 6-max 8.4.
+
+Training now samples 32 hands per node in proportion to their loss weight. That estimates the same
+loss without bias at a fraction of the cost: 48 s per epoch on 143 solves, where the full loss took
+about 255 s on 81.
 
 ## Stage 2: heads-up postflop search
 
