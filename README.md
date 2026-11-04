@@ -314,14 +314,50 @@ python -m pokerlab simulate --config configs/6max_gtopen_asymmetric.yaml --hands
 
 - **Validation:** the fork's trees are checked against PokerKit node by node and payout by payout
   (`tests/test_gtopen.py`, skipped if the fork isn't built).
-- **Postflop:** flop terminals use GTOpen's approximate continuation model; there is no postflop
-  solving yet.
+- **Postflop:** flop terminals use GTOpen's approximate continuation model; postflop play itself comes
+  from Phase 4 search (below).
 - **Exact matches only.** A cached strategy is used only when variant, players, positions, every stack,
   blinds, ante, rake, abstraction and solver/model versions all match. Anything else, including an
   opponent's off-tree raise size, falls back to the heuristic strategy. Every decision is counted by
   source in the simulation report.
 - **Cross-check solver:** `pokerlab/solver/cfr.py` (configs `6max_equal`, `6max_asymmetric`) is an
   independent NumPy solver used for comparison.
+
+## Network and real-time search (Phase 4)
+
+These parts play games that were never solved. Details and measurements are in
+[docs/phase4_report.md](docs/phase4_report.md).
+
+- **Preflop network** (`pokerlab/solver/network.py`, `models/preflop_net.pt`). Trained on GTOpen solves
+  of random stack vectors, it gives a strategy for any stack vector in one forward pass, under a second
+  per new vector. It also handles betting lines the tree lacks, such as an opponent's off-size raise.
+- **Postflop search** (`pokerlab/postflop`). Heads-up spots are re-solved one street at a time with the
+  fork's `postflop-cli`:
+  - **flop:** depth-limited, with check-down equity leaves;
+  - **turn and river:** full trees.
+
+  Each street is solved within seconds. Ranges come from the preflop strategy actually played, then
+  from each solve's reach. Multiway pots still fall back.
+
+Agent parameters (`SolverStrategy`):
+
+```yaml
+strategy_params:
+  network: models/preflop_net.pt        # preflop for unsolved stack vectors (exact solves still win)
+  postflop: search                      # heads-up postflop by street search
+  search_budget: {flop: 10, turn: 15, river: 5}   # seconds per street solve
+  search_threads: 2
+```
+
+```bash
+# once, in ../gtopen-asymmetric
+cargo build --release -p solver --bin preflop-cli --bin postflop-cli
+# in pokerlab
+python tools/preflop_data.py generate --count 200 --threads 4 --push-every 2   # training solves
+python tools/preflop_net.py train --arch mlp --epochs 80 --out models/preflop_net.pt
+python tools/preflop_net.py evaluate --model models/preflop_net.pt --tests 20  # exact NashConv
+python tools/postflop_eval.py --hands 300                                      # search vs fallback
+```
 
 ## Known limitations
 
