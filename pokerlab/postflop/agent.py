@@ -10,6 +10,8 @@ of that street's decisions read from the solve.
 
 from __future__ import annotations
 
+import json
+import os
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
@@ -112,6 +114,10 @@ class PostflopSearch:
             self.solve_log.append({"street": street, "iterations": m["iterations"], "solve_s": round(m["solve_s"], 2),
                                    "exploit_pct_pot": round(m["exploit_pct_pot"], 3), "pot_bb": round(pot, 2),
                                    "stack_bb": round(stack, 2), "hands": m["hands"]})
+            log_path = os.environ.get("POKERLAB_SEARCH_LOG")
+            if log_path:
+                with open(log_path, "a") as f:
+                    f.write(json.dumps(self.solve_log[-1]) + "\n")
         path = self._street_path(solve, obs, street_no, bb)
         if path is None:
             return None, "line_not_in_tree"
