@@ -168,7 +168,8 @@ def train(files: list[Path], epochs: int, args, log=print):
 
 
 def build(args):
-    return net.build_model(hidden=args.hidden, dim=args.dim, layers=args.layers, residual=args.residual)
+    return net.build_model(hidden=args.hidden, dim=args.dim, layers=args.layers, residual=args.residual,
+                             arch=args.arch)
 
 
 def knn_reference() -> dict[tuple, float]:
@@ -212,14 +213,33 @@ def cmd_train(args) -> None:
     print(f"saved {out} ({len(files)} solves)")
 
 
+def evaluate_train(model, names: list[str], threads: int, log=print) -> list[dict]:
+    """Exact NashConv of the network in games it was trained on (fit, not generalization)."""
+    rows = []
+    for name in names:
+        d = load(DATA / name)
+        game = game_from_meta(d["meta"])
+        tree = python_tree(game)
+        anchor = anchor_tables(game, tree, exclude=d["meta"].get("key")) if getattr(model, "residual", False) else None
+        ev = gtopen.evaluate(game, net.profile_for(model, game, tree, anchors=anchor), threads=threads)
+        rows.append({"solve": name, "stacks_bb": d["meta"]["stacks_bb"], "nash_conv_bb100": round(100 * ev["nash_conv_bb"], 3),
+                     "solve_bb100": d["meta"]["nash_conv_bb100"]})
+        log(json.dumps(rows[-1]))
+    return rows
+
+
 def cmd_evaluate(args) -> None:
     model, extra = net.load_model(args.model)
+    train_rows = evaluate_train(model, extra.get("train_solves", [])[: args.on_train], args.threads) if args.on_train else []
     rows = evaluate(model, args.tests, args.threads)
     nc = [r["nash_conv_bb100"] for r in rows]
     knn = [r["knn_bb100"] for r in rows if r["knn_bb100"] is not None]
     print(f"network median {np.median(nc):.2f} bb/100 (min {min(nc):.2f}, max {max(nc):.2f}); "
           f"library k=1 median {np.median(knn):.2f}")
-    write_json(REPORTS / f"eval_{Path(args.model).stem}.json", {"model": args.model, "extra": extra, "rows": rows})
+    if train_rows:
+        print(f"on training games: median {np.median([r['nash_conv_bb100'] for r in train_rows]):.2f} bb/100")
+    write_json(REPORTS / f"eval_{Path(args.model).stem}.json",
+               {"model": args.model, "extra": extra, "rows": rows, "train_rows": train_rows})
 
 
 def cmd_curve(args) -> None:
@@ -257,6 +277,7 @@ def main() -> None:
         q.add_argument("--threads", type=int, default=4)
         q.add_argument("--tests", type=int, default=10)
         q.add_argument("--torch-threads", type=int, default=2)
+        q.add_argument("--arch", default="bilinear", choices=["bilinear", "mlp"])
         q.add_argument("--residual", action="store_true",
                        help="learn a correction to the nearest library game's strategy (anchor input)")
 
@@ -269,6 +290,7 @@ def main() -> None:
     e.add_argument("--model", required=True)
     e.add_argument("--tests", type=int, default=10)
     e.add_argument("--threads", type=int, default=4)
+    e.add_argument("--on-train", type=int, default=0, help="also score this many training games")
     e.set_defaults(func=cmd_evaluate)
     c = sub.add_parser("curve")
     common(c)

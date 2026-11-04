@@ -9,3 +9,5 @@ data/cache/
 models/smoke.pt
 reports/phase4/*_solves.jsonl
 models/smoke_res.pt
+models/preflop_*.pt
+models/fit_*.pt

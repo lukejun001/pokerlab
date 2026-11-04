@@ -140,7 +140,7 @@ def slot_table(actions: list[str], table: np.ndarray) -> np.ndarray:
 # --- the model ------------------------------------------------------------------------------------
 
 
-def build_model(hidden: int = 256, dim: int = 64, layers: int = 3, residual: bool = False):
+def build_model(hidden: int = 256, dim: int = 64, layers: int = 3, residual: bool = False, arch: str = "bilinear"):
     import torch
     from torch import nn
 
@@ -152,17 +152,28 @@ def build_model(hidden: int = 256, dim: int = 64, layers: int = 3, residual: boo
                 mods += [nn.Linear(width, hidden), nn.SiLU()]
                 width = hidden
             self.trunk = nn.Sequential(*mods)
-            self.head = nn.Linear(hidden, len(SLOTS) * (dim + 1))
+            self.arch = arch
+            if arch == "bilinear":
+                self.head = nn.Linear(hidden, len(SLOTS) * (dim + 1))
+            else:  # "mlp": state and hand vectors meet in a hidden layer, then a per-(state, hand) MLP
+                self.state_in = nn.Linear(hidden, dim)
+                self.hand_in = nn.Linear(dim, dim, bias=False)
+                self.joint = nn.Sequential(nn.SiLU(), nn.Linear(dim, dim), nn.SiLU(), nn.Linear(dim, len(SLOTS)))
             self.hand = nn.Embedding(NUM_CLASSES, dim)
             self.hand_bias = nn.Parameter(torch.zeros(NUM_CLASSES, len(SLOTS)))
             self.residual = residual
-            self.config = {"hidden": hidden, "dim": dim, "layers": layers, "residual": residual}
+            self.config = {"hidden": hidden, "dim": dim, "layers": layers, "residual": residual, "arch": arch}
 
         def forward(self, x, mask, anchor=None):
             b = x.shape[0]
-            z = self.head(self.trunk(x)).view(b, len(SLOTS), -1)  # (B, S, dim + 1)
-            w, bias = z[..., :-1], z[..., -1]
-            logits = torch.einsum("bsd,hd->bhs", w, self.hand.weight) + bias[:, None, :] + self.hand_bias
+            t = self.trunk(x)
+            if self.arch == "bilinear":
+                z = self.head(t).view(b, len(SLOTS), -1)  # (B, S, dim + 1)
+                w, bias = z[..., :-1], z[..., -1]
+                logits = torch.einsum("bsd,hd->bhs", w, self.hand.weight) + bias[:, None, :] + self.hand_bias
+            else:
+                h = self.state_in(t)[:, None, :] + self.hand_in(self.hand.weight)[None, :, :]  # (B, 169, dim)
+                logits = self.joint(h) + self.hand_bias
             if self.residual and anchor is not None:
                 logits = logits + torch.log(anchor.clamp_min(1e-4))
             return logits.masked_fill(~mask[:, None, :], -1e9)
