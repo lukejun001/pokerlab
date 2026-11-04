@@ -187,7 +187,13 @@ class SolverStrategy(Strategy):
             if self._network is None:
                 self._network = net.load_model(self.network_path)[0]
             tree = python_tree(game)
-            profile = net.profile_for(self._network, game, tree)
+            anchors = None
+            if getattr(self._network, "residual", False):
+                from pokerlab.solver.generalize import Library, approximate_profile
+
+                library = Library(self.store, game)
+                anchors = approximate_profile(library, game, tree, k=1)[0] if len(library) else {}
+            profile = net.profile_for(self._network, game, tree, anchors=anchors)
             table = {h: (tuple(tree[h]), t) for h, t in profile.items()}
             return "network", table, f"network:{Path(self.network_path).stem}"
         if self.approximate == "off" or not hasattr(self.abstraction, "versions"):
@@ -302,8 +308,8 @@ class SolverStrategy(Strategy):
         actions = gtopen_tokens(game, state)
         feats = net.features(game, state, aggressor, actions)
         with torch.no_grad():
-            p = torch.softmax(self._network(torch.from_numpy(feats[None]),
-                                            torch.from_numpy(net.mask_of(actions)[None])), -1)[0].numpy()
+            p = torch.softmax(self._network(torch.from_numpy(feats[None]), torch.from_numpy(net.mask_of(actions)[None]),
+                                            net.uniform_anchor()), -1)[0].numpy()
         return tuple(actions), np.stack([p[:, net.slot(t)] for t in actions])
 
     def _network_off_tree(self, obs: Observation, seats: list[int], hand: int):
@@ -327,5 +333,6 @@ class SolverStrategy(Strategy):
         feats = net.features(game, state, aggressor, actions)
         mask = net.mask_of(actions)
         with torch.no_grad():
-            p = torch.softmax(self._network(torch.from_numpy(feats[None]), torch.from_numpy(mask[None])), -1)[0, hand]
+            p = torch.softmax(self._network(torch.from_numpy(feats[None]), torch.from_numpy(mask[None]),
+                                            net.uniform_anchor()), -1)[0, hand]
         return tuple(actions), np.array([float(p[net.slot(t)]) for t in actions])

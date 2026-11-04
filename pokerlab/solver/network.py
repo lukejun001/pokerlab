@@ -197,6 +197,12 @@ def load_model(path):
     return model, blob.get("extra", {})
 
 
+def uniform_anchor(n: int = 1):
+    import torch
+
+    return torch.full((n, NUM_CLASSES, len(SLOTS)), 0.25)
+
+
 def profile_for(model, game: PreflopGame, tree: dict[str, list[str]],
                 anchors: dict[str, np.ndarray] | None = None, batch: int = 4096) -> dict[str, np.ndarray]:
     """The network's strategy at every node of ``tree``: history -> (actions x 169), pokerlab class order."""
@@ -205,6 +211,8 @@ def profile_for(model, game: PreflopGame, tree: dict[str, list[str]],
     histories = list(tree)
     feats, masks = encode_nodes(game, histories, [tree[h] for h in histories])
     anchor = None
+    if anchors is None and getattr(model, "residual", False):
+        anchors = {}  # a residual model always needs an anchor: uniform where none is given
     if anchors is not None:
         anchor = np.full((len(histories), NUM_CLASSES, len(SLOTS)), 0.25, dtype=np.float32)
         for k, h in enumerate(histories):
