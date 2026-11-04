@@ -28,7 +28,7 @@ borrows from the nearest games regardless (for experiments only).
 (GTOpen abstractions only; see ``solver/ondemand.py``): ``"off"`` (default)
 nothing; ``"queue"`` records it in the store's pending queue for
 ``pokerlab strategies solve-pending`` and plays this hand as above;
-``"solve"`` solves it right away, warm-started from the library, and plays
+``"solve"`` solves it right away (``ondemand.solve_on_demand``) and plays
 the exact result (minutes per new stack vector: interactive use, not batch
 simulations). ``on_demand_iterations`` and ``on_demand_threads`` size that solve.
 """

@@ -162,6 +162,81 @@
           "nash_conv_bb100": 1.316
         }
       ]
+    },
+    {
+      "stacks_bb": [
+        63,
+        82,
+        206,
+        65,
+        72,
+        88
+      ],
+      "variant": "cold",
+      "approximation": {
+        "distance": 0.462,
+        "node_distance_mean": 0.28,
+        "node_distance_p90": 0.462,
+        "node_distance_max": 1.3863,
+        "first_in_distance_max": 0.4308,
+        "untranslated_nodes": 48
+      },
+      "approximation_s": 5.2,
+      "warm_start": null,
+      "threads": 4,
+      "wall_s": 810.68,
+      "curve": [
+        {
+          "iteration": 20,
+          "solve_s": 65.0,
+          "nash_conv_bb100": 57.78
+        },
+        {
+          "iteration": 40,
+          "solve_s": 156.8,
+          "nash_conv_bb100": 18.145
+        },
+        {
+          "iteration": 60,
+          "solve_s": 243.0,
+          "nash_conv_bb100": 7.759
+        },
+        {
+          "iteration": 80,
+          "solve_s": 322.1,
+          "nash_conv_bb100": 4.017
+        },
+        {
+          "iteration": 100,
+          "solve_s": 395.6,
+          "nash_conv_bb100": 2.369
+        },
+        {
+          "iteration": 120,
+          "solve_s": 468.8,
+          "nash_conv_bb100": 1.554
+        },
+        {
+          "iteration": 140,
+          "solve_s": 539.7,
+          "nash_conv_bb100": 1.091
+        },
+        {
+          "iteration": 160,
+          "solve_s": 608.5,
+          "nash_conv_bb100": 0.811
+        },
+        {
+          "iteration": 180,
+          "solve_s": 675.4,
+          "nash_conv_bb100": 0.629
+        },
+        {
+          "iteration": 200,
+          "solve_s": 741.4,
+          "nash_conv_bb100": 0.5
+        }
+      ]
     }
   ]
 }

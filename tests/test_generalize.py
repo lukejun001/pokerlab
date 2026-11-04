@@ -186,10 +186,13 @@ def test_on_demand_solve_warm_starts_from_the_library(tmp_path):
     queue.add(target.game)
     queue.add(target.game)
     assert [r["count"] for r in queue.items()] == [2]
-    m = solve_on_demand(store, target.game, iterations=20, threads=2)
+    m = solve_on_demand(store, target.game, iterations=20, threads=2)  # short budget: warm by default
     assert m["on_demand"]["warm_started"] and m["warm_start"]["seeded_nodes"] > 0
     assert store.lookup(target.game) is not None and queue.items() == []
     assert solve_on_demand(store, target.game)["cached"]
+    other, _ = _hu_config({"SB": 45, "BB": 50})
+    m = solve_on_demand(store, other.game, iterations=80, threads=2)  # long budget: cold by default
+    assert not m["on_demand"]["warm_started"] and m["warm_start"] is None
 
 
 @needs_fork

@@ -235,6 +235,65 @@ If the floor holds, the practical route to "any stack size" is to solve each new
 - warm-starting from the nearest library game should shorten that;
 - once solved, a vector is an exact cache hit.
 
+## Solving on demand (cloud, 4 cores)
+
+Chosen direction: when a stack vector isn't solved, solve it directly; growing the library further
+was not pursued.
+
+**What exists now** (`pokerlab/solver/ondemand.py`):
+- **`solve_on_demand`** solves a new vector with GTOpen and stores it as an ordinary exact strategy,
+  which also adds it to the library.
+- **The agent's `on_demand` option:**
+  - `queue` records unsolved games in `strategies/pending.jsonl` and falls back for now;
+    `pokerlab strategies solve-pending` solves the most-met games later.
+  - `solve` blocks and solves right away. That is for interactive use only.
+  - `off` is the default.
+- **Warm start in the fork** (`preflop-cli` `warm_start`, `PreflopSolver::warm_start_node`). A solve can
+  start from a given profile, here the library approximation. Three settings control it:
+  - each node's strategy sums become the profile times the actor's reach under it, times `sum_scale`;
+  - regrets are seeded in proportion to the profile, at the first iteration's regret mass rescaled to
+    the profile's opponent reach, times `regret_scale`;
+  - DCFR's iteration counter is set to `iterations`.
+
+  Seeded with its own converged strategy, a heads-up solve stays at equilibrium. Frozen with huge scales,
+  a 6-max solve reproduces the borrowed profile's measured NashConv: 13.5 against 12.8 bb/100 (48
+  untranslatable nodes play uniformly).
+
+**Does warm-starting speed up a solve?** Measured on held-out vector `[63, 82, 206, 65, 72, 88]`, where
+the borrowed profile scores 12.8 bb/100. Exact NashConv in bb/100, with solve seconds on 4 threads in
+brackets (`reports/phase3/warm/compare_long.json`):
+
+| Iteration | Cold | Warm r10 s30 t60 | Warm r10 s100 t300 |
+|---|---|---|---|
+| 20 (~63 s) | 57.8 | 20.4 | **13.7** |
+| 40 (~153 s) | 18.1 | 10.9 | **10.3** |
+| 60 (~241 s) | 7.8 | **6.8** | 8.3 |
+| 80 (~324 s) | **4.0** | 4.7 | 6.8 |
+| 100 (~404 s) | **2.4** | 3.4 | 5.7 |
+| 140 (~556 s) | **1.09** | 2.1 | 4.3 |
+| 200 (~765 s) | **0.50** | 1.32 | 2.96 |
+
+**Result: warm-starting only helps short solves.**
+- **Short budgets.** Warm starts lead up to about 60 iterations, reaching 13.7 bb/100 after one minute
+  where cold is at 57.8.
+- **Full solves.** Cold DCFR overtakes every warm setting by about 70 iterations and ends 2.6 times
+  lower than the best warm setting at 200 iterations.
+- **Why.** A prior heavy enough to survive the first iterations stays in the average and puts a floor
+  under it. A prior light enough to fade is overwritten by CFR's early swings and loses its head start: the light
+  settings in `compare_tune3.json` and `compare_tune4.json` (r1 s7 t20, r3 s10 t30) were at 100–184
+  bb/100 after 5 iterations, far above the 12.8 they started from.
+- **Default.** `warm="auto"` therefore warm-starts only budgets of at most 60 iterations. On-demand
+  solves default to 200 cold iterations: about 12.4 minutes on 4 cores, and about 1 bb/100 after 140
+  iterations (9 minutes).
+
+**Caveats:**
+- **One vector.** The 200-iteration comparison used one held-out vector. The short tuning runs
+  (`compare_tune*.json`) used the same vector.
+- **Tuning history.** The first seeding scaled everything from a uniform-play iteration. Those runs
+  (`compare_tune.json`, `compare_tune2.json`) were worse than cold because seeds on main-line nodes
+  were 10–100 times too small. `compare_tune3.json`, `compare_tune4.json`, `compare_diag.json` and
+  `compare_long.json` use the reach-weighted seeding.
+
 ## Phase 4 roadmap (prioritized)
 
 1. **Postflop.** Connect heads-up flop terminals to GTOpen's postflop solver, starting with the
@@ -262,6 +321,8 @@ python -m pytest
 python -m pokerlab strategies generate --config configs/6max_gtopen_asymmetric.yaml
 python -m pokerlab simulate --config configs/6max_gtopen_asymmetric.yaml --hands 10000
 python tools/phase3_experiments.py compare
+python tools/warm_start.py compare --tests 1 --iterations 200 --check-every 20 --label long \
+    --variants r10s100t300 r10s30t60 cold      # warm vs cold on-demand solves
 ```
 
 The earlier NumPy solver (`pokerlab/solver/cfr.py`, configs `6max_equal` and `6max_asymmetric`) remains

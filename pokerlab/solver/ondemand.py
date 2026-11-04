@@ -1,12 +1,16 @@
-"""Solve unsolved stack vectors on demand, warm-started from the library.
+"""Solve unsolved stack vectors on demand.
 
-Borrowed strategies are measured to be too exploitable to play directly
-(``docs/phase3_report.md``), but they are a good place for a solve to start.
-``solve_on_demand`` builds the per-decision approximation from the nearest
-solved games of the same family (``generalize.approximate_profile``), hands
-it to GTOpen as a warm start, and stores the result as an ordinary exact
-strategy. Every stored solve joins the library, so later warm starts come
-from closer neighbors.
+``solve_on_demand`` solves a stack vector the store does not have and stores
+the result as an ordinary exact strategy (which also joins the library).
+
+Warm starts from the library (the per-decision approximation of
+``generalize.approximate_profile`` handed to GTOpen as a starting profile)
+were measured in ``docs/phase3_report.md`` ("Solving on demand"): they win
+only for short budgets. On a held-out vector the borrowed profile was
+12.8 bb/100; warm runs reached 13.7 bb/100 at 20 iterations against 57.8 cold,
+but cold DCFR overtook every warm setting by about 70 iterations and ended
+at 0.50 bb/100 after 200 against 1.32 for the best warm setting. So
+``warm="auto"`` warm-starts only budgets of at most ``WARM_MAX_ITERATIONS``.
 
 Solves take minutes, so an agent at the table cannot wait for one. It can
 record the game in a pending queue (``PendingSolves``) and keep falling back;
@@ -27,12 +31,13 @@ from pokerlab.solver.game import BettingAbstraction, PreflopGame
 from pokerlab.solver.generalize import Library, approximate_profile
 from pokerlab.solver.store import StrategyStore, strategy_key
 
-ON_DEMAND_VERSION = "warm-knn1-1"
+ON_DEMAND_VERSION = "ondemand-1"
 DEFAULT_ITERATIONS = 200
-# Warm-start knobs (see preflop-cli and reports/phase3/warm/): the borrowed
-# profile's regret and strategy-sum mass relative to one iteration's, and how
-# many iterations of history DCFR's discounting treats it as.
-WARM_DEFAULTS = {"regret_scale": 1.0, "sum_scale": 1.0, "iterations": 20}
+# Warm-start knobs (gtopen.WarmStart; tuned in reports/phase3/warm/): best of
+# the settings measured at 60+ iterations.
+WARM_DEFAULTS = {"regret_scale": 10.0, "sum_scale": 30.0, "iterations": 60}
+# Above this budget a cold start converged faster in every measurement.
+WARM_MAX_ITERATIONS = 60
 
 
 def game_to_dict(game: PreflopGame) -> dict[str, Any]:
@@ -64,18 +69,24 @@ def warm_profile(store: StrategyStore, game: PreflopGame, k: int = 1) -> tuple[d
 
 
 def solve_on_demand(store: StrategyStore, game: PreflopGame, iterations: int = DEFAULT_ITERATIONS,
-                    threads: int | None = None, warm: dict[str, Any] | None = None, k: int = 1,
-                    progress: bool = False, name: str | None = None) -> dict[str, Any]:
-    """Solve ``game`` (GTOpen abstractions only), warm-started from the library when it
-    has same-family games, and store it. Returns the solve metrics; an
-    already-stored game is returned as is (``"cached": True``)."""
+                    threads: int | None = None, warm: str = "auto", warm_knobs: dict[str, Any] | None = None,
+                    k: int = 1, progress: bool = False, name: str | None = None) -> dict[str, Any]:
+    """Solve ``game`` (GTOpen abstractions only) and store it. Returns the solve
+    metrics; an already-stored game is returned as is (``"cached": True``).
+
+    ``warm``: ``"auto"`` warm-starts from the library only when ``iterations``
+    is at most ``WARM_MAX_ITERATIONS`` (and the library has same-family games);
+    ``"on"`` / ``"off"`` force it."""
+    if warm not in ("auto", "on", "off"):
+        raise ValueError("warm must be auto, on or off")
     if not isinstance(game.abstraction, gtopen.GTOpenAbstraction):
         raise ValueError("on-demand solving needs a GTOpen abstraction")
     existing = store.lookup(game)
     if existing is not None:
         return {**existing.strategy.meta["metrics"], "key": existing.strategy.key, "cached": True}
-    profile, source = warm_profile(store, game, k=k)
-    knobs = {**WARM_DEFAULTS, **(warm or {})}
+    use_warm = warm == "on" or (warm == "auto" and iterations <= WARM_MAX_ITERATIONS)
+    profile, source = warm_profile(store, game, k=k) if use_warm else (None, {})
+    knobs = {**WARM_DEFAULTS, **(warm_knobs or {})}
     start = gtopen.WarmStart(profile, **knobs) if profile else None
     key = strategy_key(game)
     config = SolverConfig(name=name or f"ondemand_{key[:12]}", game=game, chips_per_bb=game.big_blind,
