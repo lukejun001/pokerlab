@@ -65,6 +65,13 @@ What the table shows:
   to go below a few bb/100. Generation continues at about 5 solves
   an hour.
 
+**Other variables.** The model trained on stacks only (44 solves, all 6-max with the base rake) was
+scored on varied held-out games (seed 12; `--vary`: 2–6 players, rake 0–6%, various caps):
+- **6-max games with a different rake** came out fine: 6.7 and 17.6 bb/100.
+- **Games with fewer players** failed: 160–360 bb/100. The network had never seen them.
+
+A second generator (`--vary`, seed 102) now produces such games, sharing the CPU with the 6-max one.
+
 ## Stage 2: heads-up postflop search
 
 **Solver.** `postflop-cli` (new, in the fork) solves one heads-up spot within an iteration or time

@@ -1,0 +1,188 @@
+{
+  "model": "models/preflop_net.pt",
+  "extra": {
+    "train_solves": [
+      "solve_101_0007.npz",
+      "solve_101_0004.npz",
+      "solve_lib_e7012923d7a8.npz",
+      "solve_lib_88dfa9bb89c2.npz",
+      "solve_101_0002.npz",
+      "solve_101_0005.npz",
+      "solve_lib_af7dc75a6609.npz",
+      "solve_lib_73589e80fd18.npz",
+      "solve_lib_6d2a0bef679d.npz",
+      "solve_lib_38246d2b14ad.npz",
+      "solve_101_0012.npz",
+      "solve_lib_f57301d4b8b7.npz",
+      "solve_lib_a42e8ba5d5e0.npz",
+      "solve_101_0025.npz",
+      "solve_101_0011.npz",
+      "solve_101_0019.npz",
+      "solve_101_0013.npz",
+      "solve_101_0026.npz",
+      "solve_101_0018.npz",
+      "solve_101_0001.npz",
+      "solve_101_0022.npz",
+      "solve_101_0021.npz",
+      "solve_101_0020.npz",
+      "solve_lib_47fad9028344.npz",
+      "solve_101_0027.npz",
+      "solve_lib_4bc8f2b7fcf9.npz",
+      "solve_lib_9bd624b321a7.npz",
+      "solve_lib_937da493627e.npz",
+      "solve_101_0023.npz",
+      "solve_lib_d861399d6747.npz",
+      "solve_101_0006.npz",
+      "solve_101_0014.npz",
+      "solve_101_0003.npz",
+      "solve_101_0009.npz",
+      "solve_101_0015.npz",
+      "solve_101_0016.npz",
+      "solve_101_0000.npz",
+      "solve_lib_3a102dc5d202.npz",
+      "solve_101_0010.npz",
+      "solve_101_0008.npz"
+    ],
+    "val_solves": [
+      "solve_101_0017.npz",
+      "solve_lib_ac7907c2e727.npz",
+      "solve_101_0024.npz",
+      "solve_lib_2bf145717b6c.npz"
+    ],
+    "nodes": 345757,
+    "epochs": 80,
+    "train_s": 4710.2,
+    "opp_power": 0.5
+  },
+  "rows": [
+    {
+      "stacks_bb": [
+        105,
+        108,
+        29,
+        21,
+        52
+      ],
+      "rake_pct": 0.045,
+      "rake_cap_bb": 2.0,
+      "nash_conv_bb100": 159.963,
+      "br_gap_bb100": [
+        7.42,
+        42.34,
+        38.62,
+        56.05,
+        15.53
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.65,
+      "nodes": 1805
+    },
+    {
+      "stacks_bb": [
+        91,
+        82,
+        106,
+        29
+      ],
+      "rake_pct": 0.05,
+      "rake_cap_bb": 1.0,
+      "nash_conv_bb100": 361.799,
+      "br_gap_bb100": [
+        75.52,
+        50.33,
+        110.84,
+        125.1
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.39,
+      "nodes": 365
+    },
+    {
+      "stacks_bb": [
+        197,
+        23,
+        158,
+        24,
+        113,
+        47
+      ],
+      "rake_pct": 0.05,
+      "rake_cap_bb": null,
+      "nash_conv_bb100": 6.699,
+      "br_gap_bb100": [
+        0.91,
+        0.36,
+        0.87,
+        1.03,
+        1.94,
+        1.59
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 2.31,
+      "nodes": 9150
+    },
+    {
+      "stacks_bb": [
+        23,
+        202,
+        72,
+        25,
+        242,
+        219
+      ],
+      "rake_pct": 0.0,
+      "rake_cap_bb": 2.0,
+      "nash_conv_bb100": 17.566,
+      "br_gap_bb100": [
+        0.69,
+        2.16,
+        2.4,
+        1.4,
+        4.16,
+        6.76
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 2.51,
+      "nodes": 9558
+    },
+    {
+      "stacks_bb": [
+        78,
+        186
+      ],
+      "rake_pct": 0.06,
+      "rake_cap_bb": 0.06,
+      "nash_conv_bb100": 350.504,
+      "br_gap_bb100": [
+        314.14,
+        36.36
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.17,
+      "nodes": 7
+    },
+    {
+      "stacks_bb": [
+        187,
+        81
+      ],
+      "rake_pct": 0.06,
+      "rake_cap_bb": null,
+      "nash_conv_bb100": 267.112,
+      "br_gap_bb100": [
+        155.86,
+        111.26
+      ],
+      "uniform_nodes": 0,
+      "knn_bb100": null,
+      "inference_s": 0.15,
+      "nodes": 7
+    }
+  ],
+  "train_rows": []
+}

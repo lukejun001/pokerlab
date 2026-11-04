@@ -24,7 +24,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from preflop_data import OUT as DATA  # noqa: E402
-from preflop_data import class_weights, game_from_meta, load  # noqa: E402
+from preflop_data import class_weights, game_from_meta, load, random_spec  # noqa: E402
 from stack_library import game_for, random_stacks  # noqa: E402
 
 from pokerlab.solver import gtopen  # noqa: E402
@@ -178,20 +178,23 @@ def knn_reference() -> dict[tuple, float]:
     return {tuple(r["stacks_bb"]): r["nash_conv_bb100"] for r in rows if r["set"] == "holdout" and r["k"] == 1}
 
 
-def evaluate(model, tests: int, threads: int, seed: int = 11, log=print) -> list[dict]:
-    rng = random.Random(seed)
-    vectors = [random_stacks(rng) for _ in range(tests)]
-    ref = knn_reference()
+def evaluate(model, tests: int, threads: int, seed: int = 11, log=print, vary: bool = False) -> list[dict]:
+    """Held-out games: 6-max stack vectors (seed 11), or with ``vary`` games that also vary
+    players dealt and rake (seed 12; no library baseline there)."""
+    rng = random.Random(12 if vary else seed)
+    specs = [random_spec(rng, True) if vary else {"stacks_bb": random_stacks(rng)} for _ in range(tests)]
+    ref = {} if vary else knn_reference()
     rows = []
-    for stacks in vectors:
-        _, game = game_for(stacks)
+    for spec in specs:
+        stacks = spec["stacks_bb"]
+        game = game_from_meta(spec)
         t0 = time.perf_counter()
         tree = python_tree(game)
         anchor = anchor_tables(game, tree) if getattr(model, "residual", False) else None
         profile = net.profile_for(model, game, tree, anchors=anchor)
         infer_s = time.perf_counter() - t0
         ev = gtopen.evaluate(game, profile, threads=threads)
-        row = {"stacks_bb": stacks, "nash_conv_bb100": round(100 * ev["nash_conv_bb"], 3),
+        row = {**spec, "nash_conv_bb100": round(100 * ev["nash_conv_bb"], 3),
                "br_gap_bb100": [round(100 * g, 2) for g in ev["br_gaps_bb"]], "uniform_nodes": ev["uniform_nodes"],
                "knn_bb100": ref.get(tuple(stacks)), "inference_s": round(infer_s, 2), "nodes": len(tree)}
         rows.append(row)
@@ -200,7 +203,8 @@ def evaluate(model, tests: int, threads: int, seed: int = 11, log=print) -> list
 
 
 def solve_files(limit: int | None) -> list[Path]:
-    files = sorted(DATA.glob("solve_lib_*.npz")) + sorted(DATA.glob("solve_101_*.npz"))
+    files = (sorted(DATA.glob("solve_lib_*.npz")) + sorted(DATA.glob("solve_101_*.npz"))
+             + sorted(DATA.glob("solve_102_*.npz")))
     return files[:limit] if limit else files
 
 
@@ -231,14 +235,14 @@ def evaluate_train(model, names: list[str], threads: int, log=print) -> list[dic
 def cmd_evaluate(args) -> None:
     model, extra = net.load_model(args.model)
     train_rows = evaluate_train(model, extra.get("train_solves", [])[: args.on_train], args.threads) if args.on_train else []
-    rows = evaluate(model, args.tests, args.threads)
+    rows = evaluate(model, args.tests, args.threads, vary=args.vary)
     nc = [r["nash_conv_bb100"] for r in rows]
     knn = [r["knn_bb100"] for r in rows if r["knn_bb100"] is not None]
-    print(f"network median {np.median(nc):.2f} bb/100 (min {min(nc):.2f}, max {max(nc):.2f}); "
-          f"library k=1 median {np.median(knn):.2f}")
+    print(f"network median {np.median(nc):.2f} bb/100 (min {min(nc):.2f}, max {max(nc):.2f})"
+          + (f"; library k=1 median {np.median(knn):.2f}" if knn else ""))
     if train_rows:
         print(f"on training games: median {np.median([r['nash_conv_bb100'] for r in train_rows]):.2f} bb/100")
-    write_json(REPORTS / f"eval_{Path(args.model).stem}.json",
+    write_json(REPORTS / f"eval_{Path(args.model).stem}{'_vary' if args.vary else ''}.json",
                {"model": args.model, "extra": extra, "rows": rows, "train_rows": train_rows})
 
 
@@ -291,6 +295,7 @@ def main() -> None:
     e.add_argument("--tests", type=int, default=10)
     e.add_argument("--threads", type=int, default=4)
     e.add_argument("--on-train", type=int, default=0, help="also score this many training games")
+    e.add_argument("--vary", action="store_true", help="held-out games that also vary players dealt and rake")
     e.set_defaults(func=cmd_evaluate)
     c = sub.add_parser("curve")
     common(c)
