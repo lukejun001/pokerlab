@@ -24,7 +24,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from preflop_data import OUT as DATA  # noqa: E402
-from preflop_data import class_weights, load  # noqa: E402
+from preflop_data import class_weights, game_from_meta, load  # noqa: E402
 from stack_library import game_for, random_stacks  # noqa: E402
 
 from pokerlab.solver import gtopen  # noqa: E402
@@ -45,7 +45,7 @@ def encoded(path: Path, opp_power: float) -> dict[str, np.ndarray]:
             arrays = dict(d)
     else:
         d = load(path)
-        _, game = game_for(d["meta"]["stacks_bb"])
+        game = game_from_meta(d["meta"])
         feats, masks = net.encode_nodes(game, d["histories"], d["actions"])
         targets = np.zeros((len(d["histories"]), net.NUM_CLASSES, len(net.SLOTS)), dtype=np.uint8)
         off = 0
@@ -93,9 +93,11 @@ def anchors(path: Path) -> np.ndarray:
         with np.load(cache) as d:
             return d["anchor"]
     d = load(path)
-    _, game = game_for(d["meta"]["stacks_bb"])
+    game = game_from_meta(d["meta"])
     tree = dict(zip(d["histories"], d["actions"]))
-    profile = anchor_tables(game, tree, exclude=d["meta"].get("key"))
+    # Borrowing needs the library's family (6-max, base rake): other games get a uniform anchor.
+    same_family = len(d["meta"]["stacks_bb"]) == 6 and "rake_pct" not in d["meta"]
+    profile = anchor_tables(game, tree, exclude=d["meta"].get("key")) if same_family else {}
     out = np.full((len(d["histories"]), net.NUM_CLASSES, len(net.SLOTS)), 0.25, dtype=np.float16)
     for k, h in enumerate(d["histories"]):
         if h in profile:

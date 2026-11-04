@@ -113,23 +113,53 @@ def push(paths: list[Path], message: str) -> None:
             time.sleep(10)
 
 
+RAKE_PCTS = (0.0, 0.025, 0.045, 0.05, 0.06)
+RAKE_CAPS_BB = (None, 0.06, 1.0, 2.0, 3.0)  # None = uncapped; 0.06 is the base config's cap
+PLAYER_WEIGHTS = {6: 0.4, 5: 0.2, 4: 0.15, 3: 0.15, 2: 0.1}
+
+
+def random_spec(rng: random.Random, vary: bool) -> dict:
+    """A game to solve: random stacks; with ``vary`` also players dealt and rake structure."""
+    if not vary:
+        return {"stacks_bb": random_stacks(rng)}
+    n = rng.choices(list(PLAYER_WEIGHTS), weights=list(PLAYER_WEIGHTS.values()))[0]
+    return {"stacks_bb": random_stacks(rng, n), "rake_pct": rng.choice(RAKE_PCTS),
+            "rake_cap_bb": rng.choice(RAKE_CAPS_BB)}
+
+
+def game_from_meta(meta: dict):
+    """The game a training file was solved in (base config, its stacks, and any rake override)."""
+    import dataclasses
+
+    from pokerlab.engine.rake import RakeConfig
+
+    _, game = game_for(meta["stacks_bb"])
+    if "rake_pct" in meta:
+        cap = meta.get("rake_cap_bb")
+        game = dataclasses.replace(game, rake=RakeConfig(
+            percentage=meta["rake_pct"], cap=None if cap is None else int(round(cap * game.big_blind)),
+            no_flop_no_drop=True))
+    return game
+
+
 def cmd_generate(args) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     rng = random.Random(args.seed)
-    vectors = [random_stacks(rng) for _ in range(args.start + args.count)]
+    specs = [random_spec(rng, args.vary) for _ in range(args.start + args.count)]
     pending: list[Path] = []
     for i in range(args.start, args.start + args.count):
         path = OUT / f"solve_{args.seed}_{i:04d}.npz"
         if path.exists():
             continue
-        stacks = vectors[i]
-        _, game = game_for(stacks)
+        spec = specs[i]
+        stacks = spec["stacks_bb"]
+        game = game_from_meta(spec)
         t0 = time.perf_counter()
         out = gtopen.run(game, args.iterations, check_every=0, threads=args.threads, progress=False)
         m = out["metrics"]
         final = m["checkpoints"][-1]
         data = compact(out, game.n, args.min_reach)
-        meta = {"stacks_bb": stacks, "seed": args.seed, "index": i, "iterations": m["iterations"],
+        meta = {**spec, "seed": args.seed, "index": i, "iterations": m["iterations"],
                 "nash_conv_bb100": round(100 * final["nash_conv_bb"], 3), "evs_bb": final["evs_bb"],
                 "solve_s": round(m["solve_s"], 1), "wall_s": round(time.perf_counter() - t0, 1),
                 "threads": m["threads"], "action_nodes": m["action_nodes"], "kept_nodes": len(data["actors"]),
@@ -198,6 +228,7 @@ def main() -> None:
     g.add_argument("--threads", type=int, default=4)
     g.add_argument("--seed", type=int, default=101)
     g.add_argument("--min-reach", type=float, default=1e-3)
+    g.add_argument("--vary", action="store_true", help="also vary players dealt (2-6) and the rake structure")
     g.add_argument("--push-every", type=int, default=0, help="commit and push data every N solves (0 = never)")
     g.set_defaults(func=cmd_generate)
     f = sub.add_parser("from-store")
