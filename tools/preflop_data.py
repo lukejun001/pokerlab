@@ -149,6 +149,34 @@ def cmd_generate(args) -> None:
         push(pending, f"Preflop training data: last {len(pending)} solve(s)")
 
 
+def cmd_from_store(args) -> None:
+    """Convert the library's stored solves (same family as the base game) to training files."""
+    from pokerlab.solver.generalize import Library
+    from pokerlab.solver.store import StrategyStore
+
+    store = StrategyStore()
+    _, template = game_for([100] * 6)
+    OUT.mkdir(parents=True, exist_ok=True)
+    for key, stacks in Library(store, template).entries:
+        path = OUT / f"solve_lib_{key[:12]}.npz"
+        if path.exists():
+            continue
+        s = store.load(key)
+        out = {"class_labels": list(CLASS_LABELS),
+               "nodes": [{"history": h, "actor": actor, "actions": list(actions),
+                          "strategy": s.probs[off:off + len(actions)]} for h, (off, actions, actor) in s.nodes.items()]}
+        data = compact(out, len(stacks), args.min_reach)
+        m = s.meta["metrics"]
+        meta = {"stacks_bb": stacks, "seed": "library", "key": key, "iterations": m.get("iterations"),
+                "nash_conv_bb100": m.get("final_nash_conv_bb100"), "kept_nodes": len(data["actors"]),
+                "action_nodes": len(s.nodes), "min_reach": args.min_reach, "wall_s": m.get("wall_s")}
+        data["meta"] = np.frombuffer(zlib.compress(json.dumps(meta).encode()), dtype=np.uint8)
+        buf = io.BytesIO()
+        np.savez_compressed(buf, **data)
+        path.write_bytes(buf.getvalue())
+        print(path.name, stacks, meta["nash_conv_bb100"], meta["kept_nodes"])
+
+
 def cmd_summary(args) -> None:
     files = sorted(OUT.glob("solve_*.npz"))
     rows = [load(p)["meta"] for p in files]
@@ -172,6 +200,9 @@ def main() -> None:
     g.add_argument("--min-reach", type=float, default=1e-3)
     g.add_argument("--push-every", type=int, default=0, help="commit and push data every N solves (0 = never)")
     g.set_defaults(func=cmd_generate)
+    f = sub.add_parser("from-store")
+    f.add_argument("--min-reach", type=float, default=1e-3)
+    f.set_defaults(func=cmd_from_store)
     s = sub.add_parser("summary")
     s.set_defaults(func=cmd_summary)
     args = p.parse_args()
