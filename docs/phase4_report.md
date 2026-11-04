@@ -44,7 +44,8 @@ borrowing is the Phase 3 k = 1 approximation on the same vectors):
 | Bilinear head, 100 epochs | 26 | 17.4 (10 tests) | 56 | | 3.4 |
 | MLP head, 60 epochs | 26 | 11.3 (10 tests) | 23 | 7 of 10 | 3.3 |
 | MLP head, 80 epochs | 33 | 10.6 (20 tests) | 28 | 17 of 20 | 3.3 |
-| **MLP head, 80 epochs** | **44** | **6.6 (20 tests)** | **19** | **19 of 20** | **3.05** |
+| MLP head, 80 epochs | 44 | 6.6 (20 tests) | 19 | 19 of 20 | 3.05 |
+| **MLP head, 80 epochs** | **81 (61 six-max + 20 varied)** | **5.1 (20 tests)** | **15** | **20 of 20** | **3.1** |
 | MLP + anchor correction, 80 epochs | 33 | 25.8 (20 tests) | 57 | 6 of 20 | 8.6 |
 | Library borrowing (k = 1) | 16 solves | 16.1 (10 tests) / 19.3 (20 tests) | 38 | | |
 
@@ -71,6 +72,11 @@ scored on varied held-out games (seed 12; `--vary`: 2–6 players, rake 0–6%, 
 - **Games with fewer players** failed: 160–360 bb/100. The network had never seen them.
 
 A second generator (`--vary`, seed 102) now produces such games, sharing the CPU with the 6-max one.
+After adding 20 varied solves (81 in total), the same varied held-out set scores:
+- **Overall:** median 15.4 bb/100 (range 1.9–44.6), down from 214.
+- **By table size:** 6-max 4–16 bb/100; 3- and 5-handed 2–29; 4-handed and heads-up 9–45.
+- **6-max did not suffer:** its own held-out set improved to a median of 5.1, beating borrowing on all
+  20 vectors.
 
 ## Stage 2: heads-up postflop search
 
