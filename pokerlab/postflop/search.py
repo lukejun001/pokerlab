@@ -7,10 +7,13 @@ chance node that closed the line actually played). The street is then solved
 within a time budget by the fork's ``postflop-cli`` and every node of the
 street is exported, so the whole street plays from one solve.
 
-The flop is depth-limited for speed: its tree has no betting on the turn and
-river (check-down leaves), a crude stand-in for a learned value function.
-Turn and river trees are full. Exploitability is reported for each solve in
-its own tree (the flop number therefore ignores later-street play).
+The flop is depth-limited (``Spot::new_depth_limited`` in the fork): betting
+ends with the flop and each closing line is valued at an equity leaf, the
+check-down value over all runouts. That solves a richer flop tree to
+convergence in about a second, but the leaf ignores later betting; it is the
+slot a learned value function would fill. Turn and river trees are full.
+Exploitability is reported for each solve in its own tree (the flop number
+therefore ignores later-street play).
 
 Opponent bet sizes are translated to the nearest size in the tree (log
 distance of the street-total amount); all-ins map to the all-in action.
@@ -39,17 +42,17 @@ STREETS = ("flop", "turn", "river")
 
 @dataclass
 class SearchSettings:
-    flop_bet: tuple[float, ...] = (33.0,)
+    flop_bet: tuple[float, ...] = (33.0, 75.0)
     flop_raise: tuple[float, ...] = (60.0,)
     turn_bet: tuple[float, ...] = (75.0,)
     turn_raise: tuple[float, ...] = (60.0,)
     river_bet: tuple[float, ...] = (75.0,)
     river_raise: tuple[float, ...] = (60.0,)
     max_raises: int = 3
-    budget_s: dict[str, float] = field(default_factory=lambda: {"flop": 45.0, "turn": 15.0, "river": 5.0})
-    target_exploit_pct: float = 0.5
+    budget_s: dict[str, float] = field(default_factory=lambda: {"flop": 10.0, "turn": 15.0, "river": 5.0})
+    target_exploit_pct: float = 0.3
     threads: int = 2
-    flop_check_down: bool = True  # depth-limit the flop solve (no turn/river betting)
+    flop_depth_limited: bool = True  # equity leaves after the flop (else the full three-street tree)
 
 
 def class_combos() -> list[list[tuple[int, int]]]:
@@ -128,10 +131,8 @@ def solve_street(street: str, board: tuple[int, ...], ranges: tuple[dict, dict],
     s = settings
     sizes = {"flop": _sizing(s.flop_bet, s.flop_raise), "turn": _sizing(s.turn_bet, s.turn_raise),
              "river": _sizing(s.river_bet, s.river_raise)}
-    none = _sizing((), ())
     per_street = [sizes["flop"], sizes["turn"], sizes["river"]]
-    if street == "flop" and s.flop_check_down:
-        per_street = [sizes["flop"], none, none]
+    depth_limited = street == "flop" and s.flop_depth_limited
     spot = {
         "board": "".join(card_str(c) for c in board),
         "range_oop": range_string(ranges[0]), "range_ip": range_string(ranges[1]),
@@ -140,7 +141,8 @@ def solve_street(street: str, board: tuple[int, ...], ranges: tuple[dict, dict],
                  "allin_threshold": 0.85, "add_allin": True, "max_raises": s.max_raises},
     }
     request = {"spot": spot, "max_iterations": 1000, "time_limit_s": s.budget_s[street],
-               "target_exploit_pct": s.target_exploit_pct, "check_every": 10, "export_street": True}
+               "target_exploit_pct": s.target_exploit_pct, "check_every": 10, "export_street": True,
+               "depth_limited": depth_limited}
     env = dict(os.environ, SOLVER_THREADS=str(s.threads))
     with tempfile.TemporaryDirectory() as tmp:
         src, dst = Path(tmp) / "in.json", Path(tmp) / "out.json"

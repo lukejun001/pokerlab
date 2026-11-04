@@ -147,7 +147,8 @@ class PostflopSearch:
         if prev is None:
             return "previous_street_not_searched"
         path = self._street_path(prev, obs, street_no - 1, obs.game.big_blind)
-        if path is None or prev.view(path) is None or prev.view(path)["node_type"] != "chance":
+        closing = prev.view(path) if path is not None else None
+        if closing is None or closing["node_type"] not in ("chance", "terminal_showdown"):
             return "previous_street_line_not_in_tree"
         new = board[-1]
         out = []
