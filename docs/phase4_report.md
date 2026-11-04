@@ -42,23 +42,51 @@ Learning curve: pending (`tools/preflop_net.py curve`).
 budget and exports every node of the root street. Each node carries the actions, both players'
 per-combo weight, reach, equity and EV, and the actor's per-combo strategy.
 
-**Speed on this machine** (2 threads, sharing the CPU with data generation; 1-size trees plus
-all-in):
+**Depth-limited flop (new in the fork).** `Spot::new_depth_limited` ends betting with the root street.
+Each line that closes it ends at an equity leaf: per-pair win/tie/lose fractions over all remaining
+runouts, computed once per spot from the river table.
+- **Exactness.** It matches the full tree with no later betting: strategies within 2e-3 and EVs within
+  1e-2 (`crates/solver/tests/equity_leaf.rs`, flop and turn roots, with rake).
+- **Speed.** About 130 times faster: 60 flop iterations take 0.11 s instead of 14.6 s.
+- **What the leaf is.** It values a line as checked down, ignoring later betting. This is the slot a
+  learned value function would fill.
+
+**Speed on this machine** (2 threads, sharing the CPU with data generation):
 
 | Root | Tree | Result |
 |---|---|---|
-| River | 51 nodes | 0.48% of pot almost instantly |
-| Turn | 8k nodes | 0.49% of pot in 10.5 s |
-| Flop, full tree | 1.6M nodes | 95% of pot after 31 s: not usable in real time |
-| Flop, betting on the flop only (check-down after) | 250k nodes | 5.7% of pot in 55 s |
+| River, full | 51 nodes | 0.48% of pot almost instantly |
+| Turn, full | 8k nodes | 0.49% of pot in 10.5 s |
+| Flop, full three-street tree | 1.6M nodes | 95% of pot after 31 s: not usable in real time |
+| Flop, betting on the flop only, all runouts in the tree | 250k nodes | 5.7% of pot in 55 s |
+| Flop, depth-limited (33% and 75% bets, 60% raise, all-in) | ~50 nodes | 0.3% of pot in 0.1–9 s |
 
-**Agent** (`pokerlab/postflop`, `SolverStrategy(postflop="search")`). Each street is re-solved
-once per hand.
-- **Flop:** depth-limited. There is no betting after the flop, a crude stand-in for a learned value
-  function at the turn. Ranges come from the preflop profile's reach along the line played.
-- **Turn and river:** full trees. Ranges are each player's reach at the chance node that closed the
-  previous street's line.
-- **Opponent sizes:** mapped to the nearest tree size.
-- **Fallback:** multiway pots and spots with a player all-in use the heuristic fallback.
+**Evaluation** (`tools/postflop_eval.py --hands 300`, `reports/phase4/postflop_main.json`).
+- **Setup:** the same seeded 6-max table (hero against TAG, LAG, CallingStation, Nit and Balanced
+  bots) at held-out stacks 63/82/206/65/72/88 bb.
+- **Preflop:** the network in both runs.
+- **Budgets:** flop 10 s, turn 15 s, river 5 s, on 2 threads.
 
-Evaluation: pending (`tools/postflop_eval.py`).
+| Hero postflop | bb/100 (± s.e.) | Postflop decisions |
+|---|---|---|
+| Search | +240 ± 97 | 126 by search (53 flop, 40 turn, 33 river); 42 multiway and 8 off-tree spots fell back |
+| Heuristic fallback | +29 ± 109 | 216 heuristic |
+
+- **Win rate.** The difference is about 1.4 standard errors, so 300 hands cannot separate the two. It
+  is a sanity check (search plays sensibly and makes no invalid actions), not a measured edge.
+
+Search quality per street (exploitability in each solve's own tree):
+
+| Street | Solves | Median | 90th percentile | Median time |
+|---|---|---|---|---|
+| Flop (depth-limited) | 50 | 0.28% of pot | 0.99% | 6.6 s |
+| Turn | 37 | 0.30% | 2.4% | 13.3 s |
+| River | 31 | 0.27% | 0.29% | 0.05 s |
+
+**What stage 2 still lacks:**
+1. **A learned value function at the flop leaf.** Its output depends on both ranges at the leaf, which
+   change every CFR iteration, so the engine must call the network inside each iteration (DeepStack's
+   design). Training it needs tens of thousands of turn solves.
+2. **Multiway pots.** 42 of the 168 postflop decisions here were multiway and fell back.
+3. **Off-tree lines.** A few spots mapped an opponent's line to a node that doesn't match the game
+   state.

@@ -1,0 +1,69 @@
+{
+  "args": {
+    "hands": 300,
+    "seed": 7,
+    "network": "models/lib16.pt",
+    "flop_s": 10,
+    "turn_s": 15,
+    "river_s": 5,
+    "threads": 2,
+    "label": "main"
+  },
+  "runs": [
+    {
+      "postflop": "search",
+      "hands": 300,
+      "bb_per_100": 239.9,
+      "se_bb_per_100": 96.9,
+      "decision_sources": {
+        "network:lib16:off_tree": 83,
+        "network:lib16": 214,
+        "fallback:postflop_multiway": 42,
+        "search:flop": 53,
+        "search:turn": 40,
+        "search:river": 33,
+        "fallback:postflop_previous_street_not_searched": 5,
+        "fallback:postflop_line_not_in_tree": 2,
+        "fallback:postflop_previous_street_line_not_in_tree": 1
+      },
+      "invalid_actions": 0,
+      "wall_s": 1005.6
+    },
+    {
+      "postflop": "fallback",
+      "hands": 300,
+      "bb_per_100": 28.6,
+      "se_bb_per_100": 109.2,
+      "decision_sources": {
+        "network:lib16:off_tree": 79,
+        "network:lib16": 215,
+        "fallback:postflop": 216
+      },
+      "invalid_actions": 0,
+      "wall_s": 4.8
+    }
+  ],
+  "solve_summary": {
+    "flop": {
+      "solves": 50,
+      "median_exploit_pct_pot": 0.2825,
+      "p90_exploit_pct_pot": 0.9917000000000001,
+      "median_solve_s": 6.645,
+      "median_iterations": 100.0
+    },
+    "turn": {
+      "solves": 37,
+      "median_exploit_pct_pot": 0.298,
+      "p90_exploit_pct_pot": 2.3755999999999986,
+      "median_solve_s": 13.3,
+      "median_iterations": 100.0
+    },
+    "river": {
+      "solves": 31,
+      "median_exploit_pct_pot": 0.273,
+      "p90_exploit_pct_pot": 0.294,
+      "median_solve_s": 0.05,
+      "median_iterations": 100.0
+    }
+  }
+}
