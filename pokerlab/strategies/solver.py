@@ -31,12 +31,24 @@ nothing; ``"queue"`` records it in the store's pending queue for
 ``"solve"`` solves it right away (``ondemand.solve_on_demand``) and plays
 the exact result (minutes per new stack vector: interactive use, not batch
 simulations). ``on_demand_iterations`` and ``on_demand_threads`` size that solve.
+
+``network`` (a model file from ``tools/preflop_net.py``) plays any stack
+vector without an exact strategy from the preflop strategy network
+(``network:<model>``), before any approximation is tried.
+
+``postflop="search"`` plays heads-up postflop spots by re-solving each street
+in real time (``pokerlab/postflop``; ``search:<street>``), with flop ranges
+from the preflop profile used this hand; other postflop spots fall back.
+``search_budget`` ({"flop": s, "turn": s, "river": s}) and ``search_threads``
+size the solves.
 """
 
 from __future__ import annotations
 
 from collections import Counter
 from typing import Any
+
+import numpy as np
 
 from pokerlab.engine.actions import Action, ActionType
 from pokerlab.engine.observations import Observation, PublicHandRecord, Street, position_labels
@@ -48,6 +60,13 @@ from pokerlab.solver.store import DEFAULT_STORE, StrategyStore
 from pokerlab.strategies.base import Strategy, load_strategy
 
 
+class _PreflopView:
+    """Just enough of an Observation for ``history_tokens``: the preflop actions."""
+
+    def __init__(self, history) -> None:
+        self.history = history
+
+
 class SolverStrategy(Strategy):
     name = "solver"
 
@@ -55,6 +74,8 @@ class SolverStrategy(Strategy):
                  fallback: str = "equity", approximate: str = "validated",
                  abstraction: dict[str, Any] | None = None, on_demand: str = "off",
                  on_demand_iterations: int | None = None, on_demand_threads: int | None = None,
+                 network: str | None = None, postflop: str = "fallback",
+                 search_budget: dict[str, float] | None = None, search_threads: int = 2,
                  **params: Any) -> None:
         super().__init__(seed, **params)
         if config is not None:
@@ -77,6 +98,19 @@ class SolverStrategy(Strategy):
         self.on_demand_threads = on_demand_threads
         self.decision_sources: Counter[str] = Counter()
         self._games: dict[tuple, tuple] = {}
+        self.network_path = network
+        self._network = None
+        if postflop not in ("fallback", "search"):
+            raise ValueError("postflop must be fallback or search")
+        self.search = None
+        if postflop == "search":
+            from pokerlab.postflop.agent import PostflopSearch
+            from pokerlab.postflop.search import SearchSettings
+
+            settings = SearchSettings(threads=search_threads)
+            if search_budget:
+                settings.budget_s.update(search_budget)
+            self.search = PostflopSearch(settings, rng=self.rng)
 
     def reset(self, seed: int | str) -> None:
         super().reset(seed)
@@ -144,6 +178,18 @@ class SolverStrategy(Strategy):
                 match = self.store.lookup(game)
         if match is not None:
             return "exact", match.strategy, f"exact:{match.strategy.key[:12]}"
+        if self.network_path and hasattr(self.abstraction, "versions"):
+            from pathlib import Path
+
+            from pokerlab.solver import network as net
+            from pokerlab.solver.generalize import python_tree
+
+            if self._network is None:
+                self._network = net.load_model(self.network_path)[0]
+            tree = python_tree(game)
+            profile = net.profile_for(self._network, game, tree)
+            table = {h: (tuple(tree[h]), t) for h, t in profile.items()}
+            return "network", table, f"network:{Path(self.network_path).stem}"
         if self.approximate == "off" or not hasattr(self.abstraction, "versions"):
             return None, None, "no_matching_strategy"
         from pokerlab.solver.generalize import Calibration, Library, approximate_profile, python_tree
@@ -164,9 +210,25 @@ class SolverStrategy(Strategy):
         table = {h: (tuple(tree[h]), t) for h, t in profile.items()}
         return "approximate", table, f"approximate:{nearest.key[:12]}@{info[calibration.stat if calibration else 'node_distance_p90']:.2f}"
 
+    def _postflop(self, obs: Observation) -> Action:
+        if self.search is None:
+            return self._fall_back(obs, "postflop")
+        ctx = self.search.contexts.get(obs.hand_id)
+        if ctx is not None and not ctx.preflop_tokens:
+            pre = [a for a in obs.history if a.street == Street.PREFLOP]
+            ctx.preflop_tokens = self.history_tokens(_PreflopView(pre), ctx.preflop_seats)
+        try:
+            action, reason = self.search.decide(obs)
+        except (RuntimeError, FileNotFoundError, KeyError, ValueError) as e:
+            action, reason = None, f"search_error:{type(e).__name__}"
+        if action is None:
+            return self._fall_back(obs, f"postflop_{reason}")
+        self.decision_sources[reason] += 1
+        return action
+
     def decide(self, obs: Observation) -> Action:
         if obs.street != Street.PREFLOP:
-            return self._fall_back(obs, "postflop")
+            return self._postflop(obs)
         seats = self.preflop_seats(obs)
         cache_key = (tuple(obs.stacks[s] + obs.bets[s] for s in seats), obs.game)
         cached = self._games.get(cache_key)
@@ -177,6 +239,18 @@ class SolverStrategy(Strategy):
         kind, source, label = cached
         if kind is None:
             return self._fall_back(obs, label)
+        if self.search is not None and obs.hand_id not in self.search.contexts:
+            from pokerlab.postflop.agent import HandContext
+
+            if kind == "exact":
+                node_table = source.node_table
+            elif kind == "network":
+                game = self.modeled_game(obs, seats)
+                node_table = lambda h, src=source, g=game: src.get(h) or self._network_node(g, h)  # noqa: E731
+            else:
+                node_table = source.get
+            self.search.remember_preflop(HandContext(obs.hand_id, seats, [], self.modeled_game(obs, seats),
+                                                     node_table))
         history = "-".join(self.history_tokens(obs, seats))
         hand = class_of(obs.hole_cards)
         if kind == "exact":
@@ -184,6 +258,10 @@ class SolverStrategy(Strategy):
         else:
             node = source.get(history)
             found = None if node is None else (node[0], node[1][:, hand])
+        if found is None and kind == "network":
+            found = self._network_off_tree(obs, seats, hand)
+            if found is not None:
+                label = label + ":off_tree"
         if found is None:
             return self._fall_back(obs, "history_not_in_abstraction")
         actions, probs = found
@@ -203,4 +281,51 @@ class SolverStrategy(Strategy):
             return Action.check()
         if kind == "c":
             return Action.call()
-        return Action.raise_to(action_amount(choice))
+        amount = action_amount(choice)
+        if obs.min_raise_to is not None and obs.max_raise_to is not None:
+            amount = max(obs.min_raise_to, min(obs.max_raise_to, amount))
+        return Action.raise_to(amount)
+
+    def _network_node(self, game: PreflopGame, history: str):
+        """(actions, actions x 169) from the network at any preflop history, or None."""
+        import torch
+
+        from pokerlab.solver import network as net
+        from pokerlab.solver.generalize import gtopen_tokens
+
+        try:
+            state, aggressor = net.StateCache(game).get(history)
+        except (IndexError, ValueError):
+            return None
+        if state.closed:
+            return None
+        actions = gtopen_tokens(game, state)
+        feats = net.features(game, state, aggressor, actions)
+        with torch.no_grad():
+            p = torch.softmax(self._network(torch.from_numpy(feats[None]),
+                                            torch.from_numpy(net.mask_of(actions)[None])), -1)[0].numpy()
+        return tuple(actions), np.stack([p[:, net.slot(t)] for t in actions])
+
+    def _network_off_tree(self, obs: Observation, seats: list[int], hand: int):
+        """The network's strategy at a preflop state the tree does not contain
+        (e.g. after an opponent's off-tree raise size): it reads the betting
+        state, not a tree node, so it can play any line."""
+        import torch
+
+        from pokerlab.solver import network as net
+        from pokerlab.solver.generalize import gtopen_tokens
+
+        game = self.modeled_game(obs, seats)
+        tokens = self.history_tokens(obs, seats)
+        try:
+            state, aggressor = net.StateCache(game).get("-".join(tokens))
+        except (IndexError, ValueError):
+            return None
+        if state.closed or seats[state.actor] != obs.seat:
+            return None
+        actions = gtopen_tokens(game, state)
+        feats = net.features(game, state, aggressor, actions)
+        mask = net.mask_of(actions)
+        with torch.no_grad():
+            p = torch.softmax(self._network(torch.from_numpy(feats[None]), torch.from_numpy(mask[None])), -1)[0, hand]
+        return tuple(actions), np.array([float(p[net.slot(t)]) for t in actions])
