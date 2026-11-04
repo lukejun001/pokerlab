@@ -141,11 +141,10 @@ def train(files: list[Path], epochs: int, args, log=print):
         """Reach-weighted cross-entropy. With ``sample`` > 0, each row's hands are drawn in
         proportion to their weights (an unbiased estimate of the same loss at sample/169 the cost)."""
         if sample:
+            # Fixed batch shapes (rows with no weight just contribute nothing): filtering rows gave
+            # every batch a new shape, and the allocator's fragmentation grew the process to 13 GB.
             wsum = w.sum(-1)
-            keep = wsum > 0
-            x, m, t, w, wsum = x[keep], m[keep], t[keep], w[keep], wsum[keep]
-            a = None if a is None else a[keep]
-            hands = torch.multinomial(w, sample, replacement=True)  # (B, K)
+            hands = torch.multinomial(w + 1e-12, sample, replacement=True)  # (B, K)
             rows = torch.arange(len(x))[:, None]
             logp = torch.log_softmax(model.forward_hands(x, m, hands, None if a is None else a[rows, hands].float()),
                                      dim=-1)
