@@ -13,9 +13,9 @@ seed 101; the library used seed 7, held-out tests use seed 11) is saved as
 - ``opp_reach``: (nodes,) float32, product over the other seats of their mean reach;
 - ``meta``: stacks, solve metrics and final exact NashConv (JSON).
 
-Nodes are kept when their reach weight (mean actor reach times opponent
-reach) is at least ``--min-weight``; dropped nodes matter little to
-exploitability. The base game (blinds, rake, abstraction) is
+Nodes are kept when the actor reaches them with some hand class (largest
+own reach at least ``--min-reach``): a node only opponents' deviations reach
+still matters to exploitability, since best responses deviate into it. The base game (blinds, rake, abstraction) is
 configs/6max_gtopen_asymmetric.yaml; only the stacks vary.
 """
 
@@ -50,7 +50,7 @@ def class_weights() -> np.ndarray:
     return w / w.sum()
 
 
-def compact(out: dict, n: int, min_weight: float) -> dict[str, np.ndarray]:
+def compact(out: dict, n: int, min_reach: float) -> dict[str, np.ndarray]:
     order = [out["class_labels"].index(label) for label in CLASS_LABELS]
     nodes = {node["history"]: node for node in out["nodes"]}
     w0 = class_weights()
@@ -61,8 +61,7 @@ def compact(out: dict, n: int, min_weight: float) -> dict[str, np.ndarray]:
         actor = node["actor"]
         table = np.asarray(node["strategy"], dtype=np.float64)[:, order]
         opp = float(np.prod([r[i].sum() for i in range(n) if i != actor]))
-        weight = opp * r[actor].sum()
-        if weight >= min_weight:
+        if (r[actor] / w0).max() >= min_reach:
             keep_h.append(history)
             keep_a.append(node["actions"])
             keep_actor.append(actor)
@@ -129,12 +128,12 @@ def cmd_generate(args) -> None:
         out = gtopen.run(game, args.iterations, check_every=0, threads=args.threads, progress=False)
         m = out["metrics"]
         final = m["checkpoints"][-1]
-        data = compact(out, game.n, args.min_weight)
+        data = compact(out, game.n, args.min_reach)
         meta = {"stacks_bb": stacks, "seed": args.seed, "index": i, "iterations": m["iterations"],
                 "nash_conv_bb100": round(100 * final["nash_conv_bb"], 3), "evs_bb": final["evs_bb"],
                 "solve_s": round(m["solve_s"], 1), "wall_s": round(time.perf_counter() - t0, 1),
                 "threads": m["threads"], "action_nodes": m["action_nodes"], "kept_nodes": len(data["actors"]),
-                "min_weight": args.min_weight, "fork_commit": m["fork_commit"],
+                "min_reach": args.min_reach, "fork_commit": m["fork_commit"],
                 **gtopen.GTOpenAbstraction().versions}
         data["meta"] = np.frombuffer(zlib.compress(json.dumps(meta).encode()), dtype=np.uint8)
         buf = io.BytesIO()
@@ -170,7 +169,7 @@ def main() -> None:
     g.add_argument("--iterations", type=int, default=100)
     g.add_argument("--threads", type=int, default=4)
     g.add_argument("--seed", type=int, default=101)
-    g.add_argument("--min-weight", type=float, default=1e-6)
+    g.add_argument("--min-reach", type=float, default=1e-3)
     g.add_argument("--push-every", type=int, default=0, help="commit and push data every N solves (0 = never)")
     g.set_defaults(func=cmd_generate)
     s = sub.add_parser("summary")
