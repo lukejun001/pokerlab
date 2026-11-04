@@ -224,8 +224,8 @@ def evaluate(model, tests: int, threads: int, seed: int = 11, log=print, vary: b
 
 
 def solve_files(limit: int | None) -> list[Path]:
-    files = (sorted(DATA.glob("solve_lib_*.npz")) + sorted(DATA.glob("solve_101_*.npz"))
-             + sorted(DATA.glob("solve_102_*.npz")))
+    # Library solves first, then every generated stream (seed 101/102 here, others from parallel sessions).
+    files = sorted(DATA.glob("solve_lib_*.npz")) + sorted(p for p in DATA.glob("solve_*.npz") if "_lib_" not in p.name)
     return files[:limit] if limit else files
 
 

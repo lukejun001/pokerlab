@@ -96,21 +96,31 @@ def load(path: Path) -> dict:
 
 
 def push(paths: list[Path], message: str) -> None:
-    """Commit just these files and push; failures are reported, never fatal."""
+    """Commit just these files and push; with several sessions pushing to one branch, a
+    rejected push is rebased onto the remote and retried. Failures are reported, never fatal."""
     rel = [str(p.relative_to(ROOT)) for p in paths]
-    for _ in range(3):
+
+    def git(*args, timeout=300):
+        return subprocess.run(["git", "-C", str(ROOT), *args], check=True, capture_output=True, text=True,
+                              timeout=timeout)
+
+    try:
+        git("add", "--", *rel)
+        git("commit", "-q", "-m", message, "--", *rel)
+    except subprocess.CalledProcessError as e:
+        print(f"commit failed ({e.stderr.strip()[:200]})", file=sys.stderr, flush=True)
+    branch = git("branch", "--show-current").stdout.strip()
+    for attempt in range(6):
         try:
-            subprocess.run(["git", "-C", str(ROOT), "add", "--", *rel], check=True, capture_output=True)
-            subprocess.run(["git", "-C", str(ROOT), "commit", "-q", "-m", message, "--", *rel],
-                           check=True, capture_output=True)
-            branch = subprocess.run(["git", "-C", str(ROOT), "branch", "--show-current"], check=True,
-                                    capture_output=True, text=True).stdout.strip()
-            subprocess.run(["git", "-C", str(ROOT), "push", "-q", "origin", branch], check=True,
-                           capture_output=True, timeout=300)
+            git("push", "-q", "origin", branch)
             return
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
-            print(f"push failed ({e}); retrying", file=sys.stderr, flush=True)
-            time.sleep(10)
+            print(f"push failed (attempt {attempt + 1}): {getattr(e, 'stderr', '')!s:.200}", file=sys.stderr, flush=True)
+            try:
+                git("pull", "-q", "--rebase", "origin", branch)
+            except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e2:
+                print(f"pull failed: {getattr(e2, 'stderr', '')!s:.200}", file=sys.stderr, flush=True)
+            time.sleep(5 * 2 ** attempt)
 
 
 RAKE_PCTS = (0.0, 0.025, 0.045, 0.05, 0.06)
