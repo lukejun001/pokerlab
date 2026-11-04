@@ -81,6 +81,87 @@
           "nash_conv_bb100": 2.956
         }
       ]
+    },
+    {
+      "stacks_bb": [
+        63,
+        82,
+        206,
+        65,
+        72,
+        88
+      ],
+      "variant": "r10s30t60",
+      "approximation": {
+        "distance": 0.462,
+        "node_distance_mean": 0.28,
+        "node_distance_p90": 0.462,
+        "node_distance_max": 1.3863,
+        "first_in_distance_max": 0.4308,
+        "untranslated_nodes": 48
+      },
+      "approximation_s": 5.2,
+      "warm_start": {
+        "cold_nodes": 48,
+        "regret_scale": 10.0,
+        "seeded_nodes": 10374,
+        "sum_scale": 30.0,
+        "warm_iterations": 60
+      },
+      "threads": 4,
+      "wall_s": 843.27,
+      "curve": [
+        {
+          "iteration": 20,
+          "solve_s": 62.4,
+          "nash_conv_bb100": 20.375
+        },
+        {
+          "iteration": 40,
+          "solve_s": 150.9,
+          "nash_conv_bb100": 10.869
+        },
+        {
+          "iteration": 60,
+          "solve_s": 238.8,
+          "nash_conv_bb100": 6.78
+        },
+        {
+          "iteration": 80,
+          "solve_s": 322.5,
+          "nash_conv_bb100": 4.664
+        },
+        {
+          "iteration": 100,
+          "solve_s": 405.3,
+          "nash_conv_bb100": 3.437
+        },
+        {
+          "iteration": 120,
+          "solve_s": 485.2,
+          "nash_conv_bb100": 2.67
+        },
+        {
+          "iteration": 140,
+          "solve_s": 559.3,
+          "nash_conv_bb100": 2.144
+        },
+        {
+          "iteration": 160,
+          "solve_s": 632.5,
+          "nash_conv_bb100": 1.782
+        },
+        {
+          "iteration": 180,
+          "solve_s": 703.4,
+          "nash_conv_bb100": 1.518
+        },
+        {
+          "iteration": 200,
+          "solve_s": 774.7,
+          "nash_conv_bb100": 1.316
+        }
+      ]
     }
   ]
 }
