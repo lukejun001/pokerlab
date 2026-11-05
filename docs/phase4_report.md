@@ -46,7 +46,8 @@ borrowing is the Phase 3 k = 1 approximation on the same vectors):
 | MLP head, 80 epochs | 33 | 10.6 (20 tests) | 28 | 17 of 20 | 3.3 |
 | MLP head, 80 epochs | 44 | 6.6 (20 tests) | 19 | 19 of 20 | 3.05 |
 | MLP head, 80 epochs | 81 (61 six-max + 20 varied) | 5.1 (20 tests) | 15 | 20 of 20 | 3.1 |
-| **MLP head, 80 epochs, 32 sampled hands per node** | **143 (16 library + 56 six-max + 71 varied)** | **4.7 (20 tests)** | **10** | **20 of 20** | **3.2** |
+| MLP head, 80 epochs, 32 sampled hands per node | 143 (16 library + 56 six-max + 71 varied) | 4.7 (20 tests) | 10 | 20 of 20 | 3.2 |
+| **Same, more data (parallel worker sessions)** | **241 (16 library + 84 six-max + 141 varied)** | **4.9 (20 tests)** | **13** | **20 of 20** | **3.9** |
 | MLP + anchor correction, 80 epochs | 33 | 25.8 (20 tests) | 57 | 6 of 20 | 8.6 |
 | Library borrowing (k = 1) | 16 solves | 16.1 (10 tests) / 19.3 (20 tests) | 38 | | |
 
@@ -82,6 +83,14 @@ After adding 20 varied solves (81 in total), the same varied held-out set scores
 With 143 solves (71 of them varied) the varied set improved again:
 - **Overall:** median 10.0 bb/100.
 - **By table size** (medians): heads-up 9.8, 3-handed 2.4, 4-handed 11.0, 5-handed 10.3, 6-max 8.4.
+
+With 241 solves (141 of them varied, many from a parallel worker session), the varied set nearly
+halved again:
+- **Overall:** median 5.8 bb/100, mean 7.2.
+- **By table size:** heads-up 3.4, 3-handed 1.2, 4-handed 7.8, 5-handed 5.8, 6-max 7.9.
+- **6-max:** stayed level, median 4.9 against 4.7 (within noise), worst 13.
+
+This model is `models/preflop_net.pt`.
 
 Training now samples 32 hands per node in proportion to their loss weight. That estimates the same
 loss without bias at a fraction of the cost: 48 s per epoch on 143 solves, where the full loss took
