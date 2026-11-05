@@ -47,7 +47,8 @@ borrowing is the Phase 3 k = 1 approximation on the same vectors):
 | MLP head, 80 epochs | 44 | 6.6 (20 tests) | 19 | 19 of 20 | 3.05 |
 | MLP head, 80 epochs | 81 (61 six-max + 20 varied) | 5.1 (20 tests) | 15 | 20 of 20 | 3.1 |
 | MLP head, 80 epochs, 32 sampled hands per node | 143 (16 library + 56 six-max + 71 varied) | 4.7 (20 tests) | 10 | 20 of 20 | 3.2 |
-| **Same, more data (parallel worker sessions)** | **241 (16 library + 84 six-max + 141 varied)** | **4.9 (20 tests)** | **13** | **20 of 20** | **3.9** |
+| Same, more data (parallel worker session) | 241 (16 library + 84 six-max + 141 varied) | 4.9 (20 tests) | 13 | 20 of 20 | 3.9 |
+| **Final: same, 40 epochs** | **302 (16 library + 102 six-max + 184 varied)** | **4.6 (20 tests)** | **12** | **20 of 20** | **4.1** |
 | MLP + anchor correction, 80 epochs | 33 | 25.8 (20 tests) | 57 | 6 of 20 | 8.6 |
 | Library borrowing (k = 1) | 16 solves | 16.1 (10 tests) / 19.3 (20 tests) | 38 | | |
 
@@ -90,7 +91,14 @@ halved again:
 - **By table size:** heads-up 3.4, 3-handed 1.2, 4-handed 7.8, 5-handed 5.8, 6-max 7.9.
 - **6-max:** stayed level, median 4.9 against 4.7 (within noise), worst 13.
 
-This model is `models/preflop_net.pt`.
+**Final model** (`models/preflop_net.pt`, 302 solves, 40 epochs):
+- **6-max held-out:** median 4.6 bb/100, mean 5.0, worst 12.0. Library borrowing scores 19.3 on the same
+  vectors.
+- **Varied held-out:** median 5.3, mean 5.6, worst 12.5.
+- **By table size:** heads-up 2.7, 3-handed 1.6, 4-handed 6.3, 5-handed 5.7, 6-max 7.5.
+- **Against the solves it learned from:** those reached 0.1–3 bb/100 at 100–200 iterations.
+- **Gaps that remain:** about 4 bb/100 on training games, and validation loss had flattened. More data
+  and a larger model are both still open.
 
 Training now samples 32 hands per node in proportion to their loss weight. That estimates the same
 loss without bias at a fraction of the cost: 48 s per epoch on 143 solves, where the full loss took
